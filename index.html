@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GF Piscine — Hub</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:system-ui,sans-serif;background:#f1f5f9;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem}
+  h1{font-size:1.5rem;font-weight:700;color:#1e293b;margin-bottom:.5rem;text-align:center}
+  p{color:#64748b;margin-bottom:2.5rem;text-align:center;font-size:.95rem}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.5rem;width:100%;max-width:640px}
+  a{display:block;background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:2rem 1.5rem;text-decoration:none;transition:box-shadow .15s,transform .15s;text-align:center}
+  a:hover{box-shadow:0 4px 20px rgba(0,0,0,.1);transform:translateY(-2px)}
+  .icon{font-size:2.5rem;margin-bottom:1rem}
+  .label{font-size:1rem;font-weight:600;color:#0f172a;margin-bottom:.35rem}
+  .desc{font-size:.82rem;color:#64748b}
+  .badge{display:inline-block;margin-top:.75rem;font-size:.72rem;padding:.2rem .6rem;border-radius:99px;background:#dbeafe;color:#1d4ed8;font-weight:600}
+  .badge.orange{background:#ffedd5;color:#c2410c}
+</style>
+</head>
+<body>
+<h1>🏊 GF Piscine</h1>
+<p>Seleziona l'applicazione</p>
+<div class="grid">
+  <a href="https://preventivi.gfpiscine.com">
+    <div class="icon">📋</div>
+    <div class="label">Preventivi</div>
+    <div class="desc">Gestione preventivi e manutenzione stagionale</div>
+    <span class="badge">preventivi.gfpiscine.com</span>
+  </a>
+  <a href="https://interventi.gfpiscine.com">
+    <div class="icon">🔧</div>
+    <div class="label">Interventi</div>
+    <div class="desc">Gestione interventi tecnici e assistenza</div>
+    <span class="badge orange">interventi.gfpiscine.com</span>
+  </a>
+</div>
+</body>
+</html>
