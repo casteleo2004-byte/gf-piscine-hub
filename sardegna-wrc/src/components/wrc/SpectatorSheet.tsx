@@ -24,7 +24,7 @@ export function SpectatorSheet({ stage, data, onClose }: { stage: RallyStage; da
 
   return (
     <Sheet
-      title={`${stageCode(stage)} · Punto spettatore`}
+      title={`${stageCode(stage)} · Dove guardare`}
       onClose={onClose}
       headerRight={
         primary && (
@@ -38,13 +38,13 @@ export function SpectatorSheet({ stage, data, onClose }: { stage: RallyStage; da
         <PointView point={primary} stage={stage} />
       ) : (
         <p className="rounded-2xl bg-surface p-4 text-[18px] font-semibold text-muted">
-          Nessun punto spettatore salvato per questa prova.
+          Nessun punto salvato per questa prova.
         </p>
       )}
 
       {others.length > 0 && (
         <section className="mt-8">
-          <h3 className="mb-2 text-[15px] font-extrabold uppercase tracking-[0.12em] text-muted">Alternative</h3>
+          <h3 className="mb-2 text-[15px] font-extrabold uppercase tracking-[0.12em] text-muted">Altri punti di questa prova</h3>
           <ul className="space-y-3">
             {others.map((p) => (
               <li key={p.id} className="rounded-2xl bg-surface p-4">
@@ -71,7 +71,7 @@ export function SpectatorSheet({ stage, data, onClose }: { stage: RallyStage; da
       )}
 
       <Button variant="ghost" size="lg" className="mt-6 w-full" onClick={() => setEditing(blank())}>
-        <Plus size={24} /> Aggiungi punto spettatore
+        <Plus size={24} /> Aggiungi un punto
       </Button>
 
       {editing && <SpectatorEditor point={editing} data={data} onClose={() => setEditing(null)} />}
@@ -91,7 +91,7 @@ function Wow({ value, large = false }: { value: number; large?: boolean }) {
 export function GoldBadge() {
   return (
     <span className="mb-1 inline-flex items-center rounded-full bg-accent px-3 py-1 text-[14px] font-extrabold uppercase tracking-wide text-accent-ink">
-      Area RIS Experience · Pass Gold
+      Riservato Pass Gold · Area Experience
     </span>
   );
 }
@@ -105,7 +105,7 @@ function WalkFromParking({ point, stage }: { point: SpectatorPoint; stage: Rally
   ].filter(Boolean) as string[];
   return (
     <section className="mt-5 rounded-2xl bg-surface p-4">
-      <h4 className="text-[15px] font-extrabold uppercase tracking-[0.12em] text-muted">Dal parcheggio a piedi</h4>
+      <h4 className="text-[15px] font-extrabold uppercase tracking-[0.12em] text-muted">Come arrivarci</h4>
       <p className="mt-1 text-[18px] font-bold">{stage.parkingName || "Parcheggio spettatori da inserire"}</p>
       {facts.length > 0 && <p className="tnum mt-1 text-[18px] font-semibold text-hi">{facts.join(" · ")}</p>}
       {point.walkRoute ? (
@@ -135,7 +135,7 @@ function PointView({ point, stage }: { point: SpectatorPoint; stage: RallyStage 
     ["Distanza dalla strada", point.roadDistanceM != null ? `${point.roadDistanceM} m` : undefined],
     ["Attrezzatura foto", point.photoGear],
     ["Coordinate", point.point ? formatPoint(point.point) : undefined],
-    ["Access Point", point.access ? formatPoint(point.access) : undefined],
+    ["Ingresso (Access Point)", point.access ? formatPoint(point.access) : undefined],
     ["Navigazione verso", !point.point && !point.access ? point.address : undefined],
     ["Fonte", point.source],
   ];
@@ -145,7 +145,7 @@ function PointView({ point, stage }: { point: SpectatorPoint; stage: RallyStage 
         <GoldBadge />
       ) : (
         <span className="mb-1 inline-flex rounded-full border-2 border-dashed border-line px-3 py-1 text-[14px] font-bold text-muted">
-          Area Pass Gold da confermare
+          Zona per tutto il pubblico
         </span>
       )}
       <h3 className="text-[28px] font-extrabold leading-tight">{point.name || "Punto spettatore"}</h3>
@@ -160,7 +160,7 @@ function PointView({ point, stage }: { point: SpectatorPoint; stage: RallyStage 
         mode={point.point ? "walking" : "driving"}
       >
         <span className="whitespace-nowrap text-[22px]">
-          {point.point ? "NAVIGA A PIEDI" : point.access ? "NAVIGA ALL'ACCESSO" : "NAVIGA IN ZONA"}
+          {point.point ? "NAVIGA A PIEDI" : point.access ? "NAVIGA ALL'INGRESSO" : "NAVIGA IN ZONA"}
         </span>
       </NavButton>
 

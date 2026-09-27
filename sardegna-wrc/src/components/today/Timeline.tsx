@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Pencil } from "lucide-react";
+import { Check, ChevronDown, Pencil } from "lucide-react";
 import { useState } from "react";
 import { EVENT_TYPES, toneText } from "@/lib/meta";
 import { eventInfo } from "@/lib/smart";
@@ -23,68 +23,88 @@ export function Timeline({
   onEdit: (e: TripEvent) => void;
 }) {
   const [open, setOpen] = useState<string | null>(null);
+  const [showOthers, setShowOthers] = useState(false);
   if (!events.length) return null;
+
+  const rows = events.map((e, i) => ({ e, i }));
+  const main = rows.filter(({ e }) => !e.optional);
+  const others = rows.filter(({ e }) => e.optional);
+
+  const renderRow = ({ e, i }: { e: TripEvent; i: number }) => {
+    const isNext = i === nextIdx;
+    const past = !e.done && !e.optional && nextIdx >= 0 && i < nextIdx;
+    const meta = EVENT_TYPES[e.type];
+    const expanded = open === e.id;
+    return (
+      <li
+        key={e.id}
+        className={`border-b border-line last:border-b-0 ${isNext ? "bg-accent/10 shadow-[inset_6px_0_0_var(--accent)]" : ""}`}
+      >
+        <div className="flex items-stretch">
+          <button
+            type="button"
+            onClick={() => setOpen(expanded ? null : e.id)}
+            className="flex min-h-[68px] min-w-0 flex-1 items-center gap-3 py-3 pl-4 text-left"
+          >
+            <span
+              className={`tnum w-[62px] shrink-0 text-[21px] font-extrabold ${
+                e.done || past ? "text-muted line-through decoration-2" : isNext ? "text-hi" : "text-text"
+              }`}
+            >
+              {e.time || "?"}
+            </span>
+            <span className="min-w-0 flex-1">
+              {isNext && <span className="block text-[13px] font-extrabold uppercase tracking-wider text-hi">Prossima</span>}
+              <span className={`block text-[19px] font-bold leading-snug ${e.done ? "text-muted line-through" : ""}`}>
+                {e.title}
+              </span>
+              <span className={`flex items-center gap-1 text-[15px] font-semibold ${toneText[meta.tone]}`}>
+                <meta.Icon size={16} /> {meta.label}
+              </span>
+            </span>
+          </button>
+          <button
+            type="button"
+            aria-label={e.done ? "Segna da fare" : "Segna fatto"}
+            aria-pressed={e.done}
+            onClick={() => actions.toggleEventDone(e.id)}
+            className="flex w-[72px] shrink-0 items-center justify-center"
+          >
+            <span
+              className={`flex h-11 w-11 items-center justify-center rounded-full border-[3px] ${
+                e.done ? "border-ok bg-ok text-bg" : "border-line text-transparent"
+              }`}
+            >
+              <Check size={26} strokeWidth={3.5} />
+            </span>
+          </button>
+        </div>
+        {expanded && <EventDetails data={data} event={e} onEdit={() => onEdit(e)} />}
+      </li>
+    );
+  };
 
   return (
     <section className="mt-6">
-      <h2 className="mb-2 text-[15px] font-extrabold uppercase tracking-[0.12em] text-muted">Programma</h2>
-      <ol className="overflow-hidden rounded-3xl bg-surface">
-        {events.map((e, i) => {
-          const isNext = i === nextIdx;
-          const past = !e.done && nextIdx >= 0 && i < nextIdx;
-          const meta = EVENT_TYPES[e.type];
-          const expanded = open === e.id;
-          return (
-            <li
-              key={e.id}
-              className={`border-b border-line last:border-b-0 ${isNext ? "bg-accent/10 shadow-[inset_6px_0_0_var(--accent)]" : ""}`}
-            >
-              <div className="flex items-stretch">
-                <button
-                  type="button"
-                  onClick={() => setOpen(expanded ? null : e.id)}
-                  className="flex min-h-[68px] min-w-0 flex-1 items-center gap-3 py-3 pl-4 text-left"
-                >
-                  <span
-                    className={`tnum w-[62px] shrink-0 text-[21px] font-extrabold ${
-                      e.done || past ? "text-muted line-through decoration-2" : isNext ? "text-hi" : "text-text"
-                    }`}
-                  >
-                    {e.time || "?"}
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    {isNext && (
-                      <span className="block text-[13px] font-extrabold uppercase tracking-wider text-hi">Prossima</span>
-                    )}
-                    <span className={`block text-[19px] font-bold leading-snug ${e.done ? "text-muted line-through" : ""}`}>
-                      {e.title}
-                    </span>
-                    <span className={`flex items-center gap-1 text-[15px] font-semibold ${toneText[meta.tone]}`}>
-                      <meta.Icon size={16} /> {meta.label}
-                    </span>
-                  </span>
-                </button>
-                <button
-                  type="button"
-                  aria-label={e.done ? "Segna da fare" : "Segna fatto"}
-                  aria-pressed={e.done}
-                  onClick={() => actions.toggleEventDone(e.id)}
-                  className="flex w-[72px] shrink-0 items-center justify-center"
-                >
-                  <span
-                    className={`flex h-11 w-11 items-center justify-center rounded-full border-[3px] ${
-                      e.done ? "border-ok bg-ok text-bg" : "border-line text-transparent"
-                    }`}
-                  >
-                    <Check size={26} strokeWidth={3.5} />
-                  </span>
-                </button>
-              </div>
-              {expanded && <EventDetails data={data} event={e} onEdit={() => onEdit(e)} />}
-            </li>
-          );
-        })}
-      </ol>
+      <h2 className="mb-2 text-[15px] font-extrabold uppercase tracking-[0.12em] text-muted">Il programma di oggi</h2>
+      {main.length > 0 && <ol className="overflow-hidden rounded-3xl bg-surface">{main.map(renderRow)}</ol>}
+
+      {others.length > 0 && (
+        <div className="mt-4">
+          <button
+            type="button"
+            onClick={() => setShowOthers(!showOthers)}
+            className="flex min-h-14 w-full items-center justify-between gap-2 rounded-2xl border-2 border-line px-4 text-left text-[17px] font-bold text-muted"
+          >
+            <span>
+              Altro in programma oggi ({others.length})
+              <span className="block text-[14px] font-semibold">Prove ed eventi fuori dal vostro piano</span>
+            </span>
+            <ChevronDown size={22} className={showOthers ? "rotate-180" : ""} />
+          </button>
+          {showOthers && <ol className="mt-2 overflow-hidden rounded-3xl bg-surface opacity-90">{others.map(renderRow)}</ol>}
+        </div>
+      )}
     </section>
   );
 }

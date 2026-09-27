@@ -28,7 +28,7 @@ function migrate(data: AppData): AppData {
       spectatorPoints: data.spectatorPoints.filter((x) => !EXAMPLE_IDS.spectatorPoints.includes(x.id)),
     };
   }
-  if ((data.version ?? 1) < 6) {
+  if ((data.version ?? 1) < 7) {
     // Prove e aree dai documenti ufficiali: sostituiscono quelle dei dati iniziali precedenti,
     // mantenendo ciò che l'utente ha aggiunto a mano.
     const seedStages = new Set(seed.stages.map((x) => x.id));
@@ -54,10 +54,14 @@ function migrate(data: AppData): AppData {
         ...data.spectatorPoints,
         ...seed.spectatorPoints.filter((p) => !data.spectatorPoints.some((x) => x.id === p.id)),
       ],
-      gearPresets: data.gearPresets.map((g) => ({
-        ...g,
-        items: g.items.map((i) => (i.name === "Pass WRC" ? { ...i, name: "Pass Gold RIS Experience (2)" } : i)),
-      })),
+      gearPresets: data.gearPresets.map((g) => {
+        const items = g.items.map((i) => (i.name === "Pass WRC" ? { ...i, name: "Pass Gold RIS Experience (2)" } : i));
+        // Oggetti nuovi dei dati iniziali, aggiunti senza toccare quelli esistenti.
+        const extra = (seed.gearPresets.find((x) => x.id === g.id)?.items ?? []).filter(
+          (i) => !items.some((x) => x.name === i.name),
+        );
+        return { ...g, items: [...items, ...extra] };
+      }),
     };
   }
   // Completa eventuali campi aggiunti in versioni successive.

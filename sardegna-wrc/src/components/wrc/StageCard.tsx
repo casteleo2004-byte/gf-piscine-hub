@@ -1,19 +1,29 @@
 "use client";
 
-import { AlertTriangle, Check, ChevronDown, Eye, ListChecks, Pencil } from "lucide-react";
+import { AlertTriangle, Car, Check, ChevronDown, Eye, ListChecks, Pencil, Star } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { formatKm } from "@/lib/geo";
-import { spectatorPointOf, stageCode, stageTiming } from "@/lib/smart";
+import { formatPoint } from "@/lib/geo";
+import { isInPlan, spectatorPointOf, stageCode, stageTiming } from "@/lib/smart";
 import { actions } from "@/lib/store/actions";
 import { formatDuration } from "@/lib/time";
 import type { AppData, RallyStage } from "@/lib/types";
 import { buttonClass, IconButton } from "../ui/Button";
 import { NavButton } from "../ui/NavButton";
-import { Stat } from "../ui/Stat";
 
 const ACCESS_LABEL = { facile: "Facile", media: "Media", difficile: "Difficile" } as const;
 
+/** Orari di passaggio della prova: "10:08 e 16:38". */
+function passTimes(stage: RallyStage): string {
+  const times = [stage.firstCar, ...stage.passes.map((p) => p.time)].filter(Boolean);
+  if (!times.length) return "da definire";
+  return times.length === 1 ? times[0] : `${times.slice(0, -1).join(", ")} e ${times[times.length - 1]}`;
+}
+
+/**
+ * Card di una prova. Le prove del piano del giorno sono complete; le altre
+ * restano compatte (un tocco per aprirle) per non confondere chi è al primo rally.
+ */
 export function StageCard({
   stage,
   data,
@@ -25,90 +35,130 @@ export function StageCard({
   onEdit: () => void;
   onSpectator: () => void;
 }) {
+  const inPlan = isInPlan(stage, data);
+  const [open, setOpen] = useState(inPlan);
   const [more, setMore] = useState(false);
   const timing = stageTiming(stage, data);
   const sp = spectatorPointOf(stage, data);
   const day = data.days.find((d) => d.date === stage.date);
   const checklist = day?.gearPresetId ?? "rally";
+  const secondClosure = stage.passes.find((p) => p.roadClosure && p.roadClosure !== stage.roadClosure)?.roadClosure;
 
-  return (
-    <article className="overflow-hidden rounded-3xl border-l-[6px] border-rally bg-surface">
-      <div className="p-5">
-        <div className="flex items-start gap-3">
-          <div className="min-w-0 flex-1">
-            <div className="text-[16px] font-extrabold uppercase tracking-wider text-rally">
-              {stageCode(stage)}
-              {stage.lengthKm != null && <span className="ml-2 text-muted">{stage.lengthKm.toFixed(2).replace(".", ",")} km</span>}
-            </div>
-            <h3 className="text-[26px] font-extrabold leading-tight">{stage.name || "Senza nome"}</h3>
-          </div>
+  const header = (
+    <div className="flex items-start gap-3">
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[15px] font-extrabold uppercase tracking-wider">
+          <span className="text-rally">{stageCode(stage)}</span>
+          {stage.lengthKm != null && <span className="text-muted">{stage.lengthKm.toFixed(2).replace(".", ",")} km</span>}
+          {inPlan && (
+            <span className="rounded-full bg-accent px-2.5 py-0.5 text-[13px] text-accent-ink">Nel vostro piano</span>
+          )}
           {stage.seen && (
-            <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-ok/15 px-2.5 py-1 text-[14px] font-bold text-ok">
-              <Check size={16} strokeWidth={3} /> Vista
+            <span className="inline-flex items-center gap-1 text-ok">
+              <Check size={15} strokeWidth={3} /> Vista
             </span>
           )}
-          <IconButton label="Modifica prova" onClick={onEdit}>
-            <Pencil size={20} />
-          </IconButton>
         </div>
+        <h3 className="mt-0.5 text-[24px] font-extrabold leading-tight">{stage.name || "Senza nome"}</h3>
+      </div>
+      <IconButton label="Modifica prova" onClick={onEdit}>
+        <Pencil size={20} />
+      </IconButton>
+    </div>
+  );
 
-        <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3">
-          <Stat label="Prima vettura" value={stage.firstCar || "Da definire"} tone="rally" />
-          <Stat label="Partenza" value={timing.departAt ?? "—"} tone="accent" hint={timing.departEstimated && timing.departAt ? "calc." : undefined} />
-          <Stat label="Auto" value={formatDuration(timing.driveMinutes)} hint={timing.driveEstimated ? "≈" : undefined} />
-          <Stat
-            label="A piedi"
-            value={formatDuration(stage.walkMinutes)}
-            hint={stage.walkKm != null ? formatKm(stage.walkKm) : undefined}
-          />
+  if (!open) {
+    return (
+      <article className="rounded-3xl bg-surface p-4">
+        {header}
+        <p className="tnum mt-1 text-[17px] font-semibold text-muted">
+          Passaggi: <span className="text-text">{passTimes(stage)}</span>
+          {stage.roadClosure && <span className="text-rally"> · strade chiuse dalle {stage.roadClosure}</span>}
+        </p>
+        <button type="button" onClick={() => setOpen(true)} className={buttonClass("ghost", "md", "mt-3 w-full")}>
+          Apri la prova <ChevronDown size={20} />
+        </button>
+      </article>
+    );
+  }
+
+  return (
+    <article className={`overflow-hidden rounded-3xl bg-surface ${inPlan ? "border-2 border-accent" : ""}`}>
+      <div className="space-y-4 p-5">
+        {header}
+
+        <div>
+          <div className="text-[14px] font-bold uppercase tracking-wide text-muted">Passano le auto</div>
+          <div className="tnum text-[30px] font-extrabold leading-tight text-rally">{passTimes(stage)}</div>
         </div>
-
-        {stage.passes.length > 0 && (
-          <ul className="mt-3 space-y-1">
-            {stage.passes.map((p, i) => (
-              <li key={i} className="tnum text-[17px] font-semibold text-muted">
-                {p.label} · <span className="text-text">{p.time || "da definire"}</span>
-                {p.roadClosure && <span className="text-rally"> · chiusura {p.roadClosure}</span>}
-              </li>
-            ))}
-          </ul>
-        )}
 
         {stage.roadClosure && (
-          <div className="mt-4 flex items-center gap-2 rounded-xl bg-rally/15 px-3 py-2.5 text-[18px] font-bold text-rally">
-            <AlertTriangle size={22} /> Chiusura strada {stage.roadClosure}
+          <div className="flex gap-2 rounded-xl bg-rally/15 px-3 py-2.5 text-[17px] font-bold text-rally">
+            <AlertTriangle size={22} className="mt-0.5 shrink-0" />
+            <span>
+              Strade chiuse dalle {stage.roadClosure}
+              {secondClosure && ` (e dalle ${secondClosure} per il 2° passaggio)`}: dopo non si entra più, bisogna
+              arrivare prima.
+            </span>
           </div>
         )}
 
-        <NavButton
-          className="mt-5 w-full"
-          size="xl"
-          point={stage.parking}
-          label={stage.parkingName || `Parcheggio ${stageCode(stage)}`}
-        >
-          <span className="whitespace-nowrap text-[20px]">{stage.parkingKind === "access" ? "NAVIGA ALL'ACCESSO" : "NAVIGA AL PARCHEGGIO"}</span>
-        </NavButton>
-        {stage.parkingName && <p className="mt-1.5 text-center text-[15px] font-semibold text-muted">{stage.parkingName}</p>}
+        {timing.departAt && (
+          <div className="flex items-center gap-3 rounded-xl bg-surface-2 px-3 py-2.5">
+            <Car size={24} className="shrink-0 text-hi" />
+            <div className="min-w-0">
+              <div className="text-[17px] font-bold">
+                Partenza da {data.trip.baseName} <span className="tnum text-hi">{timing.departAt}</span>
+              </div>
+              {timing.driveMinutes != null && (
+                <div className="text-[15px] font-semibold text-muted">
+                  {timing.driveEstimated ? "circa " : ""}
+                  {formatDuration(timing.driveMinutes)} di auto
+                  {timing.departEstimated ? `, ${data.settings.bufferMinutes} min di margine` : ""}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
-        <div className="mt-3 grid grid-cols-2 gap-3">
-          <button type="button" onClick={onSpectator} className={buttonClass("rally", "lg")}>
-            <Eye size={22} /> Spettatore
+        <div>
+          <NavButton size="xl" className="w-full" point={stage.parking} label={stage.parkingName || `Parcheggio ${stageCode(stage)}`}>
+            <span className="whitespace-nowrap text-[20px]">
+              {stage.parkingKind === "access" ? "NAVIGA ALL'INGRESSO" : "NAVIGA AL PARCHEGGIO"}
+            </span>
+          </NavButton>
+          {stage.parkingKind === "access" && stage.parking && (
+            <p className="mt-1.5 text-center text-[15px] font-semibold text-muted">
+              Ingresso ufficiale per il pubblico: da lì seguite i cartelli fino al parcheggio.
+            </p>
+          )}
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <button type="button" onClick={onSpectator} className={buttonClass("rally", "lg", "whitespace-nowrap !px-3")}>
+            <Eye size={20} className="shrink-0" /> Dove guardare
           </button>
           <Link href={`/gear/?p=${checklist}`} className={buttonClass("secondary", "lg")}>
             <ListChecks size={22} /> Checklist
           </Link>
         </div>
-        {!sp?.experienceArea && (
-          <p className="mt-3 rounded-xl border-2 border-dashed border-line px-3 py-2 text-[15px] font-bold text-muted">
-            Area Pass Gold: da inserire dalla guida RIS Experience
+
+        {sp && (
+          <p className="text-[16px] font-semibold text-muted">
+            Punto consigliato: <span className="text-text">{sp.name}</span>
+            {sp.experienceArea && <span className="font-extrabold text-hi"> · riservato Pass Gold</span>}
           </p>
         )}
-        {sp && (
-          <p className="mt-2 text-[16px] font-semibold text-muted">
-            👁 {sp.name}
-            {sp.wow ? <span className="ml-2 font-extrabold text-hi">WOW {sp.wow}/5</span> : null}
-            {sp.experienceArea && <span className="ml-2 font-extrabold text-hi">· Area Pass Gold</span>}
-          </p>
+
+        {day && (
+          <button
+            type="button"
+            onClick={() => actions.togglePlan(day.date, stage.id)}
+            className={buttonClass(inPlan ? "secondary" : "ghost", "md", "w-full")}
+          >
+            <Star size={20} className={inPlan ? "fill-accent text-hi" : ""} />
+            {inPlan ? "Nel piano di questo giorno" : "Aggiungi al piano del giorno"}
+          </button>
         )}
       </div>
 
@@ -125,14 +175,8 @@ export function StageCard({
           <dl className="grid grid-cols-2 gap-x-4 gap-y-2">
             <Detail label="Dislivello" value={stage.elevationM != null ? `${stage.elevationM} m` : undefined} />
             <Detail label="Accesso" value={stage.access ? ACCESS_LABEL[stage.access] : undefined} />
-            <Detail
-              label="Parcheggio"
-              value={stage.parking ? `${stage.parking.lat.toFixed(5)}, ${stage.parking.lng.toFixed(5)}` : undefined}
-            />
-            <Detail
-              label="Spettatore"
-              value={sp?.point ? `${sp.point.lat.toFixed(5)}, ${sp.point.lng.toFixed(5)}` : undefined}
-            />
+            <Detail label={stage.parkingKind === "access" ? "Ingresso" : "Parcheggio"} value={stage.parking ? formatPoint(stage.parking) : undefined} />
+            <Detail label="A piedi" value={stage.walkMinutes != null ? formatDuration(stage.walkMinutes) : undefined} />
           </dl>
           {stage.gear && <Detail label="Attrezzatura" value={stage.gear} />}
           {stage.notes && <Detail label="Note" value={stage.notes} />}

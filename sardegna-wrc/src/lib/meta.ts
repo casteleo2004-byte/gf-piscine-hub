@@ -38,7 +38,7 @@ export const EVENT_TYPES: Record<EventType, { label: string; Icon: LucideIcon; t
   sveglia: { label: "Sveglia", Icon: AlarmClock, tone: "muted" },
   partenza: { label: "Partenza", Icon: Car, tone: "accent" },
   auto: { label: "In auto", Icon: Car, tone: "info" },
-  parcheggio: { label: "Parcheggio", Icon: ParkingSquare, tone: "rally" },
+  parcheggio: { label: "Arrivo e parcheggio", Icon: ParkingSquare, tone: "rally" },
   piedi: { label: "A piedi", Icon: Footprints, tone: "rally" },
   spettatore: { label: "Punto spettatore", Icon: Eye, tone: "rally" },
   prova: { label: "Prova speciale", Icon: Flag, tone: "rally" },

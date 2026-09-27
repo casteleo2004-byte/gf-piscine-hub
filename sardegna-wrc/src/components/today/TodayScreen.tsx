@@ -1,6 +1,6 @@
 "use client";
 
-import { Pencil, Plus, Settings2 } from "lucide-react";
+import { Pencil, Plus, Settings2, Ticket } from "lucide-react";
 import { useState } from "react";
 import { useNow } from "@/lib/hooks/useNow";
 import { newId } from "@/lib/id";
@@ -16,6 +16,7 @@ import { EventEditor } from "./EventEditor";
 import { NextCard } from "./NextCard";
 import { SettingsSheet } from "./SettingsSheet";
 import { Timeline } from "./Timeline";
+import { RallyGuide, RallyGuideButton } from "../wrc/RallyGuide";
 
 export function TodayScreen() {
   const data = useData();
@@ -24,6 +25,7 @@ export function TodayScreen() {
   const [editing, setEditing] = useState<TripEvent | null>(null);
   const [dayEdit, setDayEdit] = useState(false);
   const [settings, setSettings] = useState(false);
+  const [guide, setGuide] = useState(false);
 
   if (!data || !now) return <div className="h-[60vh]" aria-busy />;
 
@@ -92,7 +94,10 @@ export function TodayScreen() {
       </div>
 
       {day.notes && (
-        <p className="mb-4 whitespace-pre-line rounded-2xl border-2 border-line px-4 py-3 text-[17px] font-semibold">{day.notes}</p>
+        <p className="mb-4 flex gap-2 whitespace-pre-line rounded-2xl border-2 border-line px-4 py-3 text-[17px] font-semibold">
+          <Ticket size={22} className="mt-0.5 shrink-0 text-hi" />
+          <span>{day.notes}</span>
+        </p>
       )}
 
       <NextCard
@@ -106,6 +111,12 @@ export function TodayScreen() {
         onDetails={(e) => setEditing(e)}
       />
 
+      {day.kind === "rally" && (
+        <div className="mt-4">
+          <RallyGuideButton onClick={() => setGuide(true)} />
+        </div>
+      )}
+
       <Timeline data={data} events={events} nextIdx={nextIdx} onEdit={setEditing} />
 
       <Button variant="ghost" size="lg" className="mt-4 w-full" onClick={() => setEditing(newEvent())}>
@@ -114,6 +125,7 @@ export function TodayScreen() {
 
       {editing && <EventEditor event={editing} data={data} onClose={() => setEditing(null)} />}
       {dayEdit && <DayEditor day={day} data={data} onClose={() => setDayEdit(false)} />}
+      {guide && <RallyGuide onClose={() => setGuide(false)} />}
       {settings && <SettingsSheet data={data} onClose={() => setSettings(false)} />}
     </div>
   );

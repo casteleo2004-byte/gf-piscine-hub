@@ -13,6 +13,8 @@ import { PageHeader } from "../ui/PageHeader";
 import { SpectatorSheet } from "./SpectatorSheet";
 import { StageCard } from "./StageCard";
 import { StageEditor } from "./StageEditor";
+import { RallyGuide, RallyGuideButton } from "./RallyGuide";
+import { isInPlan } from "@/lib/smart";
 
 const OFFICIAL_GUIDES = [
   { label: "Guida RIS Experience", href: "https://rallyitaliasardegna.com/ris-experience-2/" },
@@ -25,6 +27,7 @@ export function WrcScreen() {
   const [editing, setEditing] = useState<RallyStage | null>(null);
   const [spectatorFor, setSpectatorFor] = useState<string | null>(null);
   const [showPast, setShowPast] = useState(false);
+  const [guide, setGuide] = useState(false);
 
   if (!data || !now) return <div className="h-[60vh]" aria-busy />;
 
@@ -51,19 +54,10 @@ export function WrcScreen() {
 
   return (
     <div>
-      <PageHeader
-        title="WRC"
-        subtitle={`${upcoming.length} prove in programma`}
-        right={<OnlineBadge />}
-      />
+      <PageHeader title="WRC" subtitle="Il vostro piano, giorno per giorno" right={<OnlineBadge />} />
 
-      {/* Fonti ufficiali: le aree Pass Gold e le zone pubblico 2026 si prendono da qui. */}
-      <div className="mb-6 grid grid-cols-2 gap-3">
-        {OFFICIAL_GUIDES.map((g) => (
-          <a key={g.href} href={g.href} target="_blank" rel="noopener noreferrer" className={buttonClass("secondary", "md", "text-center")}>
-            {g.label}
-          </a>
-        ))}
+      <div className="mb-6">
+        <RallyGuideButton onClick={() => setGuide(true)} />
       </div>
 
       {[...byDate.entries()].map(([date, list]) => (
@@ -72,16 +66,24 @@ export function WrcScreen() {
             {date === today ? <span className="text-hi">Oggi</span> : formatLongDate(date)}
           </h2>
           <div className="space-y-4">
-            {list.map((s) => (
-              <StageCard
-                key={s.id}
-                stage={s}
-                data={data}
-                onEdit={() => setEditing(s)}
-                onSpectator={() => setSpectatorFor(s.id)}
-              />
-            ))}
+            {list
+              .filter((s) => isInPlan(s, data))
+              .map((s) => (
+                <StageCard key={s.id} stage={s} data={data} onEdit={() => setEditing(s)} onSpectator={() => setSpectatorFor(s.id)} />
+              ))}
           </div>
+          {list.some((s) => !isInPlan(s, data)) && (
+            <>
+              <h3 className="mb-2 mt-5 text-[15px] font-bold text-muted">Altre prove di questo giorno</h3>
+              <div className="space-y-3">
+                {list
+                  .filter((s) => !isInPlan(s, data))
+                  .map((s) => (
+                    <StageCard key={s.id} stage={s} data={data} onEdit={() => setEditing(s)} onSpectator={() => setSpectatorFor(s.id)} />
+                  ))}
+              </div>
+            </>
+          )}
         </section>
       ))}
 
@@ -104,7 +106,18 @@ export function WrcScreen() {
         <Plus size={24} /> Aggiungi prova
       </Button>
 
+      {/* Fonti ufficiali. */}
+      <h2 className="mb-2 mt-8 text-[15px] font-extrabold uppercase tracking-[0.12em] text-muted">Guide ufficiali</h2>
+      <div className="grid grid-cols-2 gap-3">
+        {OFFICIAL_GUIDES.map((g) => (
+          <a key={g.href} href={g.href} target="_blank" rel="noopener noreferrer" className={buttonClass("secondary", "md", "text-center")}>
+            {g.label}
+          </a>
+        ))}
+      </div>
+
       {editing && <StageEditor stage={editing} data={data} onClose={() => setEditing(null)} />}
+      {guide && <RallyGuide onClose={() => setGuide(false)} />}
       {spectatorStage && <SpectatorSheet stage={spectatorStage} data={data} onClose={() => setSpectatorFor(null)} />}
     </div>
   );

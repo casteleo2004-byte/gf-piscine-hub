@@ -30,6 +30,8 @@ export interface TripDay {
   location: string;
   gearPresetId?: string;
   notes?: string;
+  /** Prove scelte per la giornata ("il vostro piano"). */
+  planStageIds?: string[];
 }
 
 export type EventType =
@@ -68,6 +70,8 @@ export interface TripEvent {
   deadline?: HHMM;
   roadClosure?: HHMM;
   notes?: string;
+  /** Fuori dal piano del giorno: mostrata in un gruppo a parte, mai come "prossima". */
+  optional?: boolean;
   done: boolean;
 }
 

@@ -122,9 +122,9 @@ describe("prove 2026 (timetable ufficiale V5.1)", () => {
     }
     for (const s of data.stages) if (s.parking) expect(official.has(`${s.parking.lat},${s.parking.lng}`)).toBe(true);
   });
-  it("domenica alle 13:30 la prossima è la Power Stage", () => {
+  it("domenica dopo pranzo la prossima è la Power Stage", () => {
     const ev = eventsOfDay(data, "2026-10-04");
-    expect(ev[nextEventIndex(ev, at("13:30"), true)].title).toContain("Power Stage");
+    expect(ev[nextEventIndex(ev, at("13:45"), true)].title).toContain("Power Stage");
   });
 });
 
@@ -182,7 +182,7 @@ describe("Pass Gold", () => {
   it("giovedì 1/10 è giornata di rally con Service Park e PS 1 Ittiri", () => {
     expect(data.days.find((d) => d.date === "2026-10-01")?.kind).toBe("rally");
     const ev = eventsOfDay(data, "2026-10-01");
-    expect(ev[0]).toMatchObject({ time: "08:30", address: "Lungomare Barcellona, Alghero" });
+    expect(ev.find((x) => x.title.startsWith("Service Park"))).toMatchObject({ time: "08:30", address: "Lungomare Barcellona, Alghero" });
     expect(data.stages.find((s) => s.id === "ps1")).toMatchObject({ date: "2026-10-01", firstCar: "16:05" });
   });
   it("nota del pass sui quattro giorni di rally", () => {
@@ -216,5 +216,24 @@ describe("percorso parcheggio → punto", () => {
     expect(url).toContain("origin=40.59%2C9.12");
     expect(url).toContain("travelmode=walking");
     expect(navigationUrl("apple", { point: { lat: 40.6, lng: 9.1 } }, "walking", { lat: 40.59, lng: 9.12 })).toContain("saddr=40.59%2C9.12");
+  });
+});
+
+describe("piano del giorno (primo rally)", () => {
+  const fri = eventsOfDay(data, "2026-10-02");
+  it("venerdì alle 04:00 la prossima è la partenza per l'Alà Arena, non una prova fuori piano", () => {
+    const e = fri[nextEventIndex(fri, at("04:00"), true)];
+    expect(e.title).toBe("Partenza da Alghero verso Alà Arena");
+    expect(e.time).toMatch(/^0[3-5]:\d{2}$/);
+  });
+  it("le prove fuori piano sono facoltative e non diventano mai la prossima", () => {
+    expect(fri.filter((e) => e.optional).map((e) => e.stageId)).toEqual(["ps-tula", "ps-filigosu", "ps-tula", "ps-filigosu"]);
+    for (const t of ["05:30", "08:00", "14:00", "15:00"]) expect(fri[nextEventIndex(fri, at(t), true)].optional).toBeFalsy();
+  });
+  it("la partenza segue la chiusura strade e il margine", () => {
+    const d2 = { ...data, settings: { ...data.settings, bufferMinutes: 30 } };
+    const a = eventsOfDay(data, "2026-10-02").find((e) => e.type === "partenza")!.time;
+    const b = eventsOfDay(d2, "2026-10-02").find((e) => e.type === "partenza")!.time;
+    expect(toMinutes(a) - toMinutes(b)).toBeGreaterThanOrEqual(10);
   });
 });

@@ -20,7 +20,7 @@ const UNTIMED_WINDOW_MINUTES = 180;
 
 /** Sigla della prova: "SD" per lo shakedown, altrimenti "PS n". */
 export function stageCode(stage: Pick<RallyStage, "number">): string {
-  return stage.number === 0 ? "SD" : `PS ${stage.number}`;
+  return stage.number === 0 ? "Shakedown" : `PS ${stage.number}`;
 }
 
 export function spectatorPointOf(stage: RallyStage | undefined, data: AppData): SpectatorPoint | undefined {
@@ -57,7 +57,7 @@ export function resolveTarget(event: TripEvent, data: AppData): Target | null {
       const sp = spectatorPointOf(stage, data);
       if (sp?.point) return { point: sp.point, label: sp.name, mode: "walking" };
       // Area senza coordinate interne: in auto all'Access Point ufficiale.
-      if (sp?.access) return { point: sp.access, label: `${sp.name} · Access Point`, mode: "driving" };
+      if (sp?.access) return { point: sp.access, label: `${sp.name} · ingresso`, mode: "driving" };
       // Senza coordinate si naviga in auto verso il luogo di avvicinamento.
       if (sp?.address) return { address: sp.address, label: sp.name, mode: "driving" };
     }
@@ -172,15 +172,36 @@ export function eventInfo(event: TripEvent, data: AppData): EventInfo {
   };
 }
 
+/**
+ * "Partenza" collegata a una prova e senza orario: l'orario è la partenza consigliata,
+ * calcolata dalla chiusura strade (cambia se si modifica la prova o il margine).
+ */
+function withEffectiveTime(e: TripEvent, data: AppData): TripEvent {
+  if (e.time || e.type !== "partenza" || !e.stageId) return e;
+  const stage = data.stages.find((s) => s.id === e.stageId);
+  const depart = stage ? stageTiming(stage, data).departAt : undefined;
+  return depart ? { ...e, time: depart } : e;
+}
+
 /** Minuti per l'ordinamento: le attività senza orario ("da definire") vanno in cima. */
 const sortMinutes = (t: string | undefined) => {
   const m = toMinutes(t);
   return Number.isFinite(m) ? m : -1;
 };
 
+/** La prova fa parte del piano del suo giorno? (senza piano: tutte). */
+export function isInPlan(stage: RallyStage, data: AppData): boolean {
+  const plan = data.days.find((d) => d.date === stage.date)?.planStageIds;
+  return !plan || plan.includes(stage.id);
+}
+
 export function eventsOfDay(data: AppData, date: ISODate): TripEvent[] {
+  const plan = data.days.find((d) => d.date === date)?.planStageIds;
   return data.events
     .filter((e) => e.date === date)
+    .map((e) => withEffectiveTime(e, data))
+    // Con un piano, le attività delle prove fuori piano diventano facoltative.
+    .map((e) => (plan && e.stageId ? { ...e, optional: !plan.includes(e.stageId) } : e))
     .sort((a, b) => sortMinutes(a.time) - sortMinutes(b.time) || a.id.localeCompare(b.id, undefined, { numeric: true }));
 }
 
@@ -199,14 +220,14 @@ export function stagesOfDay(data: AppData, date: ISODate): RallyStage[] {
  */
 export function nextEventIndex(events: TripEvent[], nowMin: number, isToday: boolean): number {
   const timed = (e: TripEvent) => Number.isFinite(toMinutes(e.time));
-  if (!isToday) return events.findIndex((e) => !e.done);
+  if (!isToday) return events.findIndex((e) => !e.done && !e.optional);
 
   let next = -1;
   for (let i = 0; i < events.length; i++) {
     const e = events[i];
-    if (e.done || !timed(e)) continue;
+    if (e.done || e.optional || !timed(e)) continue;
     // Attività istantanee (sveglia) già passate: non restano "in corso".
-    const later = events.slice(i + 1).filter(timed);
+    const later = events.slice(i + 1).filter((l) => timed(l) && !l.optional);
     if (INSTANT_TYPES.has(e.type) && toMinutes(e.time) < nowMin && later.length) continue;
     const superseded = later.some((l) => toMinutes(l.time) <= nowMin);
     if (superseded) continue;
@@ -218,7 +239,7 @@ export function nextEventIndex(events: TripEvent[], nowMin: number, isToday: boo
   }
   // Attività senza orario ancora da fare (es. prove prima del timetable): hanno la
   // precedenza, a meno che un'attività con orario sia vicina (entro 3 ore) o in corso.
-  const untimed = events.findIndex((e) => !e.done && !timed(e));
+  const untimed = events.findIndex((e) => !e.done && !e.optional && !timed(e));
   if (untimed >= 0 && (next < 0 || toMinutes(events[next].time) - nowMin > UNTIMED_WINDOW_MINUTES)) {
     return untimed;
   }
@@ -266,4 +287,21 @@ export function activeDay(data: AppData, today: ISODate): { day: TripDay; status
 /** Distanza in linea d'aria dalla base (per la Mappa). */
 export function distanceFromBase(data: AppData, point?: GeoPoint): number | undefined {
   return point ? haversineKm(data.trip.base, point) : undefined;
+}
+
+/** Cosa fare adesso, in parole semplici (per chi è al primo rally). */
+export function whatToDo(event: TripEvent, info: EventInfo): string | undefined {
+  const closure = info.roadClosure;
+  switch (event.type) {
+    case "partenza":
+      return closure
+        ? `Parti in orario: dalle ${closure} la strada della prova chiude e non si entra più, nemmeno a piedi.`
+        : undefined;
+    case "parcheggio":
+      return "Da qui in poi le strade della prova sono chiuse: resta nella zona spettatori fino al passaggio delle auto.";
+    case "prova":
+      return "Le auto partono una alla volta, a pochi minuti di distanza: il passaggio dura a lungo. Resta nell'area segnalata e segui le indicazioni dei commissari.";
+    default:
+      return undefined;
+  }
 }

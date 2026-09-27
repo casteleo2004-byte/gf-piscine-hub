@@ -3,7 +3,7 @@
 import { AlertTriangle, Info, ListChecks, Moon } from "lucide-react";
 import Link from "next/link";
 import { EVENT_TYPES, toneText } from "@/lib/meta";
-import { eventInfo, headline } from "@/lib/smart";
+import { eventInfo, headline, whatToDo } from "@/lib/smart";
 import { formatDuration } from "@/lib/time";
 import { formatKm } from "@/lib/geo";
 import type { AppData, TripDay, TripEvent } from "@/lib/types";
@@ -57,6 +57,7 @@ export function NextCard({
 
   const info = eventInfo(event, data);
   const h = headline(event, info, nowMin, isToday);
+  const hint = whatToDo(event, info);
   const meta = EVENT_TYPES[event.type];
   const presetId = day.gearPresetId;
 
@@ -67,9 +68,10 @@ export function NextCard({
 
       <h3 className="mt-3 text-[26px] font-bold leading-tight">{event.title}</h3>
       <div className={`mt-1 flex items-center gap-1.5 text-[17px] font-semibold ${toneText[meta.tone]}`}>
-        <meta.Icon size={20} /> {meta.label}
-        {info.target && <span className="truncate text-muted">· {info.target.label}</span>}
+        <meta.Icon size={20} className="shrink-0" /> <span className="shrink-0">{meta.label}</span>
       </div>
+      {info.target && <div className="mt-0.5 text-[16px] font-semibold text-muted">→ {info.target.label}</div>}
+      {hint && <p className="mt-3 rounded-xl bg-surface-2 px-3 py-2.5 text-[17px] font-semibold leading-snug">{hint}</p>}
 
       <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3">
         {event.time && <Stat label="Orario" value={event.time} />}
@@ -86,7 +88,7 @@ export function NextCard({
 
       {info.roadClosure && (
         <div className="mt-4 flex items-center gap-2 rounded-xl bg-rally/15 px-3 py-2.5 text-[18px] font-bold text-rally">
-          <AlertTriangle size={22} /> Chiusura strada {info.roadClosure}
+          <AlertTriangle size={22} /> Strade chiuse dalle {info.roadClosure}
         </div>
       )}
 

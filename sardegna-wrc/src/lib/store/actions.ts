@@ -42,6 +42,18 @@ export const actions = {
     });
   },
 
+  /** Aggiunge o toglie una prova dal piano del suo giorno. */
+  togglePlan(date: string, stageId: string) {
+    update((d) => {
+      const day = d.days.find((x) => x.date === date);
+      if (!day) return;
+      const plan = new Set(day.planStageIds ?? d.stages.filter((s) => s.date === date).map((s) => s.id));
+      if (plan.has(stageId)) plan.delete(stageId);
+      else plan.add(stageId);
+      day.planStageIds = [...plan];
+    });
+  },
+
   saveDay(day: TripDay) {
     update((d) => upsert(d.days, day, (x) => x.date));
   },
