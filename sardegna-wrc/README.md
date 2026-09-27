@@ -29,12 +29,19 @@ npm run build      # export statico in out/ + generazione out/sw.js
 npm start          # serve out/ per provare PWA e offline
 ```
 
-## Deploy
+## Deploy su Vercel
 
-Export statico (`out/`): qualsiasi hosting statico HTTPS va bene.
-Su Vercel: nuovo progetto da questo repository con **Root Directory = `sardegna-wrc`**
-(build `npm run build`, output `out`). L'app va servita alla radice di un dominio/sottodominio
-(es. `wrc.gfpiscine.com`).
+Il progetto è pronto (`vercel.json`: build `npm run build`, output `out`, service worker mai in cache).
+
+1. vercel.com → **Add New… → Project** → importa il repository `gf-piscine-hub`.
+2. **Root Directory**: `sardegna-wrc` (Framework Preset: Other; il resto lo legge da `vercel.json`).
+3. **Deploy**. Poi, se l'app non è sul branch principale, in *Settings → Git → Production Branch*
+   imposta il branch che la contiene.
+4. Opzionale: *Settings → Domains* → sottodominio (es. `wrc.gfpiscine.com`).
+
+Supabase non serve: i dati restano sul telefono (localStorage + IndexedDB per le foto).
+Servirebbe solo per sincronizzare i dati tra più telefoni; lo store è già predisposto
+(`src/lib/store/adapter.ts`).
 
 Installazione su iPhone: apri il sito in Safari → Condividi → **Aggiungi alla schermata Home**.
 Alla prima apertura il service worker salva tutta l'app: da lì funziona anche senza rete.
