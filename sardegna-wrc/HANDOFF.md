@@ -16,7 +16,7 @@ Leggi anche `CLAUDE.md` (regole e comandi).
   aggiunta rapida con GPS), Gear (checklist per tipo di giornata), Diario (+ riepilogo SARDEGNA 2026),
   Impostazioni (Apple/Google Maps, tema "Sole", margine partenza, base, backup JSON).
 - Demo Artifact che usa ora e data reali del telefono (nessun orologio simulato: richiesta esplicita).
-- 39 test verdi. Dati alla versione 8 con migrazioni.
+- 39 test verdi. Dati alla versione 9 con migrazioni.
 
 ## Dati del viaggio (verificati, non sensibili)
 | Cosa | Dato | Fonte |
@@ -53,20 +53,15 @@ Dati personali (nomi, targa, codici prenotazione, seriali/sigilli dei pass) **no
   sfondo mare), 10:05 e Power Stage 14:15, strade chiuse 07:05; poi podio ad Alghero 17:00
 
 ## Cose da fare
-1. **Coordinate esatte di parcheggi Gold (P verde) e aree Experience.** Sono nelle mappe interattive
-   ufficiali (Google My Maps). Link estratti dal PDF, una per scheda:
-   SD `1clSd0wgOU7mXw9b2YMD8qcgwvb40zMs`, SSS1 `1uOTQcsX27L4iuAO4KGlQN0IdSFDNA9I`,
-   SS2/5 `1jUiJq_h1eQzvw_Nq-9Ex-wxLyNmzdTE`, SS3/6 `1L6rc9nVcTGvZ-5Qe4wX_JUsXWIfZ0Eg`,
-   SS4/7 `1TfT6Znc1kTndpB774gtyWCAJFltbDzA`, SS8/11 `1aeZ039KRKmFkicOF0ZRL0M1pukbXG6s`,
-   SS9/12 `1dVDHo8oiVt9sdYno2CIsNLDm9StNanY`, SS10/13 `1ywLWmiaqTGrJy1D3rOdqITWQNqm6QCY`,
-   SS14/16 `1-UgCL8n1O6kso_L11HZcApgH0UtluEY`, SS15/17 `1g55gXtiUH4qmUn9LNWVy6vqOP6c0SCs`
-   (URL: `https://www.google.com/maps/d/u/0/edit?mid=<ID>`; KML: `https://www.google.com/maps/d/kml?mid=<ID>&forcekml=1`).
-   Nella prima sessione `www.google.com`, `rallyitaliasardegna.com`, `www.wrc.com`, `rally-maps.com`, `rlab.app`
-   erano bloccati dalla rete dell'ambiente: serve Network access "Full" o "Custom" con quei domini
-   (modificabile da claude.ai/code nel browser, icona nuvola sopra la casella del messaggio → ingranaggio).
-   Con le coordinate: impostare `parking` + `parkingKind: "parking"` sulle prove e `point` sulle aree,
-   così compaiono NAVIGA AL PARCHEGGIO e PERCORSO PARCHEGGIO → PUNTO (a piedi).
-2. Tempi e distanze a piedi parcheggio → area (non indicati dalle mappe).
+1. ~~Coordinate esatte~~ **Fatto (v9)**: dalle 10 mappe interattive ufficiali (Google My Maps, KML
+   `https://www.google.com/maps/d/kml?mid=<ID>&forcekml=1`) sono inseriti aree Experience, zone pubblico e parcheggi
+   (spettatori o "Parking Media" = P verde Experience dove la scheda PDF lo mostra). ID mappe:
+   SD `1clSd0wgOU7mXw9b2YMD8qcgwvb40zMs`, SSS1 `1uOTQcsX27L4iuAO4KGlQN0IdSFDNA9I`, SS2/5 `1jUiJq_h1eQzvw_Nq-9Ex-wxLyNmzdTE`,
+   SS3/6 `1L6rc9nVcTGvZ-5Qe4wX_JUsXWIfZ0Eg`, SS4/7 `1TfT6Znc1kTndpB774gtyWCAJFltbDzA`, SS8/11 `1aeZ039KRKmFkicOF0ZRL0M1pukbXG6s`,
+   SS9/12 `1dVDHo8oiVt9sdYno2CIsNLDm9StNanY`, SS10/13 `1ywLWmiaqTGrJy1D3rOdqITWQNqm6QCY`, SS14/16 `1-UgCL8n1O6kso_L11HZcApgH0UtluEY`,
+   SS15/17 `1g55gXtiUH4qmUn9LNWVy6vqOP6c0SCs`. Le mappe contengono anche le linee dei percorsi di accesso
+   (non ancora usate) e i "Disability Point". Da verificare sul posto quale parcheggio è riservato al Pass Gold.
+2. Tempi a piedi parcheggio → area: c'è solo la distanza in linea d'aria (calcolata dalle coordinate ufficiali).
 3. Dove si ritira la Welcome Box del Pass Gold.
 4. Ristoranti prenotati e altri piani di turismo (oggi 30/09 e 5–6/10 contengono suggerimenti, non prenotazioni).
 5. Verificare orario di sbarco a Olbia e limite check-in Moby.

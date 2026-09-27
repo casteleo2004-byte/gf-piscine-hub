@@ -103,24 +103,34 @@ describe("prove 2026 (timetable ufficiale V5.1)", () => {
     const st = data.stages.find((s) => s.id === "ps-coiluna")!;
     expect(spectatorPointOf(st, data)?.id).toBe("exp-budduso-arena");
   });
-  it("NAVIGA dalla prova porta in auto all'Access Point ufficiale dell'area Gold", () => {
-    const ev = eventsOfDay(data, "2026-10-02").find((x) => x.stageId === "ps-alalerno")!;
-    expect(resolveTarget(ev, data)).toMatchObject({ point: { lat: 40.64873143094596, lng: 9.325989460877631 }, mode: "driving" });
+  it("NAVIGA: la partenza porta in auto al parcheggio ufficiale, la prova a piedi all'area Gold", () => {
+    const fri = eventsOfDay(data, "2026-10-02");
+    const dep = fri.find((x) => x.type === "partenza")!;
+    expect(resolveTarget(dep, data)).toMatchObject({ point: { lat: 40.670986, lng: 9.294639 }, mode: "driving" });
+    const ps = fri.find((x) => x.type === "prova" && x.stageId === "ps-alalerno")!;
+    expect(resolveTarget(ps, data)).toMatchObject({ point: { lat: 40.670099, lng: 9.292726 }, mode: "walking" });
   });
-  it("nessuna coordinata inventata: le aree hanno solo Access Point ufficiali", () => {
+  it("nessuna coordinata inventata: solo punti delle mappe ufficiali", () => {
     const official = new Set([
+      // Access Point (PDF zone spettatori)
       "40.65178190753158,8.37644763855414", "40.79245974800601,8.941877463967668", "40.72751145540492,8.983330894154273",
       "40.79732777557003,8.972336269232184", "40.72157726858769,9.11652993606414", "40.64873143094596,9.325989460877631",
       "40.59673881468081,9.26669915829633", "40.58489772463757,9.242178693420435", "40.57065014718563,9.26940463215951",
       "40.64658431790494,9.324898123397684", "40.57164889280999,9.410081421503556", "40.56182559978122,9.083966853227492",
       "40.47387565711158,9.047585020643766", "40.81558864188334,8.742239797232767", "40.86468610938521,8.712213331312736",
       "40.81683533851673,8.626820580349746", "40.74863649450717,8.188445362031837",
+      // Aree e parcheggi (mappe interattive ufficiali)
+      "40.660558,8.39582", "40.659268,8.397047", "40.586806,8.566995", "40.586,8.564584", "40.780709,8.975162",
+      "40.7795393,8.9746602", "40.762394,8.9658306", "40.765139,8.963501", "40.700626,9.151407", "40.670986,9.294639",
+      "40.670099,9.292726", "40.608137,9.184611", "40.603697,9.178533", "40.565698,9.326432", "40.568983,9.332695",
+      "40.568285,9.318051", "40.595968,9.363383", "40.596437,9.367404", "40.545519,9.09484", "40.545812,9.092092",
+      "40.814591,8.700295", "40.815248,8.701731", "40.7463634,8.1611638", "40.757951,8.160377", "40.750907,8.157676",
     ]);
+    const key = (p: { lat: number; lng: number }) => `${p.lat},${p.lng}`;
     for (const p of data.spectatorPoints) {
-      expect(p.point).toBeUndefined();
-      if (p.access) expect(official.has(`${p.access.lat},${p.access.lng}`)).toBe(true);
+      for (const g of [p.point, p.access, p.parking]) if (g) expect(official.has(key(g))).toBe(true);
     }
-    for (const s of data.stages) if (s.parking) expect(official.has(`${s.parking.lat},${s.parking.lng}`)).toBe(true);
+    for (const s of data.stages) if (s.parking) expect(official.has(key(s.parking))).toBe(true);
   });
   it("domenica dopo pranzo la prossima è la Power Stage", () => {
     const ev = eventsOfDay(data, "2026-10-04");

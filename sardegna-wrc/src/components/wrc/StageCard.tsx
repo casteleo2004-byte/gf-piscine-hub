@@ -127,9 +127,11 @@ export function StageCard({
               {stage.parkingKind === "access" ? "NAVIGA ALL'INGRESSO" : "NAVIGA AL PARCHEGGIO"}
             </span>
           </NavButton>
-          {stage.parkingKind === "access" && stage.parking && (
+          {stage.parking && (
             <p className="mt-1.5 text-center text-[15px] font-semibold text-muted">
-              Ingresso ufficiale per il pubblico: da lì seguite i cartelli fino al parcheggio.
+              {stage.parkingKind === "access"
+                ? "Ingresso ufficiale per il pubblico: da lì seguite i cartelli fino al parcheggio."
+                : `${stage.parkingName ?? "Parcheggio"} · arrivate seguendo i cartelli dall'ingresso ufficiale.`}
             </p>
           )}
         </div>

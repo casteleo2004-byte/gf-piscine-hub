@@ -1,3 +1,4 @@
+import { haversineKm } from "./geo";
 import type {
   AppData,
   EventType,
@@ -13,7 +14,7 @@ import type {
 // Dati iniziali del viaggio, solo da fonti verificabili: biglietti, prenotazioni,
 // percorso ufficiale del rally. Ciò che non è noto resta vuoto o "da verificare".
 
-export const DATA_VERSION = 8;
+export const DATA_VERSION = 9;
 
 /**
  * Giorni i cui dati iniziali sono cambiati in una versione: chi ha dati salvati
@@ -27,6 +28,7 @@ export const SEED_UPDATES: Record<number, string[]> = {
   6: ["2026-10-01", "2026-10-02", "2026-10-03", "2026-10-04"], // timetable e mappe ufficiali
   7: ["2026-10-01", "2026-10-02", "2026-10-03", "2026-10-04"], // piano del giorno per chi è al primo rally
   8: ["2026-10-04"], // Argentiera: punto con sfondo mare come principale
+  9: [], // coordinate esatte da mappe interattive ufficiali (prove e aree)
 };
 
 /** Prove e punti spettatore d'esempio delle prime versioni, rimossi dalla v5. */
@@ -67,10 +69,15 @@ function stage(s: Omit<RallyStage, "seen" | "passes"> & Partial<Pick<RallyStage,
 // aree e parcheggi interni sono nelle mappe interattive ufficiali (Google My Maps /
 // rlab.app): finché non sono inserite, NAVIGA porta all'Access Point ufficiale e da lì
 // si segue l'accesso segnalato.
-const FONTE = "Timetable ufficiale V5.1 e mappa zone spettatori 2026";
+const FONTE = "Timetable ufficiale V5.1, mappa zone spettatori e mappe interattive ufficiali 2026";
+
+/** Distanza in linea d'aria parcheggio → area, arrotondata (il percorso reale è più lungo). */
+function aria(a: GeoPoint, b: GeoPoint): number {
+  return Math.round(haversineKm(a, b) * 1000 / 10) * 10;
+}
 const P = (lat: number, lng: number): GeoPoint => ({ lat, lng });
 const ACCESSO =
-  "NAVIGA porta all'Access Point ufficiale: da lì seguire l'accesso segnalato fino al parcheggio. Il parcheggio del Pass Gold è quello verde \"EXP / MEDIA / ORG\" vicino alle aree Experience.";
+  "NAVIGA porta al parcheggio indicato dalla mappa interattiva ufficiale. Arrivate dall'ingresso ufficiale per il pubblico (Access Point) seguendo i cartelli: alcune strade sono a senso unico o chiuse.";
 
 const stages: RallyStage[] = [
   stage({
@@ -81,10 +88,10 @@ const stages: RallyStage[] = [
     firstCar: "09:01",
     roadClosure: "06:00",
     lengthKm: 3.27,
-    parkingKind: "access",
-    parkingName: "Ingresso Olmedo",
-    parking: P(40.65178190753158, 8.37644763855414),
     notes: `Ex Miniera di Bauxite, vicino a Olmedo. Aree Experience 1 e 2 alla partenza, con parcheggio Experience. ${ACCESSO}`,
+    parkingKind: "parking",
+    parkingName: "Parcheggio spettatori · Ex Miniera Bauxite",
+    parking: P(40.660558, 8.39582),
   }),
   stage({
     id: "ps1",
@@ -95,9 +102,11 @@ const stages: RallyStage[] = [
     roadClosure: "06:00",
     departAt: "14:45",
     lengthKm: 2.08,
-    parkingName: "Ittiri Arena",
     notes:
       "Partenza da Alghero suggerita alle 14:45, per arrivare con un'ora di anticipo (la chiusura delle 06:00 riguarda il tracciato). Super speciale in arena (km 2,08 sulla mappa, 2,21 nel timetable). Area Experience 3 accanto al salto, RIS Hospitality. Parcheggi spettatori lungo la strada a nord, con percorso pedonale segnalato.",
+    parkingKind: "parking",
+    parkingName: "Parcheggio spettatori · Ittiri Arena",
+    parking: P(40.586806, 8.566995),
   }),
   stage({
     id: "ps-tula",
@@ -108,11 +117,11 @@ const stages: RallyStage[] = [
     roadClosure: "05:01",
     passes: [{ label: "SS 5 · 2° passaggio", time: "14:31", roadClosure: "12:31" }],
     lengthKm: 18.77,
-    parkingKind: "access",
-    parkingName: "Ingresso Experience e disabili (solo auto)",
-    parking: P(40.79732777557003, 8.972336269232184),
     notes:
       "Aree Experience 4, 5 e 6 tra Turrina Manna e Sa Mela. Accesso Experience e disabili riservato alle auto; da Tula accesso a senso unico fino allo start della prova, dopo lo start solo in uscita. Da Erula c'è il bus navetta (Bus IN/OUT Point) con punto ristoro.",
+    parkingKind: "parking",
+    parkingName: "Parcheggio Sa Mela (auto Experience e disabili)",
+    parking: P(40.780709, 8.975162),
   }),
   stage({
     id: "ps-filigosu",
@@ -137,10 +146,10 @@ const stages: RallyStage[] = [
     roadClosure: "07:08",
     passes: [{ label: "SS 7 · 2° passaggio", time: "16:38", roadClosure: "14:38" }],
     lengthKm: 23.23,
-    parkingKind: "access",
-    parkingName: "Ingresso Alà dei Sardi (Alà Arena)",
-    parking: P(40.64873143094596, 9.325989460877631),
     notes: `Alà Arena alla partenza: aree Experience 7 e 8, salto e Water Splash, RIS Hospitality, parcheggio Experience e parcheggio spettatori. Altre zone pubblico: Altopiano (7) e Sos Vanzos (8), accessi da Buddusò. ${ACCESSO}`,
+    parkingKind: "parking",
+    parkingName: "Parcheggio spettatori · Alà Arena",
+    parking: P(40.670986, 9.294639),
   }),
   stage({
     id: "ps-lernoala",
@@ -151,10 +160,10 @@ const stages: RallyStage[] = [
     roadClosure: "05:01",
     passes: [{ label: "SS 11 · 2° passaggio", time: "14:31", roadClosure: "12:31" }],
     lengthKm: 24.14,
-    parkingKind: "access",
-    parkingName: "Ingresso Buddusò (verso Tandalò e Sa Jone)",
-    parking: P(40.58489772463757, 9.242178693420435),
     notes: `Lerno Jump alla partenza: area Experience 9 con parcheggio Experience, e zona pubblico 9. Altre zone: Sa Jone (10, con parcheggio spettatori), Tandalò Paddock (11), Centrale Elettrica (12). ${ACCESSO}`,
+    parkingKind: "parking",
+    parkingName: "Parcheggio spettatori · Lerno",
+    parking: P(40.608137, 9.184611),
   }),
   stage({
     id: "ps-coiluna",
@@ -165,10 +174,10 @@ const stages: RallyStage[] = [
     roadClosure: "06:11",
     passes: [{ label: "SS 12 · 2° passaggio", time: "15:41", roadClosure: "13:41" }],
     lengthKm: 24.83,
-    parkingKind: "access",
-    parkingName: "Ingresso Buddusò (Nuraghe Loelle / Buddusò Arena)",
-    parking: P(40.57065014718563, 9.26940463215951),
     notes: `Aree Experience 10 (Buddusò Arena, con parcheggio Experience) e 11 (Nuraghe Loelle). Coiluna Jump (zona 13) solo pubblico, accesso 4x4/SUV da Alà dei Sardi o Mamone. ${ACCESSO}`,
+    parkingKind: "parking",
+    parkingName: "Parcheggio · Buddusò Arena",
+    parking: P(40.565698, 9.326432),
   }),
   stage({
     id: "ps-solorche",
@@ -179,10 +188,10 @@ const stages: RallyStage[] = [
     roadClosure: "07:07",
     passes: [{ label: "SS 13 · 2° passaggio", time: "16:37", roadClosure: "14:37" }],
     lengthKm: 12.86,
-    parkingKind: "access",
-    parkingName: "Ingresso Pattada (Galoppatoio)",
-    parking: P(40.56182559978122, 9.083966853227492),
     notes: `Galoppatoio di Pattada all'arrivo: aree Experience 12 e 13 con salto, RIS Hospitality, parcheggio Experience e spettatori. Sulla mappa SS 13 è indicata alle 16:07, nel timetable ufficiale alle 16:37: vale il timetable. Zone Casa Betania Nord/Sud (16–17) con accesso da Bultei. ${ACCESSO}`,
+    parkingKind: "parking",
+    parkingName: "Parcheggio spettatori · Galoppatoio di Pattada",
+    parking: P(40.545519, 9.09484),
   }),
   stage({
     id: "ps-osilo",
@@ -193,10 +202,10 @@ const stages: RallyStage[] = [
     roadClosure: "05:31",
     passes: [{ label: "SS 16 · 2° passaggio", time: "11:38", roadClosure: "05:31" }],
     lengthKm: 23.71,
-    parkingKind: "access",
-    parkingName: "Ingresso Osilo (Quadrivio)",
-    parking: P(40.81558864188334, 8.742239797232767),
     notes: `Quadrivio: area Experience 14 con parcheggio Experience, zona pubblico 19. Altre zone: Tanca Noa (20) e Tergu (21), accesso da Tergu. ${ACCESSO}`,
+    parkingKind: "parking",
+    parkingName: "Parcheggio Experience (P verde) · Quadrivio",
+    parking: P(40.814591, 8.700295),
   }),
   stage({
     id: "ps-argentiera",
@@ -207,12 +216,12 @@ const stages: RallyStage[] = [
     roadClosure: "07:05",
     passes: [{ label: "SS 17 · Wolf Power Stage", time: "14:15", roadClosure: "07:05" }],
     lengthKm: 7.1,
-    parkingKind: "access",
-    parkingName: "Ingresso Palmadula",
     spectatorPointId: "exp-ebi-dozzi",
-    parking: P(40.74863649450717, 8.188445362031837),
     notes:
       "Sul mare: aree Experience 15 (Ebi Dozzi) e 16 (Porto Palmas, arrivo), RIS Hospitality. Da Palmadula accesso pedonale alla zona 22; parcheggi spettatori verso l'Argentiera per le zone sul mare (23). Strade chiuse dalle 07:05 fino alla Power Stage.",
+    parkingKind: "parking",
+    parkingName: "Parcheggio spettatori · Argentiera",
+    parking: P(40.7463634, 8.1611638),
   }),
 ];
 
@@ -222,7 +231,7 @@ function sp(s: Omit<SpectatorPoint, "photoIds">): SpectatorPoint {
 
 // Aree Experience del Pass Gold (e poche zone pubblico notevoli) dalla mappa ufficiale.
 // WOW = mia valutazione in base a ciò che la mappa segnala (salti, guadi, arene, mare).
-const DA_MYMAPS = "Coordinate precise dell'area: nella mappa interattiva ufficiale della prova (QR \"Interactive MyMaps\").";
+const DA_MYMAPS = "Coordinate dell'area e del parcheggio dalla mappa interattiva ufficiale della prova.";
 
 const spectatorPoints: SpectatorPoint[] = [
   sp({
@@ -237,6 +246,10 @@ const spectatorPoints: SpectatorPoint[] = [
     description: "Shakedown a pochi km da Alghero: le auto passano più volte, ottimo per iniziare e provare foto e video.",
     source: FONTE,
     notes: DA_MYMAPS,
+    point: P(40.659268, 8.397047),
+    parking: P(40.660558, 8.39582),
+    parkingName: "Parcheggio spettatori · Ex Miniera Bauxite",
+    walkDistance: aria(P(40.660558, 8.39582), P(40.659268, 8.397047)),
   }),
   sp({
     id: "exp-ittiri",
@@ -249,6 +262,10 @@ const spectatorPoints: SpectatorPoint[] = [
     walkRoute: "Dai parcheggi spettatori lungo la strada a nord, percorso pedonale segnalato fino all'arena. Area Experience 3 accanto al salto.",
     description: "Tutto il tracciato sotto gli occhi, auto vicinissime: il modo perfetto per il primo rally.",
     source: FONTE,
+    point: P(40.586, 8.564584),
+    parking: P(40.586806, 8.566995),
+    parkingName: "Parcheggio spettatori · Ittiri Arena",
+    walkDistance: aria(P(40.586806, 8.566995), P(40.586, 8.564584)),
   }),
   sp({
     id: "exp-tula-6",
@@ -261,6 +278,10 @@ const spectatorPoints: SpectatorPoint[] = [
       "Accesso Experience e disabili (solo auto) dall'Access Point indicato, fino al parcheggio Experience vicino all'area 6. In alternativa bus navetta da Erula (Bus IN/OUT Point).",
     source: FONTE,
     notes: DA_MYMAPS,
+    point: P(40.7795393, 8.9746602),
+    parking: P(40.780709, 8.975162),
+    parkingName: "Parcheggio Sa Mela (auto Experience e disabili)",
+    walkDistance: aria(P(40.780709, 8.975162), P(40.7795393, 8.9746602)),
   }),
   sp({
     id: "exp-tula-4",
@@ -273,6 +294,10 @@ const spectatorPoints: SpectatorPoint[] = [
       "Da Tula accesso a senso unico fino allo start della prova (dopo lo start solo in uscita), fino ai parcheggi vicino all'area 4. Parcheggio Experience accanto.",
     source: FONTE,
     notes: DA_MYMAPS,
+    point: P(40.762394, 8.9658306),
+    parking: P(40.765139, 8.963501),
+    parkingName: "Parcheggio spettatori · Turrina Manna",
+    walkDistance: aria(P(40.765139, 8.963501), P(40.762394, 8.9658306)),
   }),
   sp({
     id: "zona-filigosu",
@@ -283,6 +308,7 @@ const spectatorPoints: SpectatorPoint[] = [
     walkRoute: "Da Oschiri accesso segnalato; ultimo tratto solo con 4x4.",
     description: "Nessuna area Experience su questa prova.",
     source: FONTE,
+    point: P(40.700626, 9.151407),
   }),
   sp({
     id: "exp-ala-arena",
@@ -297,6 +323,10 @@ const spectatorPoints: SpectatorPoint[] = [
     description: "Arena alla partenza con salto e Water Splash: le auto passano due volte (10:08 e 16:38).",
     source: FONTE,
     notes: DA_MYMAPS,
+    point: P(40.670099, 9.292726),
+    parking: P(40.670986, 9.294639),
+    parkingName: "Parcheggio spettatori · Alà Arena",
+    walkDistance: aria(P(40.670986, 9.294639), P(40.670099, 9.292726)),
   }),
   sp({
     id: "exp-lerno-jump",
@@ -311,6 +341,10 @@ const spectatorPoints: SpectatorPoint[] = [
     description: "Il salto di Lerno alla partenza della prova, con area Experience dedicata.",
     source: FONTE,
     notes: DA_MYMAPS,
+    point: P(40.603697, 9.178533),
+    parking: P(40.608137, 9.184611),
+    parkingName: "Parcheggio spettatori · Lerno",
+    walkDistance: aria(P(40.608137, 9.184611), P(40.603697, 9.178533)),
   }),
   sp({
     id: "exp-budduso-arena",
@@ -322,6 +356,10 @@ const spectatorPoints: SpectatorPoint[] = [
     walkRoute: "Da Buddusò accesso segnalato fino alla Buddusò Arena: parcheggio Experience accanto.",
     source: FONTE,
     notes: DA_MYMAPS,
+    point: P(40.568983, 9.332695),
+    parking: P(40.565698, 9.326432),
+    parkingName: "Parcheggio · Buddusò Arena",
+    walkDistance: aria(P(40.565698, 9.326432), P(40.568983, 9.332695)),
   }),
   sp({
     id: "exp-nuraghe-loelle",
@@ -333,6 +371,10 @@ const spectatorPoints: SpectatorPoint[] = [
     walkRoute: "Da Buddusò stesso accesso della Buddusò Arena, area poco prima.",
     source: FONTE,
     notes: DA_MYMAPS,
+    point: P(40.568285, 9.318051),
+    parking: P(40.565698, 9.326432),
+    parkingName: "Parcheggio · Buddusò Arena",
+    walkDistance: aria(P(40.565698, 9.326432), P(40.568285, 9.318051)),
   }),
   sp({
     id: "zona-coiluna-jump",
@@ -344,6 +386,10 @@ const spectatorPoints: SpectatorPoint[] = [
     walkRoute: "Accesso da Mamone (o da Alà dei Sardi); ultimo tratto solo 4x4/SUV.",
     description: "Non è un'area Experience: solo pubblico.",
     source: FONTE,
+    point: P(40.595968, 9.363383),
+    parking: P(40.596437, 9.367404),
+    parkingName: "Parcheggio Coiluna (solo 4x4)",
+    walkDistance: aria(P(40.596437, 9.367404), P(40.595968, 9.363383)),
   }),
   sp({
     id: "exp-galoppatoio",
@@ -358,6 +404,10 @@ const spectatorPoints: SpectatorPoint[] = [
     description: "Anello finale con salto al Galoppatoio di Pattada: prova nuova del 2026.",
     source: FONTE,
     notes: DA_MYMAPS,
+    point: P(40.545812, 9.092092),
+    parking: P(40.545519, 9.09484),
+    parkingName: "Parcheggio spettatori · Galoppatoio di Pattada",
+    walkDistance: aria(P(40.545519, 9.09484), P(40.545812, 9.092092)),
   }),
   sp({
     id: "exp-quadrivio",
@@ -369,6 +419,10 @@ const spectatorPoints: SpectatorPoint[] = [
     walkRoute: "Dall'Access Point indicato seguire l'accesso segnalato fino al Quadrivio: parcheggio Experience accanto all'area.",
     source: FONTE,
     notes: DA_MYMAPS,
+    point: P(40.815248, 8.701731),
+    parking: P(40.814591, 8.700295),
+    parkingName: "Parcheggio Experience (P verde) · Quadrivio",
+    walkDistance: aria(P(40.814591, 8.700295), P(40.815248, 8.701731)),
   }),
   sp({
     id: "exp-ebi-dozzi",
@@ -384,6 +438,10 @@ const spectatorPoints: SpectatorPoint[] = [
     description: "Le auto corrono sul mare: lo scenario più spettacolare del rally, dove si decide il mondiale.",
     source: FONTE,
     notes: DA_MYMAPS,
+    point: P(40.757951, 8.160377),
+    parking: P(40.7463634, 8.1611638),
+    parkingName: "Parcheggio spettatori · Argentiera",
+    walkDistance: aria(P(40.7463634, 8.1611638), P(40.757951, 8.160377)),
   }),
   sp({
     id: "exp-porto-palmas",
@@ -395,6 +453,10 @@ const spectatorPoints: SpectatorPoint[] = [
     walkRoute: "All'arrivo della prova, accanto alla RIS Hospitality.",
     source: FONTE,
     notes: DA_MYMAPS,
+    point: P(40.750907, 8.157676),
+    parking: P(40.7463634, 8.1611638),
+    parkingName: "Parcheggio spettatori · Argentiera",
+    walkDistance: aria(P(40.7463634, 8.1611638), P(40.750907, 8.157676)),
   }),
 ];
 

@@ -125,6 +125,11 @@ export interface SpectatorPoint {
   source?: string;
   /** Tragitto a piedi dal parcheggio spettatori a questo punto. */
   walkRoute?: string;
+  /** Parcheggio più adatto per quest'area (se diverso da quello della prova). */
+  parking?: GeoPoint;
+  parkingName?: string;
+  /** Distanza parcheggio → area in linea d'aria (metri). */
+  walkDistance?: number;
   description?: string;
   notes?: string;
   position?: string;

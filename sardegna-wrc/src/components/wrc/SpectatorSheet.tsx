@@ -97,31 +97,38 @@ export function GoldBadge() {
 }
 
 /** Parcheggio spettatori → punto: tempi, descrizione e percorso a piedi su Maps. */
+/** Parcheggio → area: distanza, descrizione e percorso a piedi su Maps. */
 function WalkFromParking({ point, stage }: { point: SpectatorPoint; stage: RallyStage }) {
+  const parking = point.parking ?? stage.parking;
+  const parkingName = point.parkingName ?? stage.parkingName;
   const facts = [
+    point.walkDistance != null && `circa ${formatKm(point.walkDistance / 1000)} in linea d'aria`,
     stage.walkMinutes != null && formatDuration(stage.walkMinutes),
-    stage.walkKm != null && formatKm(stage.walkKm),
     stage.elevationM != null && `+${stage.elevationM} m`,
   ].filter(Boolean) as string[];
   return (
-    <section className="mt-5 rounded-2xl bg-surface p-4">
+    <section className="mt-5 space-y-3 rounded-2xl bg-surface p-4">
       <h4 className="text-[15px] font-extrabold uppercase tracking-[0.12em] text-muted">Come arrivarci</h4>
-      <p className="mt-1 text-[18px] font-bold">{stage.parkingName || "Parcheggio spettatori da inserire"}</p>
-      {facts.length > 0 && <p className="tnum mt-1 text-[18px] font-semibold text-hi">{facts.join(" · ")}</p>}
-      {point.walkRoute ? (
-        <p className="mt-2 whitespace-pre-line text-[17px]">{point.walkRoute}</p>
-      ) : (
-        <p className="mt-2 text-[16px] text-muted">Tragitto da inserire dalla scheda ufficiale della prova (matita).</p>
-      )}
-      {stage.parking && point.point ? (
-        <NavButton className="mt-3 w-full" size="lg" variant="secondary" origin={stage.parking} point={point.point} label={point.name} mode="walking">
-          PERCORSO PARCHEGGIO → PUNTO
-        </NavButton>
-      ) : (
-        <p className="mt-2 text-[15px] font-semibold text-muted">
-          Il percorso su Maps compare quando parcheggio e punto hanno le coordinate.
-        </p>
-      )}
+      <div>
+        <p className="text-[18px] font-bold">1. In auto: {parkingName || "parcheggio da inserire"}</p>
+        {parking && (
+          <NavButton className="mt-2 w-full" size="lg" point={parking} label={parkingName}>
+            NAVIGA AL PARCHEGGIO
+          </NavButton>
+        )}
+      </div>
+      <div>
+        <p className="text-[18px] font-bold">2. A piedi fino all&apos;area</p>
+        {facts.length > 0 && <p className="tnum text-[17px] font-semibold text-hi">{facts.join(" · ")}</p>}
+        {point.walkRoute && <p className="mt-1 whitespace-pre-line text-[17px]">{point.walkRoute}</p>}
+        {parking && point.point ? (
+          <NavButton className="mt-2 w-full" size="lg" variant="secondary" origin={parking} point={point.point} label={point.name} mode="walking">
+            PERCORSO A PIEDI
+          </NavButton>
+        ) : (
+          <p className="mt-1 text-[15px] font-semibold text-muted">Il percorso su Maps compare quando parcheggio e area hanno le coordinate.</p>
+        )}
+      </div>
     </section>
   );
 }
