@@ -107,6 +107,12 @@ export interface SpectatorPoint {
   stageId: string;
   name: string;
   point?: GeoPoint;
+  /** Indirizzo/luogo per la navigazione quando mancano le coordinate. */
+  address?: string;
+  /** Spettacolarità 1–5. */
+  wow?: number;
+  /** Da dove viene l'informazione. */
+  source?: string;
   description?: string;
   notes?: string;
   position?: string;

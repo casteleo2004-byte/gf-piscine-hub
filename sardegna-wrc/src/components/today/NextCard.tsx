@@ -72,7 +72,7 @@ export function NextCard({
       </div>
 
       <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3">
-        <Stat label="Orario" value={event.time || "—"} />
+        {event.time && <Stat label="Orario" value={event.time} />}
         {info.departAt && info.departAt !== event.time && <Stat label="Partenza" value={info.departAt} tone="accent" />}
         {info.driveMinutes != null && (
           <Stat label="Auto" value={formatDuration(info.driveMinutes)} hint={info.driveEstimated ? "≈" : undefined} />

@@ -50,7 +50,7 @@ export function Timeline({
                       e.done || past ? "text-muted line-through decoration-2" : isNext ? "text-hi" : "text-text"
                     }`}
                   >
-                    {e.time || "--:--"}
+                    {e.time || "?"}
                   </span>
                   <span className="min-w-0 flex-1">
                     {isNext && (

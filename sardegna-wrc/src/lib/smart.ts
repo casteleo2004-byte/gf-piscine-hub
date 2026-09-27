@@ -16,13 +16,19 @@ const WALK_TYPES = new Set(["piedi", "spettatore", "prova"]);
 const INSTANT_TYPES = new Set(["sveglia"]);
 const STALE_MINUTES = 60;
 const LAST_STALE_MINUTES = 180;
+const UNTIMED_WINDOW_MINUTES = 180;
 
 export function spectatorPointOf(stage: RallyStage | undefined, data: AppData): SpectatorPoint | undefined {
   if (!stage) return undefined;
   return (
     data.spectatorPoints.find((p) => p.id === stage.spectatorPointId) ??
-    data.spectatorPoints.find((p) => p.stageId === stage.id)
+    spectatorPointsOf(stage.id, data)[0]
   );
+}
+
+/** Punti spettatore di una prova, i più spettacolari per primi. */
+export function spectatorPointsOf(stageId: string, data: AppData): SpectatorPoint[] {
+  return data.spectatorPoints.filter((p) => p.stageId === stageId).sort((a, b) => (b.wow ?? 0) - (a.wow ?? 0));
 }
 
 /** Destinazione per il pulsante NAVIGA di un'attività. */
@@ -43,6 +49,8 @@ export function resolveTarget(event: TripEvent, data: AppData): Target | null {
     if (walking) {
       const sp = spectatorPointOf(stage, data);
       if (sp?.point) return { point: sp.point, label: sp.name, mode: "walking" };
+      // Senza coordinate si naviga in auto verso il luogo di avvicinamento.
+      if (sp?.address) return { address: sp.address, label: sp.name, mode: "driving" };
     }
     if (stage.parking) {
       return { point: stage.parking, label: stage.parkingName || `Parcheggio PS ${stage.number}`, mode: "driving" };
@@ -155,16 +163,22 @@ export function eventInfo(event: TripEvent, data: AppData): EventInfo {
   };
 }
 
+/** Minuti per l'ordinamento: le attività senza orario ("da definire") vanno in cima. */
+const sortMinutes = (t: string | undefined) => {
+  const m = toMinutes(t);
+  return Number.isFinite(m) ? m : -1;
+};
+
 export function eventsOfDay(data: AppData, date: ISODate): TripEvent[] {
   return data.events
     .filter((e) => e.date === date)
-    .sort((a, b) => toMinutes(a.time) - toMinutes(b.time) || a.id.localeCompare(b.id));
+    .sort((a, b) => sortMinutes(a.time) - sortMinutes(b.time) || a.id.localeCompare(b.id, undefined, { numeric: true }));
 }
 
 export function stagesOfDay(data: AppData, date: ISODate): RallyStage[] {
   return data.stages
     .filter((s) => s.date === date)
-    .sort((a, b) => toMinutes(a.firstCar) - toMinutes(b.firstCar));
+    .sort((a, b) => a.number - b.number);
 }
 
 /**
@@ -175,21 +189,31 @@ export function stagesOfDay(data: AppData, date: ISODate): RallyStage[] {
  * Se la giornata non è quella corrente (futura) si parte dalla prima.
  */
 export function nextEventIndex(events: TripEvent[], nowMin: number, isToday: boolean): number {
+  const timed = (e: TripEvent) => Number.isFinite(toMinutes(e.time));
+  if (!isToday) return events.findIndex((e) => !e.done);
+
+  let next = -1;
   for (let i = 0; i < events.length; i++) {
     const e = events[i];
-    if (e.done) continue;
-    if (!isToday) return i;
+    if (e.done || !timed(e)) continue;
     // Attività istantanee (sveglia) già passate: non restano "in corso".
-    if (INSTANT_TYPES.has(e.type) && toMinutes(e.time) < nowMin && i < events.length - 1) continue;
-    const later = events.slice(i + 1);
+    const later = events.slice(i + 1).filter(timed);
+    if (INSTANT_TYPES.has(e.type) && toMinutes(e.time) < nowMin && later.length) continue;
     const superseded = later.some((l) => toMinutes(l.time) <= nowMin);
     if (superseded) continue;
     // Attività iniziata da tempo: meglio mostrare la successiva (o nulla a fine giornata).
     const elapsed = nowMin - toMinutes(e.time);
     if (elapsed > (later.length ? STALE_MINUTES : LAST_STALE_MINUTES)) continue;
-    return i;
+    next = i;
+    break;
   }
-  return -1;
+  // Attività senza orario ancora da fare (es. prove prima del timetable): hanno la
+  // precedenza, a meno che un'attività con orario sia vicina (entro 3 ore) o in corso.
+  const untimed = events.findIndex((e) => !e.done && !timed(e));
+  if (untimed >= 0 && (next < 0 || toMinutes(events[next].time) - nowMin > UNTIMED_WINDOW_MINUTES)) {
+    return untimed;
+  }
+  return next;
 }
 
 export type Urgency = "calm" | "soon" | "now" | "late";
@@ -201,8 +225,9 @@ export interface Headline {
 
 /** Messaggio principale della card "Prossima tappa". */
 export function headline(event: TripEvent, info: EventInfo, nowMin: number, isToday: boolean): Headline {
-  if (!isToday) return { text: `Alle ${event.time}`, urgency: "calm" };
   const start = toMinutes(event.time);
+  if (!Number.isFinite(start)) return { text: "Orario da definire", urgency: "calm" };
+  if (!isToday) return { text: `Alle ${event.time}`, urgency: "calm" };
   const depart = toMinutes(info.departAt);
   const rel = formatRelative;
   if (Number.isFinite(depart) && (nowMin < start || depart === start)) {

@@ -50,7 +50,7 @@ export function StageCard({
         </div>
 
         <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3">
-          <Stat label="Prima vettura" value={stage.firstCar || "—"} tone="rally" />
+          <Stat label="Prima vettura" value={stage.firstCar || "Da definire"} tone="rally" />
           <Stat label="Partenza" value={timing.departAt ?? "—"} tone="accent" hint={timing.departEstimated && timing.departAt ? "calc." : undefined} />
           <Stat label="Auto" value={formatDuration(timing.driveMinutes)} hint={timing.driveEstimated ? "≈" : undefined} />
           <Stat
@@ -64,7 +64,7 @@ export function StageCard({
           <ul className="mt-3 space-y-1">
             {stage.passes.map((p, i) => (
               <li key={i} className="tnum text-[17px] font-semibold text-muted">
-                {p.label} · <span className="text-text">{p.time}</span>
+                {p.label} · <span className="text-text">{p.time || "da definire"}</span>
               </li>
             ))}
           </ul>
@@ -97,6 +97,7 @@ export function StageCard({
         {sp && (
           <p className="mt-2 text-[16px] font-semibold text-muted">
             👁 {sp.name}
+            {sp.wow ? <span className="ml-2 font-extrabold text-hi">WOW {sp.wow}/5</span> : null}
             {sp.experienceArea && <span className="ml-2 font-extrabold text-hi">· Area Pass Gold</span>}
           </p>
         )}

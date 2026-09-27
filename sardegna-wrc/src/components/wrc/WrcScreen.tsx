@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useNow } from "@/lib/hooks/useNow";
 import { newId } from "@/lib/id";
 import { useData } from "@/lib/store/hooks";
-import { formatLongDate, toISODate, toMinutes } from "@/lib/time";
+import { formatLongDate, toISODate } from "@/lib/time";
 import type { RallyStage } from "@/lib/types";
 import { Button } from "../ui/Button";
 import { OnlineBadge } from "../ui/OnlineBadge";
@@ -25,7 +25,7 @@ export function WrcScreen() {
 
   const today = toISODate(now);
   const sorted = [...data.stages].sort(
-    (a, b) => a.date.localeCompare(b.date) || toMinutes(a.firstCar) - toMinutes(b.firstCar),
+    (a, b) => a.date.localeCompare(b.date) || a.number - b.number,
   );
   const past = sorted.filter((s) => s.date < today);
   const upcoming = sorted.filter((s) => s.date >= today);

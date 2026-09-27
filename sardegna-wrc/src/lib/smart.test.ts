@@ -2,51 +2,108 @@ import { describe, expect, it } from "vitest";
 import { parsePoint } from "./geo";
 import { navigationUrl } from "./maps";
 import { createSeed } from "./seed";
-import { activeDay, eventInfo, eventsOfDay, headline, nextEventIndex, resolveTarget, stageTiming } from "./smart";
+import { activeDay, eventInfo, eventsOfDay, headline, nextEventIndex, resolveTarget, spectatorPointOf, stageTiming } from "./smart";
+import type { TripEvent } from "./types";
 import { toMinutes } from "./time";
 
 const data = createSeed();
-const rally = eventsOfDay(data, "2026-10-02");
 const at = (t: string) => toMinutes(t);
+
+// Giornata tipo costruita a mano (indipendente dai dati del viaggio).
+let n = 0;
+const e = (time: string, title: string, type: TripEvent["type"], extra: Partial<TripEvent> = {}): TripEvent => ({
+  id: `t${++n}`,
+  date: "2026-10-02",
+  time,
+  title,
+  type,
+  done: false,
+  ...extra,
+});
+const day: TripEvent[] = [
+  e("05:45", "Sveglia", "sveglia"),
+  e("06:15", "Partenza", "partenza", { point: { lat: 40.7, lng: 9 } }),
+  e("07:40", "Parcheggio", "parcheggio"),
+  e("09:12", "Prima vettura", "prova"),
+  e("12:30", "Pranzo", "pasto"),
+  e("18:30", "Rientro", "auto"),
+  e("20:30", "Cena", "pasto"),
+];
 
 describe("nextEventIndex", () => {
   it("salta la sveglia passata e punta alla partenza", () => {
-    const i = nextEventIndex(rally, at("06:00"), true);
-    expect(rally[i].type).toBe("partenza");
-    const info = eventInfo(rally[i], data);
-    expect(headline(rally[i], info, at("06:00"), true).text).toBe("Partenza tra 15 min");
+    const i = nextEventIndex(day, at("06:00"), true);
+    expect(day[i].title).toBe("Partenza");
+    expect(headline(day[i], eventInfo(day[i], data), at("06:00"), true).text).toBe("Partenza tra 15 min");
   });
 
   it("dopo il rally passa da sola alla cena", () => {
-    const i = nextEventIndex(rally, at("20:00"), true);
-    expect(rally[i].title).toBe("Cena");
+    expect(day[nextEventIndex(day, at("20:00"), true)].title).toBe("Cena");
   });
 
   it("le attività completate vengono saltate", () => {
-    const events = rally.map((e, k) => (k < 3 ? { ...e, done: true } : e));
-    const i = nextEventIndex(events, at("05:00"), true);
-    expect(i).toBe(3);
+    const events = day.map((x, k) => (k < 3 ? { ...x, done: true } : x));
+    expect(nextEventIndex(events, at("05:00"), true)).toBe(3);
   });
 
   it("giorno futuro: prima attività non fatta", () => {
-    expect(nextEventIndex(rally, at("23:00"), false)).toBe(0);
+    expect(nextEventIndex(day, at("23:00"), false)).toBe(0);
   });
 
   it("fine giornata: nessuna prossima", () => {
-    expect(nextEventIndex(rally, at("23:50"), true)).toBe(-1);
+    expect(nextEventIndex(day, at("23:50"), true)).toBe(-1);
   });
-});
 
-describe("partenza", () => {
+  it("attività senza orario in cima, salvo un orario vicino", () => {
+    const withUntimed = [e("", "PS senza orario", "prova"), ...day];
+    expect(nextEventIndex(withUntimed, at("14:00"), true)).toBe(0);
+    expect(withUntimed[nextEventIndex(withUntimed, at("18:00"), true)].title).toBe("Rientro");
+  });
+
   it("partenza in ritardo segnalata", () => {
-    const e = rally.find((x) => x.type === "partenza")!;
-    const h = headline(e, eventInfo(e, data), at("06:30"), true);
+    const h = headline(day[1], eventInfo(day[1], data), at("06:30"), true);
     expect(h.urgency).toBe("late");
   });
 
-  it("partenza consigliata calcolata all'indietro", () => {
-    const s = { ...data.stages.find((x) => x.id === "ps4")!, departAt: undefined }; // chiusura 09:10, piedi 15, auto 105, margine 15
+  it("orario mancante", () => {
+    const x = e("", "PS", "prova");
+    expect(headline(x, eventInfo(x, data), at("08:00"), true).text).toBe("Orario da definire");
+  });
+});
+
+describe("partenza consigliata", () => {
+  it("calcolata all'indietro da chiusura strada, piedi, margine e auto", () => {
+    const s = {
+      ...data.stages[0],
+      roadClosure: "09:10",
+      walkMinutes: 15,
+      driveMinutes: 105,
+      departAt: undefined,
+    };
     expect(stageTiming(s, data).departAt).toBe("06:55");
+  });
+});
+
+describe("prove 2026", () => {
+  it("17 prove su 9 tratte con la Power Stage alle 14:15", () => {
+    expect(data.stages).toHaveLength(9);
+    const passes = data.stages.reduce((t, s) => t + 1 + s.passes.length, 0);
+    expect(passes).toBe(17);
+    const ps = data.stages.find((s) => s.id === "ps-argentiera")!;
+    expect(ps.passes[0]).toEqual({ label: "PS 17 · Wolf Power Stage", time: "14:15" });
+  });
+  it("il punto più spettacolare è il principale e si naviga verso il luogo", () => {
+    const st = data.stages.find((s) => s.id === "ps-filigosu")!;
+    expect(spectatorPointOf(st, data)?.name).toBe("Micky's Jump");
+    const ev = eventsOfDay(data, "2026-10-02").find((x) => x.stageId === "ps-filigosu")!;
+    expect(resolveTarget({ ...ev, type: "spettatore" }, data)).toMatchObject({ address: "Nuraghe Lerno, Pattada", mode: "driving" });
+  });
+  it("nessuna coordinata inventata sui punti spettatore", () => {
+    expect(data.spectatorPoints.every((p) => !p.point)).toBe(true);
+  });
+  it("domenica alle 13:30 la prossima è la Power Stage", () => {
+    const ev = eventsOfDay(data, "2026-10-04");
+    expect(ev[nextEventIndex(ev, at("13:30"), true)].title).toContain("Power Stage");
   });
 });
 

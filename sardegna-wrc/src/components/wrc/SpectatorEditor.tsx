@@ -35,7 +35,9 @@ export function SpectatorEditor({ point, data, onClose }: { point: SpectatorPoin
     >
       <div className="space-y-5">
         <TextInput label="Nome" value={d.name} onChange={(v) => set("name", v)} autoFocus={isNew} placeholder="Es. Curva sx dopo dosso" />
+        <RatingInput label="Spettacolarità (WOW)" value={d.wow} onChange={(v) => set("wow", v)} />
         <PointInput label="Posizione" value={d.point} onChange={(v) => set("point", v)} />
+        <TextInput label="Luogo per la navigazione (se mancano le coordinate)" value={d.address} onChange={(v) => set("address", v)} />
         <Chips
           label="Area RIS Experience (Pass Gold)"
           value={d.experienceArea ? "si" : "no"}
@@ -62,6 +64,7 @@ export function SpectatorEditor({ point, data, onClose }: { point: SpectatorPoin
         <NumberInput label="Distanza dalla strada" suffix="m" value={d.roadDistanceM} onChange={(v) => set("roadDistanceM", v)} />
         <TextArea label="Attrezzatura fotografica" value={d.photoGear} onChange={(v) => set("photoGear", v)} rows={2} />
         <TextArea label="Note" value={d.notes} onChange={(v) => set("notes", v)} />
+        <TextInput label="Fonte" value={d.source} onChange={(v) => set("source", v)} />
       </div>
     </Sheet>
   );

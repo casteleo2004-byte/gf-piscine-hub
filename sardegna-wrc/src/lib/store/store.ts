@@ -1,4 +1,4 @@
-import { createSeed, DATA_VERSION, SEED_UPDATES } from "../seed";
+import { createSeed, DATA_VERSION, EXAMPLE_IDS, SEED_UPDATES } from "../seed";
 import type { AppData } from "../types";
 import type { StorageAdapter } from "./adapter";
 import { localAdapter } from "./localAdapter";
@@ -20,6 +20,14 @@ function migrate(data: AppData): AppData {
       .filter(([v]) => Number(v) > (data.version ?? 1))
       .flatMap(([, dates]) => dates),
   );
+  if ((data.version ?? 1) < 5) {
+    // Via le prove d'esempio: sostituite dalle prove reali 2026.
+    data = {
+      ...data,
+      stages: data.stages.filter((x) => !EXAMPLE_IDS.stages.includes(x.id)),
+      spectatorPoints: data.spectatorPoints.filter((x) => !EXAMPLE_IDS.spectatorPoints.includes(x.id)),
+    };
+  }
   if (stale.size) {
     data = {
       ...data,
@@ -28,6 +36,10 @@ function migrate(data: AppData): AppData {
       // Nuovi luoghi e prove dei dati iniziali (per id), senza toccare quelli esistenti.
       places: [...data.places, ...seed.places.filter((p) => !data.places.some((x) => x.id === p.id))],
       stages: [...data.stages, ...seed.stages.filter((p) => !data.stages.some((x) => x.id === p.id))],
+      spectatorPoints: [
+        ...data.spectatorPoints,
+        ...seed.spectatorPoints.filter((p) => !data.spectatorPoints.some((x) => x.id === p.id)),
+      ],
       gearPresets: data.gearPresets.map((g) => ({
         ...g,
         items: g.items.map((i) => (i.name === "Pass WRC" ? { ...i, name: "Pass Gold RIS Experience (2)" } : i)),

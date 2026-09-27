@@ -4,7 +4,7 @@ import { Pencil, Plus, Star } from "lucide-react";
 import { useState } from "react";
 import { newId } from "@/lib/id";
 import { formatPoint } from "@/lib/geo";
-import { spectatorPointOf } from "@/lib/smart";
+import { spectatorPointOf, spectatorPointsOf } from "@/lib/smart";
 import { actions } from "@/lib/store/actions";
 import type { AppData, RallyStage, SpectatorPoint } from "@/lib/types";
 import { Button, IconButton } from "../ui/Button";
@@ -17,7 +17,7 @@ import { SpectatorEditor } from "./SpectatorEditor";
 export function SpectatorSheet({ stage, data, onClose }: { stage: RallyStage; data: AppData; onClose: () => void }) {
   const [editing, setEditing] = useState<SpectatorPoint | null>(null);
   const primary = spectatorPointOf(stage, data);
-  const others = data.spectatorPoints.filter((p) => p.stageId === stage.id && p.id !== primary?.id);
+  const others = spectatorPointsOf(stage.id, data).filter((p) => p.id !== primary?.id);
 
   const blank = (): SpectatorPoint => ({ id: newId("sp"), stageId: stage.id, name: "", photoIds: [] });
 
@@ -53,10 +53,11 @@ export function SpectatorSheet({ stage, data, onClose }: { stage: RallyStage; da
                     <Pencil size={20} />
                   </IconButton>
                 </div>
+                {p.wow ? <Wow value={p.wow} /> : null}
                 {p.description && <p className="mt-1 text-[16px] text-muted">{p.description}</p>}
                 <div className="mt-3 grid grid-cols-2 gap-3">
-                  <NavButton size="md" variant="secondary" point={p.point} label={p.name} mode="walking">
-                    A piedi
+                  <NavButton size="md" variant="secondary" point={p.point} address={p.address} label={p.name} mode={p.point ? "walking" : "driving"} compact>
+                    Naviga
                   </NavButton>
                   <Button size="md" onClick={() => actions.saveSpectatorPoint(p, true)}>
                     <Star size={20} /> Principale
@@ -77,6 +78,15 @@ export function SpectatorSheet({ stage, data, onClose }: { stage: RallyStage; da
   );
 }
 
+function Wow({ value, large = false }: { value: number; large?: boolean }) {
+  return (
+    <div className={`tnum font-extrabold text-hi ${large ? "mt-1 text-[22px]" : "mt-1 text-[17px]"}`}>
+      WOW {"★".repeat(value)}
+      <span className="text-muted">{"☆".repeat(5 - value)}</span>
+    </div>
+  );
+}
+
 export function GoldBadge() {
   return (
     <span className="mb-1 inline-flex items-center rounded-full bg-accent px-3 py-1 text-[14px] font-extrabold uppercase tracking-wide text-accent-ink">
@@ -94,15 +104,24 @@ function PointView({ point }: { point: SpectatorPoint }) {
     ["Distanza dalla strada", point.roadDistanceM != null ? `${point.roadDistanceM} m` : undefined],
     ["Attrezzatura foto", point.photoGear],
     ["Coordinate", point.point ? formatPoint(point.point) : undefined],
+    ["Navigazione verso", !point.point ? point.address : undefined],
+    ["Fonte", point.source],
   ];
   return (
     <div>
       {point.experienceArea && <GoldBadge />}
       <h3 className="text-[28px] font-extrabold leading-tight">{point.name || "Punto spettatore"}</h3>
+      {point.wow ? <Wow value={point.wow} large /> : null}
       {point.description && <p className="mt-2 text-[20px] leading-snug">{point.description}</p>}
 
-      <NavButton className="mt-5 w-full" point={point.point} label={point.name} mode="walking">
-        NAVIGA A PIEDI
+      <NavButton
+        className="mt-5 w-full"
+        point={point.point}
+        address={point.address}
+        label={point.name}
+        mode={point.point ? "walking" : "driving"}
+      >
+        {point.point ? "NAVIGA A PIEDI" : "NAVIGA IN ZONA"}
       </NavButton>
 
       <div className="mt-5">

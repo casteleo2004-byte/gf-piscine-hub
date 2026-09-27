@@ -26,16 +26,14 @@ globalThis.Date = DemoDate as DateConstructor;
 
 const PRESETS: { id: string; label: string; at: string | null }[] = [
   { id: "gio-0800", label: "Gio 1 · 08:00 · Service Park (Pass Gold)", at: "2026-10-01T08:00" },
-  { id: "ven-0600", label: "Ven 2 · 06:00 · partenza rally", at: "2026-10-02T06:00" },
-  { id: "ven-0750", label: "Ven 2 · 07:50 · al parcheggio", at: "2026-10-02T07:50" },
-  { id: "ven-1000", label: "Ven 2 · 10:00 · tra due prove", at: "2026-10-02T10:00" },
-  { id: "ven-1945", label: "Ven 2 · 19:45 · verso cena", at: "2026-10-02T19:45" },
-  { id: "sab-0515", label: "Sab 3 · 05:15 · in ritardo", at: "2026-10-03T05:15" },
+  { id: "gio-1530", label: "Gio 1 · 15:30 · Ittiri Arena", at: "2026-10-01T15:30" },
+  { id: "ven-0700", label: "Ven 2 · 07:00 · prove del giorno", at: "2026-10-02T07:00" },
+  { id: "dom-1330", label: "Dom 4 · 13:30 · Power Stage", at: "2026-10-04T13:30" },
   { id: "mar-2000", label: "Mar 29/9 · 20:00 · verso il porto", at: "2026-09-29T20:00" },
   { id: "mer-0640", label: "Mer 30/9 · 06:40 · sbarco a Olbia", at: "2026-09-30T06:40" },
   { id: "mer-1420", label: "Mer 30/9 · 14:20 · check-in alloggio", at: "2026-09-30T14:20" },
-  { id: "rit-1745", label: "Mer 7/10 · 17:45 · rientro", at: "2026-10-07T17:45" },
   { id: "lun-0900", label: "Lun 5 · 09:00 · turismo", at: "2026-10-05T09:00" },
+  { id: "rit-1745", label: "Mer 7/10 · 17:45 · rientro", at: "2026-10-07T17:45" },
   { id: "real", label: "Ora reale", at: null },
 ];
 
@@ -46,7 +44,8 @@ function applyPreset(id: string) {
 
 function loadPreset(): string {
   try {
-    return localStorage.getItem("wrc-demo:preset") ?? PRESETS[0].id;
+    const v = localStorage.getItem("wrc-demo:preset");
+    return PRESETS.some((p) => p.id === v) ? v! : PRESETS[0].id;
   } catch {
     return PRESETS[0].id;
   }

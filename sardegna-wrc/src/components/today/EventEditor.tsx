@@ -24,7 +24,6 @@ export function EventEditor({ event, data, onClose }: { event: TripEvent; data: 
       footer={
         <EditorFooter
           onSave={save}
-          canSave={!!d.time}
           onDelete={
             isNew
               ? undefined
