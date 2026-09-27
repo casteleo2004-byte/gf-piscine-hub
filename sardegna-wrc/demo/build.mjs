@@ -13,7 +13,7 @@ const result = await build({
   format: "iife",
   jsx: "automatic",
   target: "es2020",
-  define: { "process.env.NODE_ENV": '"production"' },
+  define: { "process.env.NODE_ENV": '"production"', "process.env.NEXT_PUBLIC_ASSET_BASE": '""' },
   alias: {
     "@": path.join(root, "src"),
     "next/link": path.join(root, "demo/shims/link.tsx"),
@@ -36,4 +36,6 @@ html,body{background:var(--bg);color:var(--text)}</style>
 `;
 fs.mkdirSync("demo/dist", { recursive: true });
 fs.writeFileSync("demo/dist/index.html", html);
+// Immagini statiche accanto alla pagina (pubblicate come file dell'Artifact).
+fs.cpSync("public/stages", "demo/dist/stages", { recursive: true });
 console.log(`demo/dist/index.html ${(html.length / 1024).toFixed(0)} KB`);

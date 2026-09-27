@@ -9,6 +9,7 @@ import { spectatorPointOf, spectatorPointsOf, stageCode } from "@/lib/smart";
 import { actions } from "@/lib/store/actions";
 import type { AppData, RallyStage, SpectatorPoint } from "@/lib/types";
 import { Button, IconButton } from "../ui/Button";
+import { ImageView } from "../ui/ImageView";
 import { NavButton } from "../ui/NavButton";
 import { PhotoStrip } from "../ui/Photos";
 import { Sheet } from "../ui/Sheet";
@@ -67,6 +68,13 @@ export function SpectatorSheet({ stage, data, onClose }: { stage: RallyStage; da
               </li>
             ))}
           </ul>
+        </section>
+      )}
+
+      {stage.mapImage && (
+        <section className="mt-8">
+          <h3 className="mb-2 text-[15px] font-extrabold uppercase tracking-[0.12em] text-muted">Scheda ufficiale della prova</h3>
+          <ImageView src={stage.mapImage} alt={`Scheda ufficiale ${stage.name}`} />
         </section>
       )}
 
@@ -157,9 +165,18 @@ function PointView({ point, stage }: { point: SpectatorPoint; stage: RallyStage 
       )}
       <h3 className="text-[28px] font-extrabold leading-tight">{point.name || "Punto spettatore"}</h3>
       {point.wow ? <Wow value={point.wow} large /> : null}
+      {point.image && (
+        <ImageView
+          className="mt-4"
+          src={point.image}
+          alt={`Vista dall'alto: ${point.name}`}
+          caption="In rosso la prova, in blu le aree Pass Gold, in giallo quelle del pubblico, P = parcheggio."
+        />
+      )}
       {point.description && <p className="mt-2 text-[20px] leading-snug">{point.description}</p>}
 
-      <NavButton
+      {!(point.parking ?? stage.parking) && (
+        <NavButton
         className="mt-5 w-full"
         point={point.point ?? point.access}
         address={point.address}
@@ -170,6 +187,7 @@ function PointView({ point, stage }: { point: SpectatorPoint; stage: RallyStage 
           {point.point ? "NAVIGA A PIEDI" : point.access ? "NAVIGA ALL'INGRESSO" : "NAVIGA IN ZONA"}
         </span>
       </NavButton>
+      )}
 
       <WalkFromParking point={point} stage={stage} />
 

@@ -9,6 +9,7 @@ import { actions } from "@/lib/store/actions";
 import { formatDuration } from "@/lib/time";
 import type { AppData, RallyStage } from "@/lib/types";
 import { buttonClass, IconButton } from "../ui/Button";
+import { ImageView } from "../ui/ImageView";
 import { NavButton } from "../ui/NavButton";
 
 const ACCESS_LABEL = { facile: "Facile", media: "Media", difficile: "Difficile" } as const;
@@ -86,6 +87,10 @@ export function StageCard({
     <article className={`overflow-hidden rounded-3xl bg-surface ${inPlan ? "border-2 border-accent" : ""}`}>
       <div className="space-y-4 p-5">
         {header}
+
+        {sp?.image && (
+          <ImageView src={sp.image} alt={`Vista dall'alto: ${sp.name}`} caption="La vostra visuale · tocca per ingrandire" />
+        )}
 
         <div>
           <div className="text-[14px] font-bold uppercase tracking-wide text-muted">Passano le auto</div>

@@ -14,7 +14,7 @@ import type {
 // Dati iniziali del viaggio, solo da fonti verificabili: biglietti, prenotazioni,
 // percorso ufficiale del rally. Ciò che non è noto resta vuoto o "da verificare".
 
-export const DATA_VERSION = 9;
+export const DATA_VERSION = 10;
 
 /**
  * Giorni i cui dati iniziali sono cambiati in una versione: chi ha dati salvati
@@ -29,6 +29,7 @@ export const SEED_UPDATES: Record<number, string[]> = {
   7: ["2026-10-01", "2026-10-02", "2026-10-03", "2026-10-04"], // piano del giorno per chi è al primo rally
   8: ["2026-10-04"], // Argentiera: punto con sfondo mare come principale
   9: [], // coordinate esatte da mappe interattive ufficiali (prove e aree)
+  10: [], // immagini: vista dall'alto delle aree e schede ufficiali
 };
 
 /** Prove e punti spettatore d'esempio delle prime versioni, rimossi dalla v5. */
@@ -92,6 +93,7 @@ const stages: RallyStage[] = [
     parkingKind: "parking",
     parkingName: "Parcheggio spettatori · Ex Miniera Bauxite",
     parking: P(40.660558, 8.39582),
+    mapImage: "stages/map-sd.jpg",
   }),
   stage({
     id: "ps1",
@@ -107,6 +109,7 @@ const stages: RallyStage[] = [
     parkingKind: "parking",
     parkingName: "Parcheggio spettatori · Ittiri Arena",
     parking: P(40.586806, 8.566995),
+    mapImage: "stages/map-ps1.jpg",
   }),
   stage({
     id: "ps-tula",
@@ -122,6 +125,7 @@ const stages: RallyStage[] = [
     parkingKind: "parking",
     parkingName: "Parcheggio Sa Mela (auto Experience e disabili)",
     parking: P(40.780709, 8.975162),
+    mapImage: "stages/map-ps-tula.jpg",
   }),
   stage({
     id: "ps-filigosu",
@@ -136,6 +140,7 @@ const stages: RallyStage[] = [
     parkingName: "Ingresso Oschiri",
     parking: P(40.72157726858769, 9.11652993606414),
     notes: "Nessuna area Experience su questa prova. Unica zona pubblico: Filigosu (area 5) vicino alla partenza, ultimo tratto solo 4x4.",
+    mapImage: "stages/map-ps-filigosu.jpg",
   }),
   stage({
     id: "ps-alalerno",
@@ -150,6 +155,7 @@ const stages: RallyStage[] = [
     parkingKind: "parking",
     parkingName: "Parcheggio spettatori · Alà Arena",
     parking: P(40.670986, 9.294639),
+    mapImage: "stages/map-ps-alalerno.jpg",
   }),
   stage({
     id: "ps-lernoala",
@@ -164,6 +170,7 @@ const stages: RallyStage[] = [
     parkingKind: "parking",
     parkingName: "Parcheggio spettatori · Lerno",
     parking: P(40.608137, 9.184611),
+    mapImage: "stages/map-ps-lernoala.jpg",
   }),
   stage({
     id: "ps-coiluna",
@@ -178,6 +185,7 @@ const stages: RallyStage[] = [
     parkingKind: "parking",
     parkingName: "Parcheggio · Buddusò Arena",
     parking: P(40.565698, 9.326432),
+    mapImage: "stages/map-ps-coiluna.jpg",
   }),
   stage({
     id: "ps-solorche",
@@ -192,6 +200,7 @@ const stages: RallyStage[] = [
     parkingKind: "parking",
     parkingName: "Parcheggio spettatori · Galoppatoio di Pattada",
     parking: P(40.545519, 9.09484),
+    mapImage: "stages/map-ps-solorche.jpg",
   }),
   stage({
     id: "ps-osilo",
@@ -206,6 +215,7 @@ const stages: RallyStage[] = [
     parkingKind: "parking",
     parkingName: "Parcheggio Experience (P verde) · Quadrivio",
     parking: P(40.814591, 8.700295),
+    mapImage: "stages/map-ps-osilo.jpg",
   }),
   stage({
     id: "ps-argentiera",
@@ -222,6 +232,7 @@ const stages: RallyStage[] = [
     parkingKind: "parking",
     parkingName: "Parcheggio spettatori · Argentiera",
     parking: P(40.7463634, 8.1611638),
+    mapImage: "stages/map-ps-argentiera.jpg",
   }),
 ];
 
@@ -250,6 +261,7 @@ const spectatorPoints: SpectatorPoint[] = [
     parking: P(40.660558, 8.39582),
     parkingName: "Parcheggio spettatori · Ex Miniera Bauxite",
     walkDistance: aria(P(40.660558, 8.39582), P(40.659268, 8.397047)),
+    image: "stages/exp-sd.jpg",
   }),
   sp({
     id: "exp-ittiri",
@@ -266,6 +278,7 @@ const spectatorPoints: SpectatorPoint[] = [
     parking: P(40.586806, 8.566995),
     parkingName: "Parcheggio spettatori · Ittiri Arena",
     walkDistance: aria(P(40.586806, 8.566995), P(40.586, 8.564584)),
+    image: "stages/exp-ittiri.jpg",
   }),
   sp({
     id: "exp-tula-6",
@@ -282,6 +295,7 @@ const spectatorPoints: SpectatorPoint[] = [
     parking: P(40.780709, 8.975162),
     parkingName: "Parcheggio Sa Mela (auto Experience e disabili)",
     walkDistance: aria(P(40.780709, 8.975162), P(40.7795393, 8.9746602)),
+    image: "stages/exp-tula-6.jpg",
   }),
   sp({
     id: "exp-tula-4",
@@ -298,6 +312,7 @@ const spectatorPoints: SpectatorPoint[] = [
     parking: P(40.765139, 8.963501),
     parkingName: "Parcheggio spettatori · Turrina Manna",
     walkDistance: aria(P(40.765139, 8.963501), P(40.762394, 8.9658306)),
+    image: "stages/exp-tula-4.jpg",
   }),
   sp({
     id: "zona-filigosu",
@@ -309,6 +324,7 @@ const spectatorPoints: SpectatorPoint[] = [
     description: "Nessuna area Experience su questa prova.",
     source: FONTE,
     point: P(40.700626, 9.151407),
+    image: "stages/zona-filigosu.jpg",
   }),
   sp({
     id: "exp-ala-arena",
@@ -327,6 +343,7 @@ const spectatorPoints: SpectatorPoint[] = [
     parking: P(40.670986, 9.294639),
     parkingName: "Parcheggio spettatori · Alà Arena",
     walkDistance: aria(P(40.670986, 9.294639), P(40.670099, 9.292726)),
+    image: "stages/exp-ala-arena.jpg",
   }),
   sp({
     id: "exp-lerno-jump",
@@ -345,6 +362,7 @@ const spectatorPoints: SpectatorPoint[] = [
     parking: P(40.608137, 9.184611),
     parkingName: "Parcheggio spettatori · Lerno",
     walkDistance: aria(P(40.608137, 9.184611), P(40.603697, 9.178533)),
+    image: "stages/exp-lerno-jump.jpg",
   }),
   sp({
     id: "exp-budduso-arena",
@@ -360,6 +378,7 @@ const spectatorPoints: SpectatorPoint[] = [
     parking: P(40.565698, 9.326432),
     parkingName: "Parcheggio · Buddusò Arena",
     walkDistance: aria(P(40.565698, 9.326432), P(40.568983, 9.332695)),
+    image: "stages/exp-budduso-arena.jpg",
   }),
   sp({
     id: "exp-nuraghe-loelle",
@@ -375,6 +394,7 @@ const spectatorPoints: SpectatorPoint[] = [
     parking: P(40.565698, 9.326432),
     parkingName: "Parcheggio · Buddusò Arena",
     walkDistance: aria(P(40.565698, 9.326432), P(40.568285, 9.318051)),
+    image: "stages/exp-nuraghe-loelle.jpg",
   }),
   sp({
     id: "zona-coiluna-jump",
@@ -390,6 +410,7 @@ const spectatorPoints: SpectatorPoint[] = [
     parking: P(40.596437, 9.367404),
     parkingName: "Parcheggio Coiluna (solo 4x4)",
     walkDistance: aria(P(40.596437, 9.367404), P(40.595968, 9.363383)),
+    image: "stages/zona-coiluna-jump.jpg",
   }),
   sp({
     id: "exp-galoppatoio",
@@ -408,6 +429,7 @@ const spectatorPoints: SpectatorPoint[] = [
     parking: P(40.545519, 9.09484),
     parkingName: "Parcheggio spettatori · Galoppatoio di Pattada",
     walkDistance: aria(P(40.545519, 9.09484), P(40.545812, 9.092092)),
+    image: "stages/exp-galoppatoio.jpg",
   }),
   sp({
     id: "exp-quadrivio",
@@ -423,6 +445,7 @@ const spectatorPoints: SpectatorPoint[] = [
     parking: P(40.814591, 8.700295),
     parkingName: "Parcheggio Experience (P verde) · Quadrivio",
     walkDistance: aria(P(40.814591, 8.700295), P(40.815248, 8.701731)),
+    image: "stages/exp-quadrivio.jpg",
   }),
   sp({
     id: "exp-ebi-dozzi",
@@ -442,6 +465,7 @@ const spectatorPoints: SpectatorPoint[] = [
     parking: P(40.7463634, 8.1611638),
     parkingName: "Parcheggio spettatori · Argentiera",
     walkDistance: aria(P(40.7463634, 8.1611638), P(40.757951, 8.160377)),
+    image: "stages/exp-ebi-dozzi.jpg",
   }),
   sp({
     id: "exp-porto-palmas",
@@ -457,6 +481,7 @@ const spectatorPoints: SpectatorPoint[] = [
     parking: P(40.7463634, 8.1611638),
     parkingName: "Parcheggio spettatori · Argentiera",
     walkDistance: aria(P(40.7463634, 8.1611638), P(40.750907, 8.157676)),
+    image: "stages/exp-porto-palmas.jpg",
   }),
 ];
 

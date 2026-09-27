@@ -98,6 +98,8 @@ export interface RallyStage {
   /** "access" = Access Point ufficiale (poi accesso segnalato), "parking" = parcheggio esatto. */
   parkingKind?: "access" | "parking";
   lengthKm?: number;
+  /** Scheda ufficiale della prova (asset statico in public/). */
+  mapImage?: string;
   spectatorPointId?: string;
   driveMinutes?: number;
   walkMinutes?: number;
@@ -130,6 +132,8 @@ export interface SpectatorPoint {
   parkingName?: string;
   /** Distanza parcheggio → area in linea d'aria (metri). */
   walkDistance?: number;
+  /** Vista dall'alto dell'area (asset statico in public/). */
+  image?: string;
   description?: string;
   notes?: string;
   position?: string;
