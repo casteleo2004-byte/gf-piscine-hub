@@ -120,7 +120,9 @@ export function eventInfo(event: TripEvent, data: AppData): EventInfo {
   let distanceEstimated = false;
   if (distanceKm == null && target?.point) {
     if (isDrive) {
-      distanceKm = estimateDrive(data.trip.base, target.point).km;
+      const km = estimateDrive(data.trip.base, target.point).km;
+      // Destinazione = base (es. rientro): la distanza dalla base non dice nulla.
+      distanceKm = km >= 0.5 ? km : undefined;
     } else {
       distanceKm = stage?.walkKm ?? undefined;
     }
