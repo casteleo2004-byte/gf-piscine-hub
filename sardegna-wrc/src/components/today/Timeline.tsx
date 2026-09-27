@@ -3,11 +3,12 @@
 import { Check, ChevronDown, Pencil } from "lucide-react";
 import { useState } from "react";
 import { EVENT_TYPES, toneText } from "@/lib/meta";
-import { eventInfo } from "@/lib/smart";
+import { eventInfo, spectatorPointOf } from "@/lib/smart";
 import { actions } from "@/lib/store/actions";
 import { formatDuration } from "@/lib/time";
 import type { AppData, TripEvent } from "@/lib/types";
 import { IconButton } from "../ui/Button";
+import { ImageView } from "../ui/ImageView";
 import { NavButton } from "../ui/NavButton";
 
 /** Timeline verticale della giornata. Tap sul cerchio = fatto; tap sulla riga = dettagli. */
@@ -111,6 +112,7 @@ export function Timeline({
 
 function EventDetails({ data, event, onEdit }: { data: AppData; event: TripEvent; onEdit: () => void }) {
   const info = eventInfo(event, data);
+  const view = info.stage ? spectatorPointOf(info.stage, data) : undefined;
   const facts = [
     info.departAt && `Partenza ${info.departAt}`,
     info.driveMinutes != null && `Auto ${formatDuration(info.driveMinutes)}`,
@@ -131,6 +133,7 @@ function EventDetails({ data, event, onEdit }: { data: AppData; event: TripEvent
         </div>
       )}
       {info.target && <p className="text-[17px] font-semibold text-muted">→ {info.target.label}</p>}
+      {view?.image && <ImageView src={view.image} alt={`Vista dall'alto: ${view.name}`} caption="La vostra visuale · tocca per ingrandire" />}
       {event.notes && <p className="whitespace-pre-line text-[17px]">{event.notes}</p>}
       <div className="flex gap-3">
         {info.target && (

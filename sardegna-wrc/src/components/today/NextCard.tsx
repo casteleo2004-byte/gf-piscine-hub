@@ -3,11 +3,12 @@
 import { AlertTriangle, Info, ListChecks, Moon } from "lucide-react";
 import Link from "next/link";
 import { EVENT_TYPES, toneText } from "@/lib/meta";
-import { eventInfo, headline, whatToDo } from "@/lib/smart";
+import { eventInfo, headline, spectatorPointOf, whatToDo } from "@/lib/smart";
 import { formatDuration } from "@/lib/time";
 import { formatKm } from "@/lib/geo";
 import type { AppData, TripDay, TripEvent } from "@/lib/types";
 import { buttonClass } from "../ui/Button";
+import { ImageView } from "../ui/ImageView";
 import { NavButton } from "../ui/NavButton";
 import { Stat } from "../ui/Stat";
 
@@ -58,6 +59,7 @@ export function NextCard({
   const info = eventInfo(event, data);
   const h = headline(event, info, nowMin, isToday);
   const hint = whatToDo(event, info);
+  const view = info.stage ? spectatorPointOf(info.stage, data) : undefined;
   const meta = EVENT_TYPES[event.type];
   const presetId = day.gearPresetId;
 
@@ -112,6 +114,9 @@ export function NextCard({
           <Info size={22} /> Dettagli
         </button>
       </div>
+      {view?.image && (
+        <ImageView className="mt-4" src={view.image} alt={`Vista dall'alto: ${view.name}`} caption={`La vostra visuale · ${view.name}`} />
+      )}
     </section>
   );
 }
