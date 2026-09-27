@@ -14,10 +14,26 @@ import type {
 // orari WRC e coordinate sono ESEMPI da sostituire con il programma
 // ufficiale direttamente dall'app (icona matita).
 
-export const DATA_VERSION = 1;
+export const DATA_VERSION = 2;
+
+/**
+ * Giorni i cui dati iniziali sono cambiati in una versione: chi ha dati salvati
+ * più vecchi riceve la nuova versione di quei giorni (attività e scheda giorno).
+ */
+export const SEED_UPDATES: Record<number, string[]> = {
+  2: ["2026-09-29", "2026-09-30", "2026-10-07"], // biglietti Moby reali
+};
 
 const ALGHERO: GeoPoint = { lat: 40.558, lng: 8.319 };
-const PORTO_TORRES: GeoPoint = { lat: 40.8397, lng: 8.4036 };
+
+// Traghetto Moby (dai biglietti): Livorno → Olbia 29/09 22:00, Olbia → Livorno 07/10 22:00,
+// cabina doppia interna C2, 2 adulti, auto al seguito. Dati personali (nomi, targa,
+// codice prenotazione) NON vanno qui: il repository è pubblico, si inseriscono dall'app.
+const LIVORNO_PORTO = "Stazione Marittima, Livorno";
+const OLBIA_PORTO = "Porto di Olbia";
+const DOCUMENTI = "All'imbarco serve la carta d'identità in originale di entrambi (indicato sul biglietto).";
+const CHECKIN_VERIFICA =
+  "Con l'auto: presentarsi circa 90 minuti prima della partenza (indicazione trovata su siti di viaggio, non sul biglietto: verificare sull'app o sul sito Moby).";
 
 const DA_VERIFICARE = "ESEMPIO: verificare con il programma ufficiale WRC.";
 
@@ -248,14 +264,24 @@ function buildEvents(): TripEvent[] {
   seq = 0;
   const [ps3, ps4, ps10, ps11, ps16, ps18] = stages;
   return [
-    // 29/09 — partenza
-    ev("2026-09-29", "18:00", "Arrivo al porto e imbarco", "traghetto", { notes: "Porto di partenza e compagnia da inserire. Tenere a portata biglietto e documenti." }),
-    ev("2026-09-29", "20:00", "Partenza traghetto", "traghetto", { deadline: "19:00" }),
+    // 29/09 — partenza (Moby, dal biglietto)
+    ev("2026-09-29", "20:30", "Check-in al porto di Livorno", "traghetto", {
+      address: LIVORNO_PORTO,
+      deadline: "20:30",
+      notes: `${CHECKIN_VERIFICA}\n${DOCUMENTI}\nCodice prenotazione: aggiungilo qui con la matita.`,
+    }),
+    ev("2026-09-29", "22:00", "Partenza Moby Livorno → Olbia", "traghetto", {
+      address: LIVORNO_PORTO,
+      notes: "Cabina doppia interna (C2) · 2 adulti · auto al seguito.",
+    }),
 
     // 30/09 — arrivo
-    ev("2026-09-30", "07:30", "Arrivo in Sardegna", "traghetto", { point: PORTO_TORRES, notes: "Porto di arrivo e orario da confermare." }),
-    ev("2026-09-30", "08:30", "Trasferimento ad Alghero", "auto", { point: ALGHERO, driveMinutes: 40, distanceKm: 36 }),
-    ev("2026-09-30", "10:00", "Check-in alloggio / deposito bagagli", "altro"),
+    ev("2026-09-30", "07:00", "Sbarco a Olbia", "traghetto", {
+      address: OLBIA_PORTO,
+      notes: "Orario indicativo: circa 07:00 secondo i siti di viaggio. Non è scritto sul biglietto: da verificare.",
+    }),
+    ev("2026-09-30", "07:30", "Trasferimento Olbia → Alghero", "auto", { point: ALGHERO }),
+    ev("2026-09-30", "10:00", "Check-in alloggio / deposito bagagli", "altro", { notes: "Orario da confermare con l'alloggio." }),
     ev("2026-09-30", "11:00", "Centro storico e Bastioni", "visita", { placeId: "pl-centro" }),
     ev("2026-09-30", "13:00", "Pranzo", "pasto"),
     ev("2026-09-30", "17:30", "Capo Caccia al tramonto", "panorama", { placeId: "pl-capocaccia", driveMinutes: 35 }),
@@ -297,22 +323,34 @@ function buildEvents(): TripEvent[] {
     ev("2026-10-06", "13:00", "Pranzo", "pasto"),
     ev("2026-10-06", "20:30", "Cena", "pasto", { placeId: "pl-cena" }),
 
-    // 07/10 — rientro
-    ev("2026-10-07", "09:00", "Check-out e carico auto", "altro"),
-    ev("2026-10-07", "10:00", "Porto di imbarco", "traghetto", { point: PORTO_TORRES, notes: "Porto e orario del traghetto di rientro da confermare." }),
+    // 07/10 — rientro (Moby, dal biglietto)
+    ev("2026-10-07", "09:00", "Check-out e carico auto", "altro", { notes: "Orario di check-out da confermare con l'alloggio." }),
+    ev("2026-10-07", "18:00", "Partenza da Alghero verso Olbia", "partenza", {
+      address: OLBIA_PORTO,
+      notes: "Orario suggerito: controllare il tempo su Maps e tenere margine per il check-in.",
+    }),
+    ev("2026-10-07", "20:30", "Check-in al porto di Olbia", "traghetto", {
+      address: OLBIA_PORTO,
+      deadline: "20:30",
+      notes: `${CHECKIN_VERIFICA}\n${DOCUMENTI}`,
+    }),
+    ev("2026-10-07", "22:00", "Partenza Moby Olbia → Livorno", "traghetto", {
+      address: OLBIA_PORTO,
+      notes: "Cabina doppia interna (C2) · 2 adulti · auto al seguito. Arrivo a Livorno la mattina dell'8 ottobre.",
+    }),
   ];
 }
 
 const days: TripDay[] = [
-  { date: "2026-09-29", title: "Partenza in traghetto", kind: "viaggio", location: "Traghetto", gearPresetId: "serata" },
-  { date: "2026-09-30", title: "Arrivo e Alghero", kind: "turismo", location: "Alghero", gearPresetId: "turismo" },
+  { date: "2026-09-29", title: "Traghetto Livorno → Olbia", kind: "viaggio", location: "Livorno", gearPresetId: "serata" },
+  { date: "2026-09-30", title: "Sbarco a Olbia e arrivo ad Alghero", kind: "turismo", location: "Olbia → Alghero", gearPresetId: "turismo" },
   { date: "2026-10-01", title: "Mare e preparazione rally", kind: "turismo", location: "Alghero", gearPresetId: "turismo" },
   { date: "2026-10-02", title: "WRC · Giorno 1", kind: "rally", location: "Alghero", gearPresetId: "rally" },
   { date: "2026-10-03", title: "WRC · Giorno 2", kind: "rally", location: "Alghero", gearPresetId: "rally" },
   { date: "2026-10-04", title: "WRC · Giorno 3 · Power Stage", kind: "rally", location: "Alghero", gearPresetId: "rally" },
   { date: "2026-10-05", title: "Stintino e La Pelosa", kind: "turismo", location: "Alghero", gearPresetId: "turismo" },
   { date: "2026-10-06", title: "Bosa e costa ovest", kind: "turismo", location: "Alghero", gearPresetId: "foto" },
-  { date: "2026-10-07", title: "Rientro", kind: "viaggio", location: "Alghero → casa" },
+  { date: "2026-10-07", title: "Rientro: traghetto Olbia → Livorno", kind: "viaggio", location: "Alghero → Olbia" },
 ];
 
 function preset(id: string, name: string, items: string[]): GearPreset {

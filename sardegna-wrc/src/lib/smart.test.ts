@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { parsePoint } from "./geo";
 import { navigationUrl } from "./maps";
 import { createSeed } from "./seed";
-import { activeDay, eventInfo, eventsOfDay, headline, nextEventIndex, stageTiming } from "./smart";
+import { activeDay, eventInfo, eventsOfDay, headline, nextEventIndex, resolveTarget, stageTiming } from "./smart";
 import { toMinutes } from "./time";
 
 const data = createSeed();
@@ -85,5 +85,17 @@ describe("navigationUrl", () => {
   });
   it("nessuna destinazione", () => {
     expect(navigationUrl("google", {})).toBeNull();
+  });
+});
+
+describe("traghetto", () => {
+  it("andata Moby Livorno → Olbia alle 22:00 del 29/09", () => {
+    const e = eventsOfDay(data, "2026-09-29").find((x) => x.title.startsWith("Partenza Moby"));
+    expect(e?.time).toBe("22:00");
+    expect(resolveTarget(e!, data)?.address).toBe("Stazione Marittima, Livorno");
+  });
+  it("ritorno Olbia → Livorno alle 22:00 del 07/10", () => {
+    const e = eventsOfDay(data, "2026-10-07").find((x) => x.title.startsWith("Partenza Moby"));
+    expect(e?.time).toBe("22:00");
   });
 });

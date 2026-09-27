@@ -1,4 +1,4 @@
-import { createSeed, DATA_VERSION } from "../seed";
+import { createSeed, DATA_VERSION, SEED_UPDATES } from "../seed";
 import type { AppData } from "../types";
 import type { StorageAdapter } from "./adapter";
 import { localAdapter } from "./localAdapter";
@@ -14,6 +14,19 @@ const listeners = new Set<Listener>();
 
 function migrate(data: AppData): AppData {
   const seed = createSeed();
+  // Aggiorna i giorni cambiati nei dati iniziali dopo il salvataggio dell'utente.
+  const stale = new Set(
+    Object.entries(SEED_UPDATES)
+      .filter(([v]) => Number(v) > (data.version ?? 1))
+      .flatMap(([, dates]) => dates),
+  );
+  if (stale.size) {
+    data = {
+      ...data,
+      events: [...data.events.filter((e) => !stale.has(e.date)), ...seed.events.filter((e) => stale.has(e.date))],
+      days: data.days.map((d) => (stale.has(d.date) ? (seed.days.find((x) => x.date === d.date) ?? d) : d)),
+    };
+  }
   // Completa eventuali campi aggiunti in versioni successive.
   return {
     ...seed,
