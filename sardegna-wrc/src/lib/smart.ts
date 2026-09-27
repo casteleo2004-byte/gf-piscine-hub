@@ -18,6 +18,11 @@ const STALE_MINUTES = 60;
 const LAST_STALE_MINUTES = 180;
 const UNTIMED_WINDOW_MINUTES = 180;
 
+/** Sigla della prova: "SD" per lo shakedown, altrimenti "PS n". */
+export function stageCode(stage: Pick<RallyStage, "number">): string {
+  return stage.number === 0 ? "SD" : `PS ${stage.number}`;
+}
+
 export function spectatorPointOf(stage: RallyStage | undefined, data: AppData): SpectatorPoint | undefined {
   if (!stage) return undefined;
   return (
@@ -51,11 +56,13 @@ export function resolveTarget(event: TripEvent, data: AppData): Target | null {
     if (walking) {
       const sp = spectatorPointOf(stage, data);
       if (sp?.point) return { point: sp.point, label: sp.name, mode: "walking" };
+      // Area senza coordinate interne: in auto all'Access Point ufficiale.
+      if (sp?.access) return { point: sp.access, label: `${sp.name} · Access Point`, mode: "driving" };
       // Senza coordinate si naviga in auto verso il luogo di avvicinamento.
       if (sp?.address) return { address: sp.address, label: sp.name, mode: "driving" };
     }
     if (stage.parking) {
-      return { point: stage.parking, label: stage.parkingName || `Parcheggio PS ${stage.number}`, mode: "driving" };
+      return { point: stage.parking, label: stage.parkingName || `Parcheggio ${stageCode(stage)}`, mode: "driving" };
     }
   }
   return null;

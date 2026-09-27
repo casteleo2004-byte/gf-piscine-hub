@@ -2,6 +2,7 @@
 
 import { Plus, X } from "lucide-react";
 import { useDraft } from "@/lib/hooks/useDraft";
+import { stageCode } from "@/lib/smart";
 import { actions } from "@/lib/store/actions";
 import type { Access, AppData, RallyStage } from "@/lib/types";
 import { Button, IconButton } from "../ui/Button";
@@ -22,7 +23,7 @@ export function StageEditor({ stage, data, onClose }: { stage: RallyStage; data:
 
   return (
     <Sheet
-      title={isNew ? "Nuova prova" : `Modifica PS ${stage.number}`}
+      title={isNew ? "Nuova prova" : `Modifica ${stageCode(stage)}`}
       onClose={onClose}
       footer={
         <EditorFooter

@@ -4,7 +4,7 @@ import { AlertTriangle, Check, ChevronDown, Eye, ListChecks, Pencil } from "luci
 import Link from "next/link";
 import { useState } from "react";
 import { formatKm } from "@/lib/geo";
-import { spectatorPointOf, stageTiming } from "@/lib/smart";
+import { spectatorPointOf, stageCode, stageTiming } from "@/lib/smart";
 import { actions } from "@/lib/store/actions";
 import { formatDuration } from "@/lib/time";
 import type { AppData, RallyStage } from "@/lib/types";
@@ -36,7 +36,10 @@ export function StageCard({
       <div className="p-5">
         <div className="flex items-start gap-3">
           <div className="min-w-0 flex-1">
-            <div className="text-[16px] font-extrabold uppercase tracking-wider text-rally">PS {stage.number}</div>
+            <div className="text-[16px] font-extrabold uppercase tracking-wider text-rally">
+              {stageCode(stage)}
+              {stage.lengthKm != null && <span className="ml-2 text-muted">{stage.lengthKm.toFixed(2).replace(".", ",")} km</span>}
+            </div>
             <h3 className="text-[26px] font-extrabold leading-tight">{stage.name || "Senza nome"}</h3>
           </div>
           {stage.seen && (
@@ -65,6 +68,7 @@ export function StageCard({
             {stage.passes.map((p, i) => (
               <li key={i} className="tnum text-[17px] font-semibold text-muted">
                 {p.label} · <span className="text-text">{p.time || "da definire"}</span>
+                {p.roadClosure && <span className="text-rally"> · chiusura {p.roadClosure}</span>}
               </li>
             ))}
           </ul>
@@ -80,9 +84,9 @@ export function StageCard({
           className="mt-5 w-full"
           size="xl"
           point={stage.parking}
-          label={stage.parkingName || `Parcheggio PS ${stage.number}`}
+          label={stage.parkingName || `Parcheggio ${stageCode(stage)}`}
         >
-          <span className="whitespace-nowrap text-[20px]">NAVIGA AL PARCHEGGIO</span>
+          <span className="whitespace-nowrap text-[20px]">{stage.parkingKind === "access" ? "NAVIGA ALL'ACCESSO" : "NAVIGA AL PARCHEGGIO"}</span>
         </NavButton>
         {stage.parkingName && <p className="mt-1.5 text-center text-[15px] font-semibold text-muted">{stage.parkingName}</p>}
 

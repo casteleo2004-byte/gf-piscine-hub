@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { formatKm, getCurrentPoint, haversineKm } from "@/lib/geo";
 import { newId } from "@/lib/id";
 import { PLACE_CATEGORIES, PLACE_FILTERS, toneText } from "@/lib/meta";
+import { stageCode } from "@/lib/smart";
 import { useData } from "@/lib/store/hooks";
 import type { AppData, GeoPoint, Place, PlaceCategory } from "@/lib/types";
 import { Button, buttonClass } from "../ui/Button";
@@ -39,22 +40,22 @@ function buildRows(data: AppData): Row[] {
     if (s.parking) {
       rows.push({
         key: `park-${s.id}`,
-        name: s.parkingName || `Parcheggio PS ${s.number}`,
+        name: s.parkingName || `Parcheggio ${stageCode(s)}`,
         category: "parcheggio",
         point: s.parking,
-        subtitle: `PS ${s.number} ${s.name}`,
+        subtitle: `${stageCode(s)} ${s.name}`,
       });
     }
   }
   for (const sp of data.spectatorPoints) {
     const s = data.stages.find((x) => x.id === sp.stageId);
-    if (sp.point) {
+    if (sp.point || sp.access) {
       rows.push({
         key: `sp-${sp.id}`,
         name: sp.name || "Punto spettatore",
-        category: "spettatore",
-        point: sp.point,
-        subtitle: s ? `PS ${s.number} ${s.name}` : undefined,
+        category: sp.experienceArea ? "rally" : "spettatore",
+        point: sp.point ?? sp.access,
+        subtitle: s ? `${stageCode(s)} ${s.name}` : undefined,
       });
     }
   }

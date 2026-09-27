@@ -2,7 +2,7 @@
 
 import { Check } from "lucide-react";
 import { useDraft } from "@/lib/hooks/useDraft";
-import { stagesOfDay } from "@/lib/smart";
+import { stageCode, stagesOfDay } from "@/lib/smart";
 import { actions } from "@/lib/store/actions";
 import { formatLongDate } from "@/lib/time";
 import type { AppData, DiaryEntry, TripDay } from "@/lib/types";
@@ -55,7 +55,7 @@ export function DiaryEditor({
                     s.seen ? "bg-ok text-bg" : "bg-surface-2"
                   }`}
                 >
-                  {s.seen && <Check size={18} strokeWidth={3} />} PS {s.number} {s.name}
+                  {s.seen && <Check size={18} strokeWidth={3} />} {stageCode(s)} {s.name}
                 </button>
               ))}
             </div>

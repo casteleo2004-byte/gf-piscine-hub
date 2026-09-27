@@ -28,6 +28,20 @@ function migrate(data: AppData): AppData {
       spectatorPoints: data.spectatorPoints.filter((x) => !EXAMPLE_IDS.spectatorPoints.includes(x.id)),
     };
   }
+  if ((data.version ?? 1) < 6) {
+    // Prove e aree dai documenti ufficiali: sostituiscono quelle dei dati iniziali precedenti,
+    // mantenendo ciò che l'utente ha aggiunto a mano.
+    const seedStages = new Set(seed.stages.map((x) => x.id));
+    const seedPoints = new Set(seed.spectatorPoints.map((x) => x.id));
+    data = {
+      ...data,
+      stages: [...seed.stages, ...data.stages.filter((x) => !seedStages.has(x.id))],
+      spectatorPoints: [
+        ...seed.spectatorPoints,
+        ...data.spectatorPoints.filter((x) => !seedPoints.has(x.id) && !EXAMPLE_IDS.spectatorPoints.includes(x.id)),
+      ],
+    };
+  }
   if (stale.size) {
     data = {
       ...data,

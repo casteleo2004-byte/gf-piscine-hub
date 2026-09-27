@@ -2,6 +2,7 @@
 
 import { useDraft } from "@/lib/hooks/useDraft";
 import { EVENT_TYPES } from "@/lib/meta";
+import { stageCode } from "@/lib/smart";
 import { actions } from "@/lib/store/actions";
 import type { AppData, EventType, TripEvent } from "@/lib/types";
 import { EditorFooter } from "../ui/EditorFooter";
@@ -53,7 +54,7 @@ export function EventEditor({ event, data, onClose }: { event: TripEvent; data: 
           label="Prova WRC collegata"
           value={d.stageId}
           onChange={(v) => set("stageId", v)}
-          options={data.stages.map((s) => ({ value: s.id, label: `PS ${s.number} · ${s.name}` }))}
+          options={data.stages.map((s) => ({ value: s.id, label: `${stageCode(s)} · ${s.name}` }))}
         />
         <Select
           label="Luogo salvato"

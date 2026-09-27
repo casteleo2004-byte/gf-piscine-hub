@@ -74,6 +74,7 @@ export interface TripEvent {
 export interface StagePass {
   label: string;
   time: HHMM;
+  roadClosure?: HHMM;
 }
 
 export type Access = "facile" | "media" | "difficile";
@@ -90,6 +91,9 @@ export interface RallyStage {
   departAt?: HHMM;
   parkingName?: string;
   parking?: GeoPoint;
+  /** "access" = Access Point ufficiale (poi accesso segnalato), "parking" = parcheggio esatto. */
+  parkingKind?: "access" | "parking";
+  lengthKm?: number;
   spectatorPointId?: string;
   driveMinutes?: number;
   walkMinutes?: number;
@@ -109,6 +113,8 @@ export interface SpectatorPoint {
   point?: GeoPoint;
   /** Indirizzo/luogo per la navigazione quando mancano le coordinate. */
   address?: string;
+  /** Access Point ufficiale da cui si raggiunge l'area (in auto). */
+  access?: GeoPoint;
   /** Spettacolarità 1–5. */
   wow?: number;
   /** Da dove viene l'informazione. */

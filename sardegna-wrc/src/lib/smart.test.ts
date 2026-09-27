@@ -84,22 +84,43 @@ describe("partenza consigliata", () => {
   });
 });
 
-describe("prove 2026", () => {
-  it("17 prove su 9 tratte con la Power Stage alle 14:15", () => {
-    expect(data.stages).toHaveLength(9);
-    const passes = data.stages.reduce((t, s) => t + 1 + s.passes.length, 0);
-    expect(passes).toBe(17);
-    const ps = data.stages.find((s) => s.id === "ps-argentiera")!;
-    expect(ps.passes[0]).toEqual({ label: "PS 17 · Wolf Power Stage", time: "14:15" });
+describe("prove 2026 (timetable ufficiale V5.1)", () => {
+  it("shakedown + 17 prove speciali, Power Stage alle 14:15", () => {
+    const ps = data.stages.filter((s) => s.number > 0);
+    expect(ps.reduce((t, s) => t + 1 + s.passes.length, 0)).toBe(17);
+    expect(data.stages.find((s) => s.id === "sd")).toMatchObject({ firstCar: "09:01", roadClosure: "06:00" });
+    const arg = data.stages.find((s) => s.id === "ps-argentiera")!;
+    expect(arg).toMatchObject({ firstCar: "10:05", roadClosure: "07:05" });
+    expect(arg.passes[0]).toMatchObject({ label: "SS 17 · Wolf Power Stage", time: "14:15" });
   });
-  it("il punto più spettacolare è il principale e si naviga verso il luogo", () => {
-    const st = data.stages.find((s) => s.id === "ps-filigosu")!;
-    expect(spectatorPointOf(st, data)?.name).toBe("Micky's Jump");
-    const ev = eventsOfDay(data, "2026-10-02").find((x) => x.stageId === "ps-filigosu")!;
-    expect(resolveTarget({ ...ev, type: "spettatore" }, data)).toMatchObject({ address: "Nuraghe Lerno, Pattada", mode: "driving" });
+  it("orari dei passaggi come nel timetable", () => {
+    const times = (d: string) => eventsOfDay(data, d).filter((e) => e.type === "prova").map((e) => e.time);
+    expect(times("2026-10-02")).toEqual(["08:01", "09:01", "10:08", "14:31", "15:31", "16:38"]);
+    expect(times("2026-10-03")).toEqual(["08:01", "09:11", "10:07", "14:31", "15:41", "16:37"]);
+    expect(times("2026-10-04")).toEqual(["08:31", "10:05", "11:38", "14:15"]);
   });
-  it("nessuna coordinata inventata sui punti spettatore", () => {
-    expect(data.spectatorPoints.every((p) => !p.point)).toBe(true);
+  it("l'area Experience (Pass Gold) viene prima di una zona pubblico più WOW", () => {
+    const st = data.stages.find((s) => s.id === "ps-coiluna")!;
+    expect(spectatorPointOf(st, data)?.id).toBe("exp-budduso-arena");
+  });
+  it("NAVIGA dalla prova porta in auto all'Access Point ufficiale dell'area Gold", () => {
+    const ev = eventsOfDay(data, "2026-10-02").find((x) => x.stageId === "ps-alalerno")!;
+    expect(resolveTarget(ev, data)).toMatchObject({ point: { lat: 40.64873143094596, lng: 9.325989460877631 }, mode: "driving" });
+  });
+  it("nessuna coordinata inventata: le aree hanno solo Access Point ufficiali", () => {
+    const official = new Set([
+      "40.65178190753158,8.37644763855414", "40.79245974800601,8.941877463967668", "40.72751145540492,8.983330894154273",
+      "40.79732777557003,8.972336269232184", "40.72157726858769,9.11652993606414", "40.64873143094596,9.325989460877631",
+      "40.59673881468081,9.26669915829633", "40.58489772463757,9.242178693420435", "40.57065014718563,9.26940463215951",
+      "40.64658431790494,9.324898123397684", "40.57164889280999,9.410081421503556", "40.56182559978122,9.083966853227492",
+      "40.47387565711158,9.047585020643766", "40.81558864188334,8.742239797232767", "40.86468610938521,8.712213331312736",
+      "40.81683533851673,8.626820580349746", "40.74863649450717,8.188445362031837",
+    ]);
+    for (const p of data.spectatorPoints) {
+      expect(p.point).toBeUndefined();
+      if (p.access) expect(official.has(`${p.access.lat},${p.access.lng}`)).toBe(true);
+    }
+    for (const s of data.stages) if (s.parking) expect(official.has(`${s.parking.lat},${s.parking.lng}`)).toBe(true);
   });
   it("domenica alle 13:30 la prossima è la Power Stage", () => {
     const ev = eventsOfDay(data, "2026-10-04");
@@ -182,13 +203,10 @@ describe("alloggio", () => {
 });
 
 describe("aree Pass Gold", () => {
-  it("un'area Gold confermata diventa il punto principale anche se meno WOW", () => {
+  it("un punto aggiunto a mano e marcato Gold scavalca le zone pubblico", () => {
     const st = data.stages.find((s) => s.id === "ps-filigosu")!;
-    const d2 = {
-      ...data,
-      spectatorPoints: data.spectatorPoints.map((p) => (p.id === "sp-lerno-rocce" ? { ...p, experienceArea: true } : p)),
-    };
-    expect(spectatorPointOf(st, d2)?.id).toBe("sp-lerno-rocce");
+    const mine = { id: "mio", stageId: "ps-filigosu", name: "Mio", photoIds: [], experienceArea: true, wow: 2 };
+    expect(spectatorPointOf(st, { ...data, spectatorPoints: [...data.spectatorPoints, mine] })?.id).toBe("mio");
   });
 });
 

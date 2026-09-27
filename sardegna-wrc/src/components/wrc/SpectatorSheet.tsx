@@ -5,7 +5,7 @@ import { useState } from "react";
 import { newId } from "@/lib/id";
 import { formatKm, formatPoint } from "@/lib/geo";
 import { formatDuration } from "@/lib/time";
-import { spectatorPointOf, spectatorPointsOf } from "@/lib/smart";
+import { spectatorPointOf, spectatorPointsOf, stageCode } from "@/lib/smart";
 import { actions } from "@/lib/store/actions";
 import type { AppData, RallyStage, SpectatorPoint } from "@/lib/types";
 import { Button, IconButton } from "../ui/Button";
@@ -24,7 +24,7 @@ export function SpectatorSheet({ stage, data, onClose }: { stage: RallyStage; da
 
   return (
     <Sheet
-      title={`PS ${stage.number} · Punto spettatore`}
+      title={`${stageCode(stage)} · Punto spettatore`}
       onClose={onClose}
       headerRight={
         primary && (
@@ -57,7 +57,7 @@ export function SpectatorSheet({ stage, data, onClose }: { stage: RallyStage; da
                 {p.wow ? <Wow value={p.wow} /> : null}
                 {p.description && <p className="mt-1 text-[16px] text-muted">{p.description}</p>}
                 <div className="mt-3 grid grid-cols-2 gap-3">
-                  <NavButton size="md" variant="secondary" point={p.point} address={p.address} label={p.name} mode={p.point ? "walking" : "driving"} compact>
+                  <NavButton size="md" variant="secondary" point={p.point ?? p.access} address={p.address} label={p.name} mode={p.point ? "walking" : "driving"} compact>
                     Naviga
                   </NavButton>
                   <Button size="md" onClick={() => actions.saveSpectatorPoint(p, true)}>
@@ -135,7 +135,8 @@ function PointView({ point, stage }: { point: SpectatorPoint; stage: RallyStage 
     ["Distanza dalla strada", point.roadDistanceM != null ? `${point.roadDistanceM} m` : undefined],
     ["Attrezzatura foto", point.photoGear],
     ["Coordinate", point.point ? formatPoint(point.point) : undefined],
-    ["Navigazione verso", !point.point ? point.address : undefined],
+    ["Access Point", point.access ? formatPoint(point.access) : undefined],
+    ["Navigazione verso", !point.point && !point.access ? point.address : undefined],
     ["Fonte", point.source],
   ];
   return (
@@ -153,12 +154,14 @@ function PointView({ point, stage }: { point: SpectatorPoint; stage: RallyStage 
 
       <NavButton
         className="mt-5 w-full"
-        point={point.point}
+        point={point.point ?? point.access}
         address={point.address}
         label={point.name}
         mode={point.point ? "walking" : "driving"}
       >
-        {point.point ? "NAVIGA A PIEDI" : "NAVIGA IN ZONA"}
+        <span className="whitespace-nowrap text-[22px]">
+          {point.point ? "NAVIGA A PIEDI" : point.access ? "NAVIGA ALL'ACCESSO" : "NAVIGA IN ZONA"}
+        </span>
       </NavButton>
 
       <WalkFromParking point={point} stage={stage} />

@@ -13,7 +13,7 @@ import type {
 // Dati iniziali del viaggio, solo da fonti verificabili: biglietti, prenotazioni,
 // percorso ufficiale del rally. Ciò che non è noto resta vuoto o "da verificare".
 
-export const DATA_VERSION = 5;
+export const DATA_VERSION = 6;
 
 /**
  * Giorni i cui dati iniziali sono cambiati in una versione: chi ha dati salvati
@@ -24,12 +24,17 @@ export const SEED_UPDATES: Record<number, string[]> = {
   3: ["2026-10-01", "2026-10-02", "2026-10-03", "2026-10-04"], // Pass Gold RIS Experience 1–4/10
   4: ["2026-09-30", "2026-10-02", "2026-10-03", "2026-10-07"], // alloggio Redroom-house
   5: ["2026-10-02", "2026-10-03", "2026-10-04"], // prove reali 2026 al posto degli esempi
+  6: ["2026-10-01", "2026-10-02", "2026-10-03", "2026-10-04"], // timetable e mappe ufficiali
 };
 
 /** Prove e punti spettatore d'esempio delle prime versioni, rimossi dalla v5. */
 export const EXAMPLE_IDS = {
   stages: ["ps3", "ps4", "ps10", "ps11", "ps16", "ps18"],
-  spectatorPoints: ["sp3", "sp4", "sp10", "sp16", "sp18"],
+  spectatorPoints: [
+    "sp3", "sp4", "sp10", "sp16", "sp18",
+    // candidati da fonti web (v5), sostituiti dalle aree ufficiali (v6)
+    "sp-ittiri", "sp-micky", "sp-lerno-rocce", "sp-coiluna-jump", "sp-budduso-arena", "sp-nurage", "sp-argentiera-guado",
+  ],
 };
 
 const ALGHERO: GeoPoint = { lat: 40.558, lng: 8.319 };
@@ -50,99 +55,162 @@ const CHECKIN_VERIFICA =
 const SERVICE_PARK = "Lungomare Barcellona, Alghero";
 const PASS_GOLD_NOTE =
   "Pass Gold RIS Experience valido oggi (uno a testa, portarlo con sé): accesso alle Aree Experience delle prove speciali.";
+const proposta = (t: string) => `${PASS_GOLD_NOTE}\nProposta: ${t}`;
 
 function stage(s: Omit<RallyStage, "seen" | "passes"> & Partial<Pick<RallyStage, "passes">>): RallyStage {
   return { passes: [], seen: false, ...s };
 }
 
-// Prove 2026: nomi, lunghezze e giorni dal percorso ufficiale (17 PS, 309,36 km, 1–4 ottobre).
-// Noti solo due orari: PS 1 Ittiri 16:05 e PS 17 Wolf Power Stage 14:15. Numerazione di
-// venerdì-domenica dedotta dall'ordine annunciato. Il resto arriva col timetable ufficiale.
-const TIMETABLE = "Orari dei passaggi: dal timetable ufficiale (non ancora inseriti).";
-const NUMERO_DEDOTTO = "Numero PS dedotto dall'ordine annunciato: verificare col timetable.";
+// Prove 2026 dal TIMETABLE UFFICIALE (V5.1, 14/09/2026) e dalla MAPPA ZONE SPETTATORI
+// ufficiale: orari, chiusure strade, km, Access Point (coordinate esatte) e aree
+// Experience del Pass Gold (cerchi blu numerati sulle mappe). Le coordinate precise di
+// aree e parcheggi interni sono nelle mappe interattive ufficiali (Google My Maps /
+// rlab.app): finché non sono inserite, NAVIGA porta all'Access Point ufficiale e da lì
+// si segue l'accesso segnalato.
+const FONTE = "Timetable ufficiale V5.1 e mappa zone spettatori 2026";
+const P = (lat: number, lng: number): GeoPoint => ({ lat, lng });
+const ACCESSO =
+  "NAVIGA porta all'Access Point ufficiale: da lì seguire l'accesso segnalato fino al parcheggio. Il parcheggio del Pass Gold è quello verde \"EXP / MEDIA / ORG\" vicino alle aree Experience.";
 
 const stages: RallyStage[] = [
+  stage({
+    id: "sd",
+    number: 0,
+    name: "Shakedown · Monte Baranta",
+    date: "2026-10-01",
+    firstCar: "09:01",
+    roadClosure: "06:00",
+    lengthKm: 3.27,
+    parkingKind: "access",
+    parkingName: "Access Point Olmedo",
+    parking: P(40.65178190753158, 8.37644763855414),
+    notes: `Ex Miniera di Bauxite, vicino a Olmedo. Aree Experience 1 e 2 alla partenza, con parcheggio Experience. ${ACCESSO}`,
+  }),
   stage({
     id: "ps1",
     number: 1,
     name: "Ittiri Arena Show",
     date: "2026-10-01",
     firstCar: "16:05",
+    roadClosure: "06:00",
+    lengthKm: 2.08,
     parkingName: "Ittiri Arena",
-    notes: "2,08 km, super speciale in arena. Nome e orario dal percorso annunciato dagli organizzatori.",
+    notes:
+      "Super speciale in arena (km 2,08 sulla mappa, 2,21 nel timetable). Area Experience 3 accanto al salto, RIS Hospitality. Parcheggi spettatori lungo la strada a nord, con percorso pedonale segnalato.",
   }),
   stage({
     id: "ps-tula",
     number: 2,
     name: "Tula – Erula",
     date: "2026-10-02",
-    firstCar: "",
-    passes: [{ label: "2° passaggio (PS 5)", time: "" }],
-    notes: `18,14 km, due passaggi. ${TIMETABLE} ${NUMERO_DEDOTTO}`,
+    firstCar: "08:01",
+    roadClosure: "05:01",
+    passes: [{ label: "SS 5 · 2° passaggio", time: "14:31", roadClosure: "12:31" }],
+    lengthKm: 18.77,
+    parkingKind: "access",
+    parkingName: "Access Point Experience e disabili (solo auto)",
+    parking: P(40.79732777557003, 8.972336269232184),
+    notes:
+      "Aree Experience 4, 5 e 6 tra Turrina Manna e Sa Mela. Accesso Experience e disabili riservato alle auto; da Tula accesso a senso unico fino allo start della prova, dopo lo start solo in uscita. Da Erula c'è il bus navetta (Bus IN/OUT Point) con punto ristoro.",
   }),
   stage({
     id: "ps-filigosu",
     number: 3,
     name: "Su Filigosu – Lerno",
     date: "2026-10-02",
-    firstCar: "",
-    passes: [{ label: "2° passaggio (PS 6)", time: "" }],
-    notes: `Due passaggi. Qui c'è Micky's Jump, il salto più famoso del rally. ${TIMETABLE} ${NUMERO_DEDOTTO}`,
+    firstCar: "09:01",
+    roadClosure: "06:01",
+    passes: [{ label: "SS 6 · 2° passaggio", time: "15:31", roadClosure: "13:31" }],
+    lengthKm: 17.83,
+    parkingKind: "access",
+    parkingName: "Access Point Oschiri",
+    parking: P(40.72157726858769, 9.11652993606414),
+    notes: "Nessuna area Experience su questa prova. Unica zona pubblico: Filigosu (area 5) vicino alla partenza, ultimo tratto solo 4x4.",
   }),
   stage({
     id: "ps-alalerno",
     number: 4,
-    name: "Monti di Alà – Conchedda – Lerno",
+    name: "Monti di Alà – Sa Conchedda – Lerno",
     date: "2026-10-02",
-    firstCar: "",
-    passes: [{ label: "2° passaggio (PS 7)", time: "" }],
-    notes: `Due passaggi. ${TIMETABLE} ${NUMERO_DEDOTTO}`,
+    firstCar: "10:08",
+    roadClosure: "07:08",
+    passes: [{ label: "SS 7 · 2° passaggio", time: "16:38", roadClosure: "14:38" }],
+    lengthKm: 23.23,
+    parkingKind: "access",
+    parkingName: "Access Point Alà dei Sardi (Alà Arena)",
+    parking: P(40.64873143094596, 9.325989460877631),
+    notes: `Alà Arena alla partenza: aree Experience 7 e 8, salto e Water Splash, RIS Hospitality, parcheggio Experience e parcheggio spettatori. Altre zone pubblico: Altopiano (7) e Sos Vanzos (8), accessi da Buddusò. ${ACCESSO}`,
   }),
   stage({
     id: "ps-lernoala",
     number: 8,
     name: "Lerno – Sa Conchedda – Monti di Alà",
     date: "2026-10-03",
-    firstCar: "",
-    passes: [{ label: "2° passaggio (PS 11)", time: "" }],
-    notes: `24,42 km, due passaggi. ${TIMETABLE} ${NUMERO_DEDOTTO}`,
+    firstCar: "08:01",
+    roadClosure: "05:01",
+    passes: [{ label: "SS 11 · 2° passaggio", time: "14:31", roadClosure: "12:31" }],
+    lengthKm: 24.14,
+    parkingKind: "access",
+    parkingName: "Access Point Buddusò (verso Tandalò e Sa Jone)",
+    parking: P(40.58489772463757, 9.242178693420435),
+    notes: `Lerno Jump alla partenza: area Experience 9 con parcheggio Experience, e zona pubblico 9. Altre zone: Sa Jone (10, con parcheggio spettatori), Tandalò Paddock (11), Centrale Elettrica (12). ${ACCESSO}`,
   }),
   stage({
     id: "ps-coiluna",
     number: 9,
     name: "Coiluna – Loelle",
     date: "2026-10-03",
-    firstCar: "",
-    passes: [{ label: "2° passaggio (PS 12)", time: "" }],
-    notes: `24,83 km, due passaggi. Coiluna's Jump, Buddusò Arena e il tornante "Nurage". ${TIMETABLE} ${NUMERO_DEDOTTO}`,
+    firstCar: "09:11",
+    roadClosure: "06:11",
+    passes: [{ label: "SS 12 · 2° passaggio", time: "15:41", roadClosure: "13:41" }],
+    lengthKm: 24.83,
+    parkingKind: "access",
+    parkingName: "Access Point Buddusò (Nuraghe Loelle / Buddusò Arena)",
+    parking: P(40.57065014718563, 9.26940463215951),
+    notes: `Aree Experience 10 (Buddusò Arena, con parcheggio Experience) e 11 (Nuraghe Loelle). Coiluna Jump (zona 13) solo pubblico, accesso 4x4/SUV da Alà dei Sardi o Mamone. ${ACCESSO}`,
   }),
   stage({
     id: "ps-solorche",
     number: 10,
-    name: "Solorché",
+    name: "Solorchè",
     date: "2026-10-03",
-    firstCar: "",
-    passes: [{ label: "2° passaggio (PS 13)", time: "" }],
-    notes: `13,13 km, prova nuova nella zona di Pattada: sconosciuta anche ai piloti. ${TIMETABLE} ${NUMERO_DEDOTTO}`,
+    firstCar: "10:07",
+    roadClosure: "07:07",
+    passes: [{ label: "SS 13 · 2° passaggio", time: "16:37", roadClosure: "14:37" }],
+    lengthKm: 12.86,
+    parkingKind: "access",
+    parkingName: "Access Point Pattada (Galoppatoio)",
+    parking: P(40.56182559978122, 9.083966853227492),
+    notes: `Galoppatoio di Pattada all'arrivo: aree Experience 12 e 13 con salto, RIS Hospitality, parcheggio Experience e spettatori. Sulla mappa SS 13 è indicata alle 16:07, nel timetable ufficiale alle 16:37: vale il timetable. Zone Casa Betania Nord/Sud (16–17) con accesso da Bultei. ${ACCESSO}`,
   }),
   stage({
     id: "ps-osilo",
     number: 14,
     name: "Osilo – Tergu",
     date: "2026-10-04",
-    firstCar: "",
-    passes: [{ label: "2° passaggio (PS 16)", time: "" }],
-    notes: `23,71 km, due passaggi. ${TIMETABLE} ${NUMERO_DEDOTTO}`,
+    firstCar: "08:31",
+    roadClosure: "05:31",
+    passes: [{ label: "SS 16 · 2° passaggio", time: "11:38", roadClosure: "05:31" }],
+    lengthKm: 23.71,
+    parkingKind: "access",
+    parkingName: "Access Point Osilo (Quadrivio)",
+    parking: P(40.81558864188334, 8.742239797232767),
+    notes: `Quadrivio: area Experience 14 con parcheggio Experience, zona pubblico 19. Altre zone: Tanca Noa (20) e Tergu (21), accesso da Tergu. ${ACCESSO}`,
   }),
   stage({
     id: "ps-argentiera",
     number: 15,
     name: "Sassari – Argentiera · Power Stage",
     date: "2026-10-04",
-    firstCar: "",
-    passes: [{ label: "PS 17 · Wolf Power Stage", time: "14:15" }],
+    firstCar: "10:05",
+    roadClosure: "07:05",
+    passes: [{ label: "SS 17 · Wolf Power Stage", time: "14:15", roadClosure: "07:05" }],
+    lengthKm: 7.1,
+    parkingKind: "access",
+    parkingName: "Access Point Palmadula",
+    parking: P(40.74863649450717, 8.188445362031837),
     notes:
-      "7,10 km. Ultimo tratto a bordo costa con il mare sullo sfondo, arrivo a Porto Palmas. La Power Stage (PS 17) è alle 14:15; orario del primo passaggio dal timetable.",
+      "Sul mare: aree Experience 15 (Ebi Dozzi) e 16 (Porto Palmas, arrivo), RIS Hospitality. Da Palmadula accesso pedonale alla zona 22; parcheggi spettatori verso l'Argentiera per le zone sul mare (23). Strade chiuse dalle 07:05 fino alla Power Stage.",
   }),
 ];
 
@@ -150,85 +218,179 @@ function sp(s: Omit<SpectatorPoint, "photoIds">): SpectatorPoint {
   return { photoIds: [], ...s };
 }
 
-// Punti più spettacolari citati dalle fonti. Senza coordinate: la posizione esatta e le
-// zone pubblico/RIS Experience vanno prese dalla guida spettatori ufficiale 2026.
-const DA_GUIDA = "Posizione esatta, parcheggio e accesso a piedi: dalla guida spettatori ufficiale 2026 (scheda della prova).";
+// Aree Experience del Pass Gold (e poche zone pubblico notevoli) dalla mappa ufficiale.
+// WOW = mia valutazione in base a ciò che la mappa segnala (salti, guadi, arene, mare).
+const DA_MYMAPS = "Coordinate precise dell'area: nella mappa interattiva ufficiale della prova (QR \"Interactive MyMaps\").";
 
 const spectatorPoints: SpectatorPoint[] = [
   sp({
-    id: "sp-ittiri",
+    id: "exp-sd",
+    stageId: "sd",
+    name: "Experience 1–2 · Ex Miniera Bauxite",
+    access: P(40.65178190753158, 8.37644763855414),
+    experienceArea: true,
+    wow: 4,
+    cornerType: "Tornanti e salto alla partenza",
+    walkRoute: "Dall'Access Point di Olmedo seguire l'accesso segnalato fino all'Ex Miniera: parcheggio Experience accanto alla partenza.",
+    description: "Shakedown a pochi km da Alghero: le auto passano più volte, ottimo per iniziare e provare foto e video.",
+    source: FONTE,
+    notes: DA_MYMAPS,
+  }),
+  sp({
+    id: "exp-ittiri",
     stageId: "ps1",
-    name: "Ittiri Arena",
+    name: "Experience 3 · Ittiri Arena",
     address: "Ittiri Arena, Ittiri",
+    experienceArea: true,
     wow: 4,
-    description:
-      "Super speciale in arena: auto vicinissime e tutto il tracciato sotto gli occhi. Perfetta per il primo rally della vita.",
-    source: "Percorso ufficiale 2026 (ACI Sport)",
-    notes: DA_GUIDA,
+    cornerType: "Arena con salto e water splash",
+    walkRoute: "Dai parcheggi spettatori lungo la strada a nord, percorso pedonale segnalato fino all'arena. Area Experience 3 accanto al salto.",
+    description: "Tutto il tracciato sotto gli occhi, auto vicinissime: il modo perfetto per il primo rally.",
+    source: FONTE,
   }),
   sp({
-    id: "sp-micky",
+    id: "exp-tula-6",
+    stageId: "ps-tula",
+    name: "Experience 6 · Sa Mela",
+    access: P(40.79732777557003, 8.972336269232184),
+    experienceArea: true,
+    wow: 4,
+    walkRoute:
+      "Accesso Experience e disabili (solo auto) dall'Access Point indicato, fino al parcheggio Experience vicino all'area 6. In alternativa bus navetta da Erula (Bus IN/OUT Point).",
+    source: FONTE,
+    notes: DA_MYMAPS,
+  }),
+  sp({
+    id: "exp-tula-4",
+    stageId: "ps-tula",
+    name: "Experience 4–5 · Turrina Manna",
+    access: P(40.72751145540492, 8.983330894154273),
+    experienceArea: true,
+    wow: 4,
+    walkRoute:
+      "Da Tula accesso a senso unico fino allo start della prova (dopo lo start solo in uscita), fino ai parcheggi vicino all'area 4. Parcheggio Experience accanto.",
+    source: FONTE,
+    notes: DA_MYMAPS,
+  }),
+  sp({
+    id: "zona-filigosu",
     stageId: "ps-filigosu",
-    name: "Micky's Jump",
-    address: "Nuraghe Lerno, Pattada",
+    name: "Zona pubblico 5 · Filigosu",
+    access: P(40.72157726858769, 9.11652993606414),
+    wow: 3,
+    walkRoute: "Da Oschiri accesso segnalato; ultimo tratto solo con 4x4.",
+    description: "Nessuna area Experience su questa prova.",
+    source: FONTE,
+  }),
+  sp({
+    id: "exp-ala-arena",
+    stageId: "ps-alalerno",
+    name: "Experience 7–8 · Alà Arena",
+    access: P(40.64873143094596, 9.325989460877631),
+    experienceArea: true,
     wow: 5,
-    cornerType: "Salto (km 5,5 nelle edizioni passate)",
-    description:
-      "Il salto più famoso del Rally Italia Sardegna: le auto volano per decine di metri. Atmosfera incredibile, da vedere assolutamente la prima volta.",
-    position:
-      "Accesso descritto da WRC.com: dalla SS 389 svolta per Nuraghe Lerno, dopo 160 m a destra, prosegui 4,8 km, poi a destra in salita su sterrato. Parcheggia dove puoi e sali a piedi: anche un paio di km se arrivi tardi.",
-    source: "WRC.com Stage Guide · Rally Italia Sardegna",
-    notes: `Arrivare molto presto: è la zona più affollata. ${DA_GUIDA}`,
+    cornerType: "Salto e Water Splash",
+    walkRoute:
+      "Dall'Access Point di Alà dei Sardi seguire l'accesso segnalato fino all'Alà Arena: parcheggio Experience e parcheggio spettatori accanto all'area, RIS Hospitality.",
+    description: "Arena alla partenza con salto e Water Splash: le auto passano due volte (10:08 e 16:38).",
+    source: FONTE,
+    notes: DA_MYMAPS,
   }),
   sp({
-    id: "sp-lerno-rocce",
-    stageId: "ps-filigosu",
-    name: "Curve tra i graniti · vista Lago Lerno",
-    wow: 4,
-    description: "Circa 600 m dopo Micky's Jump: serie di curve tra enormi rocce di granito con il Lago Lerno sullo sfondo. Scenario da cartolina.",
-    source: "WRC.com Stage Guide · Rally Italia Sardegna",
-    notes: DA_GUIDA,
-  }),
-  sp({
-    id: "sp-coiluna-jump",
-    stageId: "ps-coiluna",
-    name: "Coiluna's Jump",
+    id: "exp-lerno-jump",
+    stageId: "ps-lernoala",
+    name: "Experience 9 · Lerno Jump",
+    access: P(40.58489772463757, 9.242178693420435),
+    experienceArea: true,
     wow: 5,
     cornerType: "Salto",
-    description: "Salto amatissimo dai fotografi, vicino al lago di Sa Coiluna: le auto decollano appena dopo la partenza della prova.",
-    source: "WRC.com / guide alle prove 2026",
-    notes: `Indicato come zona pubblico. ${DA_GUIDA}`,
+    walkRoute:
+      "Dall'Access Point di Buddusò seguire l'accesso segnalato verso Tandalò e Sa Jone fino alla partenza: parcheggio Experience accanto al Lerno Jump.",
+    description: "Il salto di Lerno alla partenza della prova, con area Experience dedicata.",
+    source: FONTE,
+    notes: DA_MYMAPS,
   }),
   sp({
-    id: "sp-budduso-arena",
+    id: "exp-budduso-arena",
     stageId: "ps-coiluna",
-    name: "Buddusò Arena",
+    name: "Experience 10 · Buddusò Arena",
+    access: P(40.57065014718563, 9.26940463215951),
+    experienceArea: true,
     wow: 4,
-    description: "Zona pubblico organizzata lungo la Coiluna – Loelle.",
-    source: "Guide alle prove 2026",
-    notes: DA_GUIDA,
+    walkRoute: "Da Buddusò accesso segnalato fino alla Buddusò Arena: parcheggio Experience accanto.",
+    source: FONTE,
+    notes: DA_MYMAPS,
   }),
   sp({
-    id: "sp-nurage",
+    id: "exp-nuraghe-loelle",
     stageId: "ps-coiluna",
-    name: "Tornante \"Nurage\"",
+    name: "Experience 11 · Nuraghe Loelle",
+    access: P(40.57065014718563, 9.26940463215951),
+    experienceArea: true,
     wow: 4,
-    cornerType: "Tornante molto veloce",
-    description: "Famoso tornantone veloce e spettacolare: traversi e sterrato che vola.",
-    source: "Guide alle prove 2026",
-    notes: DA_GUIDA,
+    walkRoute: "Da Buddusò stesso accesso della Buddusò Arena, area poco prima.",
+    source: FONTE,
+    notes: DA_MYMAPS,
   }),
   sp({
-    id: "sp-argentiera-guado",
-    stageId: "ps-argentiera",
-    name: "Guado sulla spiaggia dell'Argentiera",
-    address: "Argentiera, Sassari",
+    id: "zona-coiluna-jump",
+    stageId: "ps-coiluna",
+    name: "Zona pubblico 13 · Coiluna Jump",
+    access: P(40.57164889280999, 9.410081421503556),
     wow: 5,
-    cornerType: "Guado",
-    description:
-      "Zona pubblico lungo una delle spiagge più belle della Sardegna: guado, mare e l'ex villaggio minerario. Qui si decide il mondiale con la Power Stage.",
-    source: "Guide alle prove 2026",
-    notes: `Power Stage alle 14:15: arrivare con largo anticipo. ${DA_GUIDA}`,
+    cornerType: "Salto",
+    walkRoute: "Accesso da Mamone (o da Alà dei Sardi); ultimo tratto solo 4x4/SUV.",
+    description: "Non è un'area Experience: solo pubblico.",
+    source: FONTE,
+  }),
+  sp({
+    id: "exp-galoppatoio",
+    stageId: "ps-solorche",
+    name: "Experience 12–13 · Galoppatoio Pattada",
+    access: P(40.56182559978122, 9.083966853227492),
+    experienceArea: true,
+    wow: 5,
+    cornerType: "Salto all'arrivo",
+    walkRoute:
+      "Dall'Access Point di Pattada seguire l'accesso segnalato fino al Galoppatoio: parcheggio Experience e spettatori accanto all'area, RIS Hospitality.",
+    description: "Anello finale con salto al Galoppatoio di Pattada: prova nuova del 2026.",
+    source: FONTE,
+    notes: DA_MYMAPS,
+  }),
+  sp({
+    id: "exp-quadrivio",
+    stageId: "ps-osilo",
+    name: "Experience 14 · Quadrivio",
+    access: P(40.81558864188334, 8.742239797232767),
+    experienceArea: true,
+    wow: 4,
+    walkRoute: "Dall'Access Point indicato seguire l'accesso segnalato fino al Quadrivio: parcheggio Experience accanto all'area.",
+    source: FONTE,
+    notes: DA_MYMAPS,
+  }),
+  sp({
+    id: "exp-ebi-dozzi",
+    stageId: "ps-argentiera",
+    name: "Experience 15 · Ebi Dozzi (sul mare)",
+    access: P(40.74863649450717, 8.188445362031837),
+    experienceArea: true,
+    wow: 5,
+    cornerType: "Tratto a bordo mare",
+    walkRoute: "Accesso dal lato Argentiera / Porto Palmas; parcheggi spettatori verso l'Argentiera. Da Palmadula solo accesso pedonale alla zona 22.",
+    description: "Le auto corrono sul mare: lo scenario più spettacolare del rally, dove si decide il mondiale.",
+    source: FONTE,
+    notes: DA_MYMAPS,
+  }),
+  sp({
+    id: "exp-porto-palmas",
+    stageId: "ps-argentiera",
+    name: "Experience 16 · Porto Palmas (arrivo)",
+    access: P(40.74863649450717, 8.188445362031837),
+    experienceArea: true,
+    wow: 5,
+    walkRoute: "All'arrivo della prova, accanto alla RIS Hospitality.",
+    source: FONTE,
+    notes: DA_MYMAPS,
   }),
 ];
 
@@ -308,43 +470,45 @@ function buildEvents(): TripEvent[] {
     ev("2026-09-30", "17:30", "Capo Caccia al tramonto", "panorama", { placeId: "pl-capocaccia", driveMinutes: 35 }),
     ev("2026-09-30", "20:30", "Cena", "pasto", { placeId: "pl-cena" }),
 
-    // 01/10 — turismo + preparazione rally
+    // 01/10 — giovedì (timetable ufficiale)
     ev("2026-10-01", "08:30", "Service Park Alghero · primo giorno Pass Gold", "rally", {
       address: SERVICE_PARK,
-      notes:
-        "Orario e sede sono quelli stampati sul Pass Gold. Dove si ritira la Welcome Box (T-shirt ufficiale): da verificare con l'organizzazione.",
+      notes: "Orario e sede stampati sul Pass Gold. Dove si ritira la Welcome Box: da verificare con l'organizzazione.",
     }),
-    ev("2026-10-01", "09:01", "Shakedown", "rally", {
-      notes: "Orario annunciato dagli organizzatori; luogo ancora da comunicare.",
-    }),
-    ev("2026-10-01", "16:05", "PS 1 Ittiri Arena Show · prima vettura", "prova", { stageId: "ps1" }),
-    ev("2026-10-01", "18:30", "Preparare zaino e batterie per domani", "altro", {
-      notes: "Caricare Nikon, GoPro, Osmo Pocket, powerbank. Svuotare schede.",
-    }),
+    ev("2026-10-01", "09:01", "Shakedown · Monte Baranta", "prova", { stageId: "sd", roadClosure: "06:00" }),
+    ev("2026-10-01", "15:00", "Partenza del rally · Alghero", "rally", { address: SERVICE_PARK }),
+    ev("2026-10-01", "16:05", "SSS 1 · Ittiri Arena Show", "prova", { stageId: "ps1", roadClosure: "06:00" }),
     ev("2026-10-01", "20:30", "Cena", "pasto", { placeId: "pl-cena" }),
 
-    // 02/10 — venerdì: orari delle prove non ancora noti (vuoti = "da definire")
-    ev("2026-10-02", "", "PS 2 / PS 5 · Tula – Erula", "prova", { stageId: "ps-tula" }),
-    ev("2026-10-02", "", "PS 3 / PS 6 · Su Filigosu – Lerno (Micky's Jump)", "prova", { stageId: "ps-filigosu" }),
-    ev("2026-10-02", "", "PS 4 / PS 7 · Monti di Alà – Conchedda – Lerno", "prova", { stageId: "ps-alalerno" }),
+    // 02/10 — venerdì
+    ev("2026-10-02", "08:01", "SS 2 · Tula – Erula 1", "prova", { stageId: "ps-tula", roadClosure: "05:01" }),
+    ev("2026-10-02", "09:01", "SS 3 · Su Filigosu – Lerno 1", "prova", { stageId: "ps-filigosu", roadClosure: "06:01" }),
+    ev("2026-10-02", "10:08", "SS 4 · Monti di Alà – Sa Conchedda – Lerno 1", "prova", { stageId: "ps-alalerno", roadClosure: "07:08" }),
+    ev("2026-10-02", "14:31", "SS 5 · Tula – Erula 2", "prova", { stageId: "ps-tula", roadClosure: "12:31" }),
+    ev("2026-10-02", "15:31", "SS 6 · Su Filigosu – Lerno 2", "prova", { stageId: "ps-filigosu", roadClosure: "13:31" }),
+    ev("2026-10-02", "16:38", "SS 7 · Monti di Alà – Sa Conchedda – Lerno 2", "prova", { stageId: "ps-alalerno", roadClosure: "14:38" }),
     ev("2026-10-02", "20:30", "Cena", "pasto", { placeId: "pl-cena" }),
 
     // 03/10 — sabato
-    ev("2026-10-03", "", "PS 8 / PS 11 · Lerno – Sa Conchedda – Monti di Alà", "prova", { stageId: "ps-lernoala" }),
-    ev("2026-10-03", "", "PS 9 / PS 12 · Coiluna – Loelle (Coiluna's Jump)", "prova", { stageId: "ps-coiluna" }),
-    ev("2026-10-03", "", "PS 10 / PS 13 · Solorché", "prova", { stageId: "ps-solorche" }),
+    ev("2026-10-03", "08:01", "SS 8 · Lerno – Sa Conchedda – Monti di Alà 1", "prova", { stageId: "ps-lernoala", roadClosure: "05:01" }),
+    ev("2026-10-03", "09:11", "SS 9 · Coiluna – Loelle 1", "prova", { stageId: "ps-coiluna", roadClosure: "06:11" }),
+    ev("2026-10-03", "10:07", "SS 10 · Solorchè 1", "prova", { stageId: "ps-solorche", roadClosure: "07:07" }),
+    ev("2026-10-03", "14:31", "SS 11 · Lerno – Sa Conchedda – Monti di Alà 2", "prova", { stageId: "ps-lernoala", roadClosure: "12:31" }),
+    ev("2026-10-03", "15:41", "SS 12 · Coiluna – Loelle 2", "prova", { stageId: "ps-coiluna", roadClosure: "13:41" }),
+    ev("2026-10-03", "16:37", "SS 13 · Solorchè 2", "prova", { stageId: "ps-solorche", roadClosure: "14:37" }),
     ev("2026-10-03", "20:30", "Cena", "pasto", { placeId: "pl-cena" }),
 
     // 04/10 — domenica
-    ev("2026-10-04", "", "PS 14 / PS 16 · Osilo – Tergu", "prova", { stageId: "ps-osilo" }),
-    ev("2026-10-04", "", "PS 15 · Sassari – Argentiera (1° passaggio)", "prova", { stageId: "ps-argentiera" }),
-    ev("2026-10-04", "14:15", "PS 17 · Wolf Power Stage Sassari – Argentiera", "prova", {
+    ev("2026-10-04", "08:31", "SS 14 · Osilo – Tergu 1", "prova", { stageId: "ps-osilo", roadClosure: "05:31" }),
+    ev("2026-10-04", "10:05", "SS 15 · Sassari – Argentiera 1", "prova", { stageId: "ps-argentiera", roadClosure: "07:05" }),
+    ev("2026-10-04", "11:38", "SS 16 · Osilo – Tergu 2", "prova", { stageId: "ps-osilo", roadClosure: "05:31" }),
+    ev("2026-10-04", "14:15", "SS 17 · Wolf Power Stage Sassari – Argentiera", "prova", {
       stageId: "ps-argentiera",
-      notes: "Ultima prova: si decide il mondiale. Orario annunciato dagli organizzatori.",
+      roadClosure: "07:05",
+      notes: "Ultima prova: si decide il mondiale.",
     }),
-    ev("2026-10-04", "", "Arrivo finale e podio ad Alghero", "rally", {
-      notes: "Arrivo cerimoniale sotto i Bastioni di Alghero. Orario da verificare.",
-    }),
+    ev("2026-10-04", "15:15", "Arrivo del rally · Alghero", "rally", { notes: "Parc Fermé di Alghero, arrivo cerimoniale sotto i Bastioni." }),
+    ev("2026-10-04", "17:00", "Podio · Alghero", "rally"),
     ev("2026-10-04", "20:30", "Cena", "pasto", { placeId: "pl-cena" }),
 
     // 05/10 — Stintino
@@ -384,10 +548,10 @@ function buildEvents(): TripEvent[] {
 const days: TripDay[] = [
   { date: "2026-09-29", title: "Traghetto Livorno → Olbia", kind: "viaggio", location: "Livorno", gearPresetId: "serata" },
   { date: "2026-09-30", title: "Sbarco a Olbia e arrivo ad Alghero", kind: "turismo", location: "Olbia → Alghero", gearPresetId: "turismo" },
-  { date: "2026-10-01", title: "WRC · Giovedì · Shakedown e Ittiri Arena", kind: "rally", location: "Alghero", gearPresetId: "rally", notes: PASS_GOLD_NOTE },
-  { date: "2026-10-02", title: "WRC · Venerdì", kind: "rally", location: "Alghero", gearPresetId: "rally", notes: PASS_GOLD_NOTE },
-  { date: "2026-10-03", title: "WRC · Sabato", kind: "rally", location: "Alghero", gearPresetId: "rally", notes: PASS_GOLD_NOTE },
-  { date: "2026-10-04", title: "WRC · Domenica · Power Stage", kind: "rally", location: "Alghero", gearPresetId: "rally", notes: PASS_GOLD_NOTE },
+  { date: "2026-10-01", title: "WRC · Giovedì · Shakedown e Ittiri Arena", kind: "rally", location: "Alghero", gearPresetId: "rally", notes: proposta("Shakedown alle aree Experience 1–2 (Olmedo, vicino ad Alghero), poi Ittiri Arena, Experience 3, alle 16:05.") },
+  { date: "2026-10-02", title: "WRC · Venerdì", kind: "rally", location: "Alghero", gearPresetId: "rally", notes: proposta("Alà Arena, Experience 7–8, con salto e Water Splash: SS 4 alle 10:08 e SS 7 alle 16:38. Strade chiuse dalle 07:08.") },
+  { date: "2026-10-03", title: "WRC · Sabato", kind: "rally", location: "Alghero", gearPresetId: "rally", notes: proposta("Galoppatoio di Pattada, Experience 12–13, con salto: SS 10 alle 10:07 e SS 13 alle 16:37. Strade chiuse dalle 07:07. In alternativa Lerno Jump, Experience 9: 08:01 e 14:31.") },
+  { date: "2026-10-04", title: "WRC · Domenica · Power Stage", kind: "rally", location: "Alghero", gearPresetId: "rally", notes: proposta("Argentiera sul mare, Experience 15–16: SS 15 alle 10:05 e Power Stage alle 14:15. Strade chiuse dalle 07:05. Poi podio ad Alghero alle 17:00.") },
   { date: "2026-10-05", title: "Stintino e La Pelosa", kind: "turismo", location: "Alghero", gearPresetId: "turismo" },
   { date: "2026-10-06", title: "Bosa e costa ovest", kind: "turismo", location: "Alghero", gearPresetId: "foto" },
   { date: "2026-10-07", title: "Rientro: traghetto Olbia → Livorno", kind: "viaggio", location: "Alghero → Olbia" },
