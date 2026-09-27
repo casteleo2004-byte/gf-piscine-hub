@@ -13,7 +13,7 @@ import type {
 // Dati iniziali del viaggio, solo da fonti verificabili: biglietti, prenotazioni,
 // percorso ufficiale del rally. Ciò che non è noto resta vuoto o "da verificare".
 
-export const DATA_VERSION = 7;
+export const DATA_VERSION = 8;
 
 /**
  * Giorni i cui dati iniziali sono cambiati in una versione: chi ha dati salvati
@@ -26,6 +26,7 @@ export const SEED_UPDATES: Record<number, string[]> = {
   5: ["2026-10-02", "2026-10-03", "2026-10-04"], // prove reali 2026 al posto degli esempi
   6: ["2026-10-01", "2026-10-02", "2026-10-03", "2026-10-04"], // timetable e mappe ufficiali
   7: ["2026-10-01", "2026-10-02", "2026-10-03", "2026-10-04"], // piano del giorno per chi è al primo rally
+  8: ["2026-10-04"], // Argentiera: punto con sfondo mare come principale
 };
 
 /** Prove e punti spettatore d'esempio delle prime versioni, rimossi dalla v5. */
@@ -208,6 +209,7 @@ const stages: RallyStage[] = [
     lengthKm: 7.1,
     parkingKind: "access",
     parkingName: "Ingresso Palmadula",
+    spectatorPointId: "exp-ebi-dozzi",
     parking: P(40.74863649450717, 8.188445362031837),
     notes:
       "Sul mare: aree Experience 15 (Ebi Dozzi) e 16 (Porto Palmas, arrivo), RIS Hospitality. Da Palmadula accesso pedonale alla zona 22; parcheggi spettatori verso l'Argentiera per le zone sul mare (23). Strade chiuse dalle 07:05 fino alla Power Stage.",
@@ -375,7 +377,9 @@ const spectatorPoints: SpectatorPoint[] = [
     access: P(40.74863649450717, 8.188445362031837),
     experienceArea: true,
     wow: 5,
-    cornerType: "Tratto a bordo mare",
+    cornerType: "Tratto a bordo mare: le auto con il mare alle spalle",
+    photoGear:
+      "Guardando verso il mare si è rivolti a ovest: al passaggio delle 10:05 il sole è alle spalle (luce migliore), alle 14:15 è più laterale e verso il mare.",
     walkRoute: "Accesso dal lato Argentiera / Porto Palmas; parcheggi spettatori verso l'Argentiera. Da Palmadula solo accesso pedonale alla zona 22.",
     description: "Le auto corrono sul mare: lo scenario più spettacolare del rally, dove si decide il mondiale.",
     source: FONTE,

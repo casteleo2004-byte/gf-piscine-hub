@@ -237,3 +237,11 @@ describe("piano del giorno (primo rally)", () => {
     expect(toMinutes(a) - toMinutes(b)).toBeGreaterThanOrEqual(10);
   });
 });
+
+describe("prova sul mare", () => {
+  it("domenica il punto principale dell'Argentiera è Ebi Dozzi, area Gold sul mare", () => {
+    const st = data.stages.find((s) => s.id === "ps-argentiera")!;
+    expect(spectatorPointOf(st, data)).toMatchObject({ id: "exp-ebi-dozzi", experienceArea: true });
+    expect(data.days.find((d) => d.date === "2026-10-04")?.planStageIds).toEqual(["ps-argentiera"]);
+  });
+});
