@@ -1,0 +1,396 @@
+import type {
+  AppData,
+  EventType,
+  GearPreset,
+  GeoPoint,
+  Place,
+  RallyStage,
+  SpectatorPoint,
+  TripDay,
+  TripEvent,
+} from "./types";
+
+// Dati iniziali del viaggio. Date e base sono definitive; prove speciali,
+// orari WRC e coordinate sono ESEMPI da sostituire con il programma
+// ufficiale direttamente dall'app (icona matita).
+
+export const DATA_VERSION = 1;
+
+const ALGHERO: GeoPoint = { lat: 40.558, lng: 8.319 };
+const PORTO_TORRES: GeoPoint = { lat: 40.8397, lng: 8.4036 };
+
+const DA_VERIFICARE = "ESEMPIO: verificare con il programma ufficiale WRC.";
+
+function stage(s: Omit<RallyStage, "seen" | "passes"> & Partial<Pick<RallyStage, "passes">>): RallyStage {
+  return { passes: [], seen: false, ...s };
+}
+
+const stages: RallyStage[] = [
+  stage({
+    id: "ps3",
+    number: 3,
+    name: "Tula",
+    date: "2026-10-02",
+    firstCar: "09:12",
+    passes: [{ label: "PS 7 · 2° passaggio", time: "15:10" }],
+    departAt: "06:15",
+    parkingName: "Parcheggio spettatori Tula",
+    parking: { lat: 40.733, lng: 8.983 },
+    spectatorPointId: "sp3",
+    driveMinutes: 80,
+    walkMinutes: 22,
+    walkKm: 1.6,
+    elevationM: 90,
+    roadClosure: "08:00",
+    access: "media",
+    gear: "Nikon + 18-105, GoPro sul cappellino, impermeabile nello zaino",
+    notes: DA_VERIFICARE,
+  }),
+  stage({
+    id: "ps4",
+    number: 4,
+    name: "Coiluna – Loelle",
+    date: "2026-10-02",
+    firstCar: "10:25",
+    parkingName: "Area spettatori Loelle",
+    parking: { lat: 40.618, lng: 9.28 },
+    spectatorPointId: "sp4",
+    driveMinutes: 105,
+    walkMinutes: 15,
+    walkKm: 1,
+    roadClosure: "09:10",
+    access: "facile",
+    notes: DA_VERIFICARE,
+  }),
+  stage({
+    id: "ps10",
+    number: 10,
+    name: "Monte Lerno",
+    date: "2026-10-03",
+    firstCar: "08:40",
+    passes: [{ label: "PS 14 · 2° passaggio", time: "14:30" }],
+    parkingName: "Parcheggio Pattada",
+    parking: { lat: 40.593, lng: 9.124 },
+    spectatorPointId: "sp10",
+    driveMinutes: 95,
+    walkMinutes: 30,
+    walkKm: 2.1,
+    elevationM: 150,
+    roadClosure: "07:30",
+    access: "difficile",
+    gear: "Scarpe da trekking, frontale (partenza col buio)",
+    notes: `Salto famoso: arrivare presto. ${DA_VERIFICARE}`,
+  }),
+  stage({
+    id: "ps11",
+    number: 11,
+    name: "Monti di Alà",
+    date: "2026-10-03",
+    firstCar: "09:55",
+    parkingName: "Parcheggio Alà dei Sardi",
+    parking: { lat: 40.647, lng: 9.228 },
+    driveMinutes: 110,
+    walkMinutes: 10,
+    roadClosure: "08:40",
+    access: "facile",
+    notes: DA_VERIFICARE,
+  }),
+  stage({
+    id: "ps16",
+    number: 16,
+    name: "Sedini – Castelsardo",
+    date: "2026-10-04",
+    firstCar: "08:15",
+    parkingName: "Parcheggio Sedini",
+    parking: { lat: 40.852, lng: 8.815 },
+    spectatorPointId: "sp16",
+    driveMinutes: 70,
+    walkMinutes: 18,
+    walkKm: 1.2,
+    roadClosure: "07:00",
+    access: "media",
+    notes: DA_VERIFICARE,
+  }),
+  stage({
+    id: "ps18",
+    number: 18,
+    name: "Tergu – Osilo · Power Stage",
+    date: "2026-10-04",
+    firstCar: "12:15",
+    parkingName: "Parcheggio Tergu",
+    parking: { lat: 40.868, lng: 8.715 },
+    spectatorPointId: "sp18",
+    driveMinutes: 55,
+    walkMinutes: 25,
+    walkKm: 1.8,
+    elevationM: 60,
+    roadClosure: "10:45",
+    access: "media",
+    notes: `Power Stage: molto affollata. ${DA_VERIFICARE}`,
+  }),
+];
+
+function sp(s: Omit<SpectatorPoint, "photoIds">): SpectatorPoint {
+  return { photoIds: [], ...s };
+}
+
+const spectatorPoints: SpectatorPoint[] = [
+  sp({
+    id: "sp3",
+    stageId: "ps3",
+    name: "Curva sx dopo dosso",
+    point: { lat: 40.7265, lng: 8.971 },
+    description: "Curva a sinistra dopo dosso. Visuale buona anche 50 metri prima. Possibilità foto frontale.",
+    position: "Lato esterno, sul terrapieno rialzato",
+    cornerType: "Sinistra dopo dosso",
+    visibility: 4,
+    safety: 4,
+    roadDistanceM: 15,
+    photoGear: "Nikon 18-105 a 70-105mm, tempi 1/1000",
+  }),
+  sp({
+    id: "sp4",
+    stageId: "ps4",
+    name: "Tornante Loelle",
+    point: { lat: 40.612, lng: 9.295 },
+    description: "Tornante lento, buono per video con Osmo Pocket.",
+    cornerType: "Tornante destro",
+    visibility: 3,
+    safety: 5,
+  }),
+  sp({
+    id: "sp10",
+    stageId: "ps10",
+    name: "Salto Monte Lerno",
+    point: { lat: 40.586, lng: 9.115 },
+    description: "Zona del salto: arrivare molto presto, spazio limitato.",
+    cornerType: "Salto su rettilineo",
+    visibility: 5,
+    safety: 3,
+  }),
+  sp({
+    id: "sp16",
+    stageId: "ps16",
+    name: "Veloce in discesa",
+    point: { lat: 40.86, lng: 8.8 },
+    cornerType: "Destra veloce in discesa",
+    visibility: 4,
+    safety: 4,
+  }),
+  sp({
+    id: "sp18",
+    stageId: "ps18",
+    name: "Power Stage – collina",
+    point: { lat: 40.86, lng: 8.72 },
+    description: "Collina con vista su più curve.",
+    visibility: 5,
+    safety: 4,
+  }),
+];
+
+function place(p: Omit<Place, "photoIds" | "visited">): Place {
+  return { photoIds: [], visited: false, ...p };
+}
+
+const places: Place[] = [
+  place({ id: "pl-centro", name: "Centro storico e Bastioni", category: "visitare", point: { lat: 40.559, lng: 8.313 }, address: "Bastioni Marco Polo, Alghero" }),
+  place({ id: "pl-capocaccia", name: "Belvedere Capo Caccia", category: "panorama", point: { lat: 40.569, lng: 8.163 }, notes: "Tramonto spettacolare." }),
+  place({ id: "pl-nettuno", name: "Grotta di Nettuno", category: "attrazione", point: { lat: 40.5625, lng: 8.1625 }, notes: "Escala del Cabirol: 654 gradini. Verificare orari e mare." }),
+  place({ id: "pl-palmavera", name: "Nuraghe di Palmavera", category: "attrazione", point: { lat: 40.593, lng: 8.243 } }),
+  place({ id: "pl-mugoni", name: "Spiaggia di Mugoni", category: "spiaggia", point: { lat: 40.597, lng: 8.207 } }),
+  place({ id: "pl-pelosa", name: "Spiaggia La Pelosa", category: "spiaggia", point: { lat: 40.964, lng: 8.209 }, booking: "Accesso a numero chiuso: verificare se serve prenotazione in ottobre." }),
+  place({ id: "pl-bosa", name: "Bosa", category: "visitare", point: { lat: 40.298, lng: 8.498 } }),
+  place({ id: "pl-castelsardo", name: "Castelsardo", category: "visitare", point: { lat: 40.914, lng: 8.713 } }),
+  place({ id: "pl-cena", name: "Ristorante per cena (da scegliere)", category: "ristorante", notes: "Aggiungere indirizzo e prenotazione." }),
+];
+
+let seq = 0;
+function ev(
+  date: string,
+  time: string,
+  title: string,
+  type: EventType,
+  extra: Partial<TripEvent> = {},
+): TripEvent {
+  seq += 1;
+  return { id: `ev${seq}`, date, time, title, type, done: false, ...extra };
+}
+
+function rallyDay(date: string, first: RallyStage, second: RallyStage | null, wake: string): TripEvent[] {
+  const list: TripEvent[] = [
+    ev(date, wake, "Sveglia", "sveglia"),
+    ev(date, first.departAt ?? "", `Partenza da Alghero → PS ${first.number}`, "partenza", { stageId: first.id }),
+  ];
+  // Orari derivati dalla prova: arrivo, camminata, prima vettura.
+  const arrive = timeMinus(first.roadClosure ?? first.firstCar, 20 + (first.walkMinutes ?? 0));
+  list.push(
+    ev(date, arrive, "Arrivo parcheggio WRC", "parcheggio", { stageId: first.id }),
+    ev(date, timePlus(arrive, 20), "Partenza a piedi", "piedi", { stageId: first.id }),
+    ev(date, timePlus(arrive, 20 + (first.walkMinutes ?? 0)), "Punto spettatore", "spettatore", { stageId: first.id }),
+    ev(date, first.firstCar, `PS ${first.number} ${first.name} · prima vettura`, "prova", { stageId: first.id }),
+  );
+  if (second) {
+    list.push(
+      ev(date, second.firstCar, `PS ${second.number} ${second.name} · prima vettura`, "prova", { stageId: second.id }),
+    );
+  }
+  return list.map((e) => (e.time ? e : { ...e, time: timeMinus(arrive, first.driveMinutes ?? 60) }));
+}
+
+function timeMinus(t: string, min: number): string {
+  const [h, m] = t.split(":").map(Number);
+  const v = (((h * 60 + m - min) % 1440) + 1440) % 1440;
+  return `${String(Math.floor(v / 60)).padStart(2, "0")}:${String(v % 60).padStart(2, "0")}`;
+}
+const timePlus = (t: string, min: number) => timeMinus(t, -min);
+
+function buildEvents(): TripEvent[] {
+  seq = 0;
+  const [ps3, ps4, ps10, ps11, ps16, ps18] = stages;
+  return [
+    // 29/09 — partenza
+    ev("2026-09-29", "18:00", "Arrivo al porto e imbarco", "traghetto", { notes: "Porto di partenza e compagnia da inserire. Tenere a portata biglietto e documenti." }),
+    ev("2026-09-29", "20:00", "Partenza traghetto", "traghetto", { deadline: "19:00" }),
+
+    // 30/09 — arrivo
+    ev("2026-09-30", "07:30", "Arrivo in Sardegna", "traghetto", { point: PORTO_TORRES, notes: "Porto di arrivo e orario da confermare." }),
+    ev("2026-09-30", "08:30", "Trasferimento ad Alghero", "auto", { point: ALGHERO, driveMinutes: 40, distanceKm: 36 }),
+    ev("2026-09-30", "10:00", "Check-in alloggio / deposito bagagli", "altro"),
+    ev("2026-09-30", "11:00", "Centro storico e Bastioni", "visita", { placeId: "pl-centro" }),
+    ev("2026-09-30", "13:00", "Pranzo", "pasto"),
+    ev("2026-09-30", "17:30", "Capo Caccia al tramonto", "panorama", { placeId: "pl-capocaccia", driveMinutes: 35 }),
+    ev("2026-09-30", "20:30", "Cena", "pasto", { placeId: "pl-cena" }),
+
+    // 01/10 — turismo + preparazione rally
+    ev("2026-10-01", "09:00", "Colazione e spesa (acqua, snack per il rally)", "altro"),
+    ev("2026-10-01", "10:30", "Nuraghe di Palmavera", "visita", { placeId: "pl-palmavera" }),
+    ev("2026-10-01", "12:00", "Spiaggia di Mugoni", "spiaggia", { placeId: "pl-mugoni" }),
+    ev("2026-10-01", "17:00", "Preparare zaino e batterie per il rally", "altro", { notes: "Caricare Nikon, GoPro, Osmo Pocket, powerbank. Svuotare schede." }),
+    ev("2026-10-01", "20:30", "Cena", "pasto", { placeId: "pl-cena" }),
+
+    // 02/10 — WRC giorno 1
+    ...rallyDay("2026-10-02", ps3, ps4, "05:45"),
+    ev("2026-10-02", "12:30", "Pranzo", "pasto"),
+    ev("2026-10-02", "18:30", "Rientro ad Alghero", "auto", { point: ALGHERO }),
+    ev("2026-10-02", "20:30", "Cena", "pasto", { placeId: "pl-cena" }),
+
+    // 03/10 — WRC giorno 2
+    ...rallyDay("2026-10-03", ps10, ps11, "04:45"),
+    ev("2026-10-03", "12:30", "Pranzo", "pasto"),
+    ev("2026-10-03", "18:30", "Rientro ad Alghero", "auto", { point: ALGHERO }),
+    ev("2026-10-03", "20:30", "Cena", "pasto", { placeId: "pl-cena" }),
+
+    // 04/10 — WRC giorno 3
+    ...rallyDay("2026-10-04", ps16, ps18, "04:30"),
+    ev("2026-10-04", "15:00", "Castelsardo", "visita", { placeId: "pl-castelsardo" }),
+    ev("2026-10-04", "20:30", "Cena", "pasto", { placeId: "pl-cena" }),
+
+    // 05/10 — Stintino
+    ev("2026-10-05", "09:30", "Partenza per Stintino", "partenza", { placeId: "pl-pelosa", driveMinutes: 55 }),
+    ev("2026-10-05", "10:30", "Spiaggia La Pelosa", "spiaggia", { placeId: "pl-pelosa" }),
+    ev("2026-10-05", "13:00", "Pranzo", "pasto"),
+    ev("2026-10-05", "20:30", "Cena", "pasto", { placeId: "pl-cena" }),
+
+    // 06/10 — Bosa
+    ev("2026-10-06", "09:30", "Strada panoramica Alghero → Bosa", "panorama", { placeId: "pl-bosa", driveMinutes: 50, notes: "SP105 lungo la costa: soste foto." }),
+    ev("2026-10-06", "11:00", "Bosa", "visita", { placeId: "pl-bosa" }),
+    ev("2026-10-06", "13:00", "Pranzo", "pasto"),
+    ev("2026-10-06", "20:30", "Cena", "pasto", { placeId: "pl-cena" }),
+
+    // 07/10 — rientro
+    ev("2026-10-07", "09:00", "Check-out e carico auto", "altro"),
+    ev("2026-10-07", "10:00", "Porto di imbarco", "traghetto", { point: PORTO_TORRES, notes: "Porto e orario del traghetto di rientro da confermare." }),
+  ];
+}
+
+const days: TripDay[] = [
+  { date: "2026-09-29", title: "Partenza in traghetto", kind: "viaggio", location: "Traghetto", gearPresetId: "serata" },
+  { date: "2026-09-30", title: "Arrivo e Alghero", kind: "turismo", location: "Alghero", gearPresetId: "turismo" },
+  { date: "2026-10-01", title: "Mare e preparazione rally", kind: "turismo", location: "Alghero", gearPresetId: "turismo" },
+  { date: "2026-10-02", title: "WRC · Giorno 1", kind: "rally", location: "Alghero", gearPresetId: "rally" },
+  { date: "2026-10-03", title: "WRC · Giorno 2", kind: "rally", location: "Alghero", gearPresetId: "rally" },
+  { date: "2026-10-04", title: "WRC · Giorno 3 · Power Stage", kind: "rally", location: "Alghero", gearPresetId: "rally" },
+  { date: "2026-10-05", title: "Stintino e La Pelosa", kind: "turismo", location: "Alghero", gearPresetId: "turismo" },
+  { date: "2026-10-06", title: "Bosa e costa ovest", kind: "turismo", location: "Alghero", gearPresetId: "foto" },
+  { date: "2026-10-07", title: "Rientro", kind: "viaggio", location: "Alghero → casa" },
+];
+
+function preset(id: string, name: string, items: string[]): GearPreset {
+  return {
+    id,
+    name,
+    items: items.map((n, i) => ({ id: `${id}-${i}`, name: n, checked: false })),
+  };
+}
+
+const RALLY_BASE = [
+  "Pass WRC",
+  "iPhone 16 Pro Max",
+  "Powerbank + cavo",
+  "Nikon D3200 + 18-105",
+  "Batterie cariche",
+  "GoPro Hero 11",
+  "DJI Osmo Pocket 3",
+  "Acqua",
+  "Snack",
+  "Frontale",
+  "Impermeabile",
+  "Zaino",
+];
+
+const gearPresets: GearPreset[] = [
+  preset("rally", "Rally", RALLY_BASE),
+  preset("pioggia", "Rally pioggia", [
+    ...RALLY_BASE,
+    "Guscio impermeabile",
+    "Sovrapantaloni",
+    "Protezione fotocamera",
+    "Cambio calze",
+    "Sacchetto stagno per elettronica",
+  ]),
+  preset("turismo", "Turismo", [
+    "iPhone 16 Pro Max",
+    "Powerbank",
+    "Acqua",
+    "Occhiali da sole",
+    "Crema solare",
+    "Costume e telo",
+    "Zaino",
+  ]),
+  preset("foto", "Foto/Video", [
+    "Nikon D3200",
+    "Obiettivo 18-105",
+    "Batterie Nikon",
+    "Schede SD vuote",
+    "GoPro Hero 11 + batterie",
+    "Supporti GoPro",
+    "DJI Osmo Pocket 3",
+    "DJI Mic (Creator Combo)",
+    "Powerbank + cavi",
+    "Panno pulizia lenti",
+    "Protezione pioggia fotocamera",
+  ]),
+  preset("serata", "Serata", ["iPhone", "Portafoglio e documenti", "Chiavi auto", "Giacca leggera"]),
+];
+
+export function createSeed(): AppData {
+  return {
+    version: DATA_VERSION,
+    trip: {
+      id: "sardegna-2026",
+      name: "Sardegna 2026",
+      startDate: "2026-09-29",
+      endDate: "2026-10-07",
+      baseName: "Alghero",
+      base: ALGHERO,
+    },
+    days: structuredClone(days),
+    events: buildEvents(),
+    stages: structuredClone(stages),
+    spectatorPoints: structuredClone(spectatorPoints),
+    places: structuredClone(places),
+    gearPresets: structuredClone(gearPresets),
+    diary: [],
+    settings: { mapsApp: "apple", theme: "dark", bufferMinutes: 15 },
+  };
+}
