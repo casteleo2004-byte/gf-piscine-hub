@@ -3,7 +3,8 @@
 import { Pencil, Plus, Star } from "lucide-react";
 import { useState } from "react";
 import { newId } from "@/lib/id";
-import { formatPoint } from "@/lib/geo";
+import { formatKm, formatPoint } from "@/lib/geo";
+import { formatDuration } from "@/lib/time";
 import { spectatorPointOf, spectatorPointsOf } from "@/lib/smart";
 import { actions } from "@/lib/store/actions";
 import type { AppData, RallyStage, SpectatorPoint } from "@/lib/types";
@@ -34,7 +35,7 @@ export function SpectatorSheet({ stage, data, onClose }: { stage: RallyStage; da
       }
     >
       {primary ? (
-        <PointView point={primary} />
+        <PointView point={primary} stage={stage} />
       ) : (
         <p className="rounded-2xl bg-surface p-4 text-[18px] font-semibold text-muted">
           Nessun punto spettatore salvato per questa prova.
@@ -95,7 +96,37 @@ export function GoldBadge() {
   );
 }
 
-function PointView({ point }: { point: SpectatorPoint }) {
+/** Parcheggio spettatori → punto: tempi, descrizione e percorso a piedi su Maps. */
+function WalkFromParking({ point, stage }: { point: SpectatorPoint; stage: RallyStage }) {
+  const facts = [
+    stage.walkMinutes != null && formatDuration(stage.walkMinutes),
+    stage.walkKm != null && formatKm(stage.walkKm),
+    stage.elevationM != null && `+${stage.elevationM} m`,
+  ].filter(Boolean) as string[];
+  return (
+    <section className="mt-5 rounded-2xl bg-surface p-4">
+      <h4 className="text-[15px] font-extrabold uppercase tracking-[0.12em] text-muted">Dal parcheggio a piedi</h4>
+      <p className="mt-1 text-[18px] font-bold">{stage.parkingName || "Parcheggio spettatori da inserire"}</p>
+      {facts.length > 0 && <p className="tnum mt-1 text-[18px] font-semibold text-hi">{facts.join(" · ")}</p>}
+      {point.walkRoute ? (
+        <p className="mt-2 whitespace-pre-line text-[17px]">{point.walkRoute}</p>
+      ) : (
+        <p className="mt-2 text-[16px] text-muted">Tragitto da inserire dalla scheda ufficiale della prova (matita).</p>
+      )}
+      {stage.parking && point.point ? (
+        <NavButton className="mt-3 w-full" size="lg" variant="secondary" origin={stage.parking} point={point.point} label={point.name} mode="walking">
+          PERCORSO PARCHEGGIO → PUNTO
+        </NavButton>
+      ) : (
+        <p className="mt-2 text-[15px] font-semibold text-muted">
+          Il percorso su Maps compare quando parcheggio e punto hanno le coordinate.
+        </p>
+      )}
+    </section>
+  );
+}
+
+function PointView({ point, stage }: { point: SpectatorPoint; stage: RallyStage }) {
   const rows: [string, string | undefined][] = [
     ["Posizione consigliata", point.position],
     ["Tipo di curva", point.cornerType],
@@ -129,6 +160,8 @@ function PointView({ point }: { point: SpectatorPoint }) {
       >
         {point.point ? "NAVIGA A PIEDI" : "NAVIGA IN ZONA"}
       </NavButton>
+
+      <WalkFromParking point={point} stage={stage} />
 
       <div className="mt-5">
         <PhotoStrip ids={point.photoIds} onChange={(ids) => actions.saveSpectatorPoint({ ...point, photoIds: ids })} />

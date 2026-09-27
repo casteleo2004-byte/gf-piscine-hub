@@ -17,6 +17,8 @@ interface Props {
   className?: string;
   /** Solo icona quando la posizione manca (liste). */
   compact?: boolean;
+  /** Punto di partenza fisso (default: posizione attuale). */
+  origin?: GeoPoint;
 }
 
 /** Apre Apple Maps / Google Maps già impostato sulla destinazione. */
@@ -30,9 +32,10 @@ export function NavButton({
   variant = "primary",
   className = "",
   compact = false,
+  origin,
 }: Props) {
   const data = useData();
-  const url = data ? navigationUrl(data.settings.mapsApp, { point, address, label }, mode) : null;
+  const url = data ? navigationUrl(data.settings.mapsApp, { point, address, label }, mode, origin) : null;
   const Icon = mode === "walking" ? Footprints : Navigation;
   const content = (
     <>

@@ -6,7 +6,7 @@ import { useNow } from "@/lib/hooks/useNow";
 import { newId } from "@/lib/id";
 import { activeDay, eventsOfDay, nextEventIndex } from "@/lib/smart";
 import { useData } from "@/lib/store/hooks";
-import { daysBetween, formatDayMonth, formatWeekday, nowMinutes, toISODate } from "@/lib/time";
+import { daysBetween, formatDayMonth, formatLongDate, formatWeekday, nowMinutes, toISODate } from "@/lib/time";
 import type { TripEvent } from "@/lib/types";
 import { Button, IconButton } from "../ui/Button";
 import { OnlineBadge } from "../ui/OnlineBadge";
@@ -51,11 +51,11 @@ export function TodayScreen() {
       <header className="flex items-start gap-2 pb-3 pt-1">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-[32px] font-extrabold leading-tight">{formatWeekday(day.date)}</h1>
+            <h1 className="text-[32px] font-extrabold leading-tight">{formatWeekday(today)}</h1>
             <OnlineBadge />
           </div>
           <div className="text-[19px] font-semibold text-muted">
-            {formatDayMonth(day.date)} · {day.location}
+            {formatDayMonth(today)} · {status === "during" ? autoDay.location : status === "before" ? "prima della partenza" : "viaggio concluso"}
           </div>
         </div>
         <IconButton label="Impostazioni" onClick={() => setSettings(true)}>
@@ -82,7 +82,10 @@ export function TodayScreen() {
       )}
 
       <div className="mb-4 flex items-center gap-2">
-        <h2 className="min-w-0 flex-1 text-[21px] font-bold">{day.title}</h2>
+        <h2 className="min-w-0 flex-1 text-[21px] font-bold">
+          {!isToday && <span className="block text-[16px] font-bold uppercase tracking-wide text-hi">{formatLongDate(day.date)}</span>}
+          {day.title}
+        </h2>
         <IconButton label="Modifica giornata" onClick={() => setDayEdit(true)}>
           <Pencil size={20} />
         </IconButton>

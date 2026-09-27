@@ -191,3 +191,12 @@ describe("aree Pass Gold", () => {
     expect(spectatorPointOf(st, d2)?.id).toBe("sp-lerno-rocce");
   });
 });
+
+describe("percorso parcheggio → punto", () => {
+  it("link a piedi con partenza dal parcheggio", () => {
+    const url = navigationUrl("google", { point: { lat: 40.6, lng: 9.1 } }, "walking", { lat: 40.59, lng: 9.12 });
+    expect(url).toContain("origin=40.59%2C9.12");
+    expect(url).toContain("travelmode=walking");
+    expect(navigationUrl("apple", { point: { lat: 40.6, lng: 9.1 } }, "walking", { lat: 40.59, lng: 9.12 })).toContain("saddr=40.59%2C9.12");
+  });
+});

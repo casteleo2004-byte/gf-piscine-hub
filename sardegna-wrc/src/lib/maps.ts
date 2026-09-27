@@ -11,19 +11,20 @@ export function navigationUrl(
   app: MapsApp,
   dest: { point?: GeoPoint; address?: string; label?: string },
   mode: TravelMode = "driving",
+  /** Partenza diversa dalla posizione attuale (es. parcheggio → punto spettatore). */
+  origin?: GeoPoint,
 ): string | null {
   const target = dest.point ? `${dest.point.lat},${dest.point.lng}` : dest.address?.trim();
   if (!target) return null;
+  const from = origin ? `${origin.lat},${origin.lng}` : undefined;
   if (app === "apple") {
     const params = new URLSearchParams({ daddr: target, dirflg: mode === "walking" ? "w" : "d" });
+    if (from) params.set("saddr", from);
     if (dest.label && dest.point) params.set("q", dest.label);
     return `https://maps.apple.com/?${params.toString()}`;
   }
-  const params = new URLSearchParams({
-    api: "1",
-    destination: target,
-    travelmode: mode,
-  });
+  const params = new URLSearchParams({ api: "1", destination: target, travelmode: mode });
+  if (from) params.set("origin", from);
   return `https://www.google.com/maps/dir/?${params.toString()}`;
 }
 

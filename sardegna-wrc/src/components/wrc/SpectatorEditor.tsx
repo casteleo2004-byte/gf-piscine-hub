@@ -48,6 +48,12 @@ export function SpectatorEditor({ point, data, onClose }: { point: SpectatorPoin
           ]}
         />
         <TextArea
+          label="Tragitto a piedi dal parcheggio"
+          value={d.walkRoute}
+          onChange={(v) => set("walkRoute", v)}
+          placeholder="Es. dal parcheggio seguire la sterrata a sinistra, 1,2 km in salita, poi il sentiero segnalato…"
+        />
+        <TextArea
           label="Descrizione"
           value={d.description}
           onChange={(v) => set("description", v)}

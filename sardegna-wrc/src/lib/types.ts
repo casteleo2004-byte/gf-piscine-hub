@@ -113,6 +113,8 @@ export interface SpectatorPoint {
   wow?: number;
   /** Da dove viene l'informazione. */
   source?: string;
+  /** Tragitto a piedi dal parcheggio spettatori a questo punto. */
+  walkRoute?: string;
   description?: string;
   notes?: string;
   position?: string;
