@@ -33,6 +33,7 @@ const PRESETS: { id: string; label: string; at: string | null }[] = [
   { id: "sab-0515", label: "Sab 3 · 05:15 · in ritardo", at: "2026-10-03T05:15" },
   { id: "mar-2000", label: "Mar 29/9 · 20:00 · verso il porto", at: "2026-09-29T20:00" },
   { id: "mer-0640", label: "Mer 30/9 · 06:40 · sbarco a Olbia", at: "2026-09-30T06:40" },
+  { id: "mer-1420", label: "Mer 30/9 · 14:20 · check-in alloggio", at: "2026-09-30T14:20" },
   { id: "rit-1745", label: "Mer 7/10 · 17:45 · rientro", at: "2026-10-07T17:45" },
   { id: "lun-0900", label: "Lun 5 · 09:00 · turismo", at: "2026-10-05T09:00" },
   { id: "real", label: "Ora reale", at: null },

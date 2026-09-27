@@ -13,6 +13,7 @@ import { Sheet } from "../ui/Sheet";
 
 // In aggiunta rapida solo 4 campi: Nome, Categoria, Posizione, Nota.
 const QUICK_CATS: PlaceCategory[] = [
+  "alloggio",
   "panorama",
   "spiaggia",
   "ristorante",

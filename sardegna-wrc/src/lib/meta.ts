@@ -1,5 +1,6 @@
 import {
   AlarmClock,
+  BedDouble,
   Camera,
   Car,
   Circle,
@@ -62,6 +63,7 @@ export const PLACE_CATEGORIES: Record<PlaceCategory, { label: string; Icon: Luci
   distributore: { label: "Distributore", Icon: Fuel, tone: "ok" },
   attrazione: { label: "Attrazione", Icon: Camera, tone: "info" },
   visitare: { label: "Da visitare", Icon: MapPin, tone: "info" },
+  alloggio: { label: "Alloggio", Icon: BedDouble, tone: "accent" },
 };
 
 /** Filtri semplici della Mappa. */

@@ -112,3 +112,14 @@ describe("Pass Gold", () => {
     expect(withPass).toEqual(["2026-10-01", "2026-10-02", "2026-10-03", "2026-10-04"]);
   });
 });
+
+describe("alloggio", () => {
+  it("check-in 30/09 alle 15:00 con limite 23:30 e navigazione all'indirizzo", () => {
+    const e = eventsOfDay(data, "2026-09-30").find((x) => x.title === "Check-in Redroom-house")!;
+    expect(e).toMatchObject({ time: "15:00", deadline: "23:30" });
+    expect(resolveTarget(e, data)?.address).toBe("Via Michelangelo, 07041 Alghero");
+  });
+  it("check-out 07/10 entro le 10:00", () => {
+    expect(eventsOfDay(data, "2026-10-07")[0]).toMatchObject({ title: "Check-out Redroom-house", deadline: "10:00" });
+  });
+});

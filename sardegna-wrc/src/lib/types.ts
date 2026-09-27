@@ -133,7 +133,8 @@ export type PlaceCategory =
   | "supermercato"
   | "distributore"
   | "attrazione"
-  | "visitare";
+  | "visitare"
+  | "alloggio";
 
 export interface Place {
   id: string;

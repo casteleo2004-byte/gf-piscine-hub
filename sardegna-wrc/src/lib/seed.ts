@@ -14,7 +14,7 @@ import type {
 // orari WRC e coordinate sono ESEMPI da sostituire con il programma
 // ufficiale direttamente dall'app (icona matita).
 
-export const DATA_VERSION = 3;
+export const DATA_VERSION = 4;
 
 /**
  * Giorni i cui dati iniziali sono cambiati in una versione: chi ha dati salvati
@@ -23,6 +23,7 @@ export const DATA_VERSION = 3;
 export const SEED_UPDATES: Record<number, string[]> = {
   2: ["2026-09-29", "2026-09-30", "2026-10-07"], // biglietti Moby reali
   3: ["2026-10-01", "2026-10-02", "2026-10-03", "2026-10-04"], // Pass Gold RIS Experience 1–4/10
+  4: ["2026-09-30", "2026-10-02", "2026-10-03", "2026-10-07"], // alloggio Redroom-house
 };
 
 const ALGHERO: GeoPoint = { lat: 40.558, lng: 8.319 };
@@ -227,7 +228,18 @@ function place(p: Omit<Place, "photoIds" | "visited">): Place {
   return { photoIds: [], visited: false, ...p };
 }
 
+// Alloggio (dalla prenotazione): 30/09–07/10, check-in 15:00–23:30, check-out 08:00–10:00.
+const ALLOGGIO = "pl-alloggio";
+
 const places: Place[] = [
+  place({
+    id: ALLOGGIO,
+    name: "Redroom-house",
+    category: "alloggio",
+    address: "Via Michelangelo, 07041 Alghero",
+    hours: "Check-in 15:00–23:30 · Check-out 08:00–10:00",
+    notes: "Soggiorno dal 30/09 al 07/10. Comunicare all'host l'orario di arrivo dall'app di prenotazione.",
+  }),
   place({
     id: "pl-servicepark",
     name: "Service Park Alghero",
@@ -308,7 +320,11 @@ function buildEvents(): TripEvent[] {
       notes: "Orario indicativo: circa 07:00 secondo i siti di viaggio. Non è scritto sul biglietto: da verificare.",
     }),
     ev("2026-09-30", "07:30", "Trasferimento Olbia → Alghero", "auto", { point: ALGHERO }),
-    ev("2026-09-30", "10:00", "Check-in alloggio / deposito bagagli", "altro", { notes: "Orario da confermare con l'alloggio." }),
+    ev("2026-09-30", "15:00", "Check-in Redroom-house", "altro", {
+      placeId: ALLOGGIO,
+      deadline: "23:30",
+      notes: "Check-in dalle 15:00 alle 23:30. Fino ad allora i bagagli restano in auto.",
+    }),
     ev("2026-09-30", "11:00", "Centro storico e Bastioni", "visita", { placeId: "pl-centro" }),
     ev("2026-09-30", "13:00", "Pranzo", "pasto"),
     ev("2026-09-30", "17:30", "Capo Caccia al tramonto", "panorama", { placeId: "pl-capocaccia", driveMinutes: 35 }),
@@ -332,13 +348,13 @@ function buildEvents(): TripEvent[] {
     // 02/10 — WRC giorno 1
     ...rallyDay("2026-10-02", ps3, ps4, "05:45"),
     ev("2026-10-02", "12:30", "Pranzo", "pasto"),
-    ev("2026-10-02", "18:30", "Rientro ad Alghero", "auto", { point: ALGHERO }),
+    ev("2026-10-02", "18:30", "Rientro all'alloggio", "auto", { placeId: ALLOGGIO }),
     ev("2026-10-02", "20:30", "Cena", "pasto", { placeId: "pl-cena" }),
 
     // 03/10 — WRC giorno 2
     ...rallyDay("2026-10-03", ps10, ps11, "04:45"),
     ev("2026-10-03", "12:30", "Pranzo", "pasto"),
-    ev("2026-10-03", "18:30", "Rientro ad Alghero", "auto", { point: ALGHERO }),
+    ev("2026-10-03", "18:30", "Rientro all'alloggio", "auto", { placeId: ALLOGGIO }),
     ev("2026-10-03", "20:30", "Cena", "pasto", { placeId: "pl-cena" }),
 
     // 04/10 — WRC giorno 3
@@ -359,7 +375,11 @@ function buildEvents(): TripEvent[] {
     ev("2026-10-06", "20:30", "Cena", "pasto", { placeId: "pl-cena" }),
 
     // 07/10 — rientro (Moby, dal biglietto)
-    ev("2026-10-07", "09:00", "Check-out e carico auto", "altro", { notes: "Orario di check-out da confermare con l'alloggio." }),
+    ev("2026-10-07", "09:00", "Check-out Redroom-house", "altro", {
+      placeId: ALLOGGIO,
+      deadline: "10:00",
+      notes: "Check-out dalle 08:00 alle 10:00. Poi giornata libera fino alla partenza per Olbia.",
+    }),
     ev("2026-10-07", "18:00", "Partenza da Alghero verso Olbia", "partenza", {
       address: OLBIA_PORTO,
       notes: "Orario suggerito: controllare il tempo su Maps e tenere margine per il check-in.",
