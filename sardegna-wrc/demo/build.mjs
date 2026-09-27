@@ -28,10 +28,20 @@ const css = fs
   .map((f) => fs.readFileSync(path.join(cssDir, f), "utf8"))
   .join("\n");
 
+// Immagini incorporate come data URI: funzionano in qualsiasi visualizzatore, senza file esterni.
+const assets = Object.fromEntries(
+  fs
+    .readdirSync("public/stages")
+    .filter((f) => f.endsWith(".jpg"))
+    .map((f) => [`stages/${f}`, `data:image/jpeg;base64,${fs.readFileSync(path.join("public/stages", f)).toString("base64")}`]),
+);
+const assetScript = `<script>window.__WRC_ASSETS__=${JSON.stringify(assets)}</script>`;
+
 const html = `<title>Sardegna WRC Trip</title>
 <style>${css}
 html,body{background:var(--bg);color:var(--text)}</style>
 <div id="root"></div>
+${assetScript}
 <script>${js}</script>
 `;
 fs.mkdirSync("demo/dist", { recursive: true });
