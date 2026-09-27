@@ -109,7 +109,13 @@ function PointView({ point }: { point: SpectatorPoint }) {
   ];
   return (
     <div>
-      {point.experienceArea && <GoldBadge />}
+      {point.experienceArea ? (
+        <GoldBadge />
+      ) : (
+        <span className="mb-1 inline-flex rounded-full border-2 border-dashed border-line px-3 py-1 text-[14px] font-bold text-muted">
+          Area Pass Gold da confermare
+        </span>
+      )}
       <h3 className="text-[28px] font-extrabold leading-tight">{point.name || "Punto spettatore"}</h3>
       {point.wow ? <Wow value={point.wow} large /> : null}
       {point.description && <p className="mt-2 text-[20px] leading-snug">{point.description}</p>}

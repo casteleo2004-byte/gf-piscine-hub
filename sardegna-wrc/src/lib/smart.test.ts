@@ -180,3 +180,14 @@ describe("alloggio", () => {
     expect(eventsOfDay(data, "2026-10-07")[0]).toMatchObject({ title: "Check-out Redroom-house", deadline: "10:00" });
   });
 });
+
+describe("aree Pass Gold", () => {
+  it("un'area Gold confermata diventa il punto principale anche se meno WOW", () => {
+    const st = data.stages.find((s) => s.id === "ps-filigosu")!;
+    const d2 = {
+      ...data,
+      spectatorPoints: data.spectatorPoints.map((p) => (p.id === "sp-lerno-rocce" ? { ...p, experienceArea: true } : p)),
+    };
+    expect(spectatorPointOf(st, d2)?.id).toBe("sp-lerno-rocce");
+  });
+});

@@ -26,9 +26,11 @@ export function spectatorPointOf(stage: RallyStage | undefined, data: AppData): 
   );
 }
 
-/** Punti spettatore di una prova, i più spettacolari per primi. */
+/** Punti spettatore di una prova: prima le aree Pass Gold, poi i più spettacolari. */
 export function spectatorPointsOf(stageId: string, data: AppData): SpectatorPoint[] {
-  return data.spectatorPoints.filter((p) => p.stageId === stageId).sort((a, b) => (b.wow ?? 0) - (a.wow ?? 0));
+  return data.spectatorPoints
+    .filter((p) => p.stageId === stageId)
+    .sort((a, b) => Number(!!b.experienceArea) - Number(!!a.experienceArea) || (b.wow ?? 0) - (a.wow ?? 0));
 }
 
 /** Destinazione per il pulsante NAVIGA di un'attività. */

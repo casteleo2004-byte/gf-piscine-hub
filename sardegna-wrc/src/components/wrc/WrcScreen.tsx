@@ -7,12 +7,17 @@ import { newId } from "@/lib/id";
 import { useData } from "@/lib/store/hooks";
 import { formatLongDate, toISODate } from "@/lib/time";
 import type { RallyStage } from "@/lib/types";
-import { Button } from "../ui/Button";
+import { Button, buttonClass } from "../ui/Button";
 import { OnlineBadge } from "../ui/OnlineBadge";
 import { PageHeader } from "../ui/PageHeader";
 import { SpectatorSheet } from "./SpectatorSheet";
 import { StageCard } from "./StageCard";
 import { StageEditor } from "./StageEditor";
+
+const OFFICIAL_GUIDES = [
+  { label: "Guida RIS Experience", href: "https://rallyitaliasardegna.com/ris-experience-2/" },
+  { label: "Guida spettatori", href: "https://rallyitaliasardegna.com/guide-to-ss-spectators/" },
+];
 
 export function WrcScreen() {
   const data = useData();
@@ -51,6 +56,15 @@ export function WrcScreen() {
         subtitle={`${upcoming.length} prove in programma`}
         right={<OnlineBadge />}
       />
+
+      {/* Fonti ufficiali: le aree Pass Gold e le zone pubblico 2026 si prendono da qui. */}
+      <div className="mb-6 grid grid-cols-2 gap-3">
+        {OFFICIAL_GUIDES.map((g) => (
+          <a key={g.href} href={g.href} target="_blank" rel="noopener noreferrer" className={buttonClass("secondary", "md", "text-center")}>
+            {g.label}
+          </a>
+        ))}
+      </div>
 
       {[...byDate.entries()].map(([date, list]) => (
         <section key={date} className="mb-6">

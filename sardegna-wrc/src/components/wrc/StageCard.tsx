@@ -94,6 +94,11 @@ export function StageCard({
             <ListChecks size={22} /> Checklist
           </Link>
         </div>
+        {!sp?.experienceArea && (
+          <p className="mt-3 rounded-xl border-2 border-dashed border-line px-3 py-2 text-[15px] font-bold text-muted">
+            Area Pass Gold: da inserire dalla guida RIS Experience
+          </p>
+        )}
         {sp && (
           <p className="mt-2 text-[16px] font-semibold text-muted">
             👁 {sp.name}
