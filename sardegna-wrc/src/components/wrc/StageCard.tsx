@@ -94,7 +94,12 @@ export function StageCard({
             <ListChecks size={22} /> Checklist
           </Link>
         </div>
-        {sp && <p className="mt-2 text-[16px] font-semibold text-muted">👁 {sp.name}</p>}
+        {sp && (
+          <p className="mt-2 text-[16px] font-semibold text-muted">
+            👁 {sp.name}
+            {sp.experienceArea && <span className="ml-2 font-extrabold text-hi">· Area Pass Gold</span>}
+          </p>
+        )}
       </div>
 
       <button

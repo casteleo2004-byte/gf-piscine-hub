@@ -45,7 +45,7 @@ describe("partenza", () => {
   });
 
   it("partenza consigliata calcolata all'indietro", () => {
-    const s = { ...data.stages[1], departAt: undefined }; // chiusura 09:10, piedi 15, auto 105, margine 15
+    const s = { ...data.stages.find((x) => x.id === "ps4")!, departAt: undefined }; // chiusura 09:10, piedi 15, auto 105, margine 15
     expect(stageTiming(s, data).departAt).toBe("06:55");
   });
 });
@@ -97,5 +97,18 @@ describe("traghetto", () => {
   it("ritorno Olbia → Livorno alle 22:00 del 07/10", () => {
     const e = eventsOfDay(data, "2026-10-07").find((x) => x.title.startsWith("Partenza Moby"));
     expect(e?.time).toBe("22:00");
+  });
+});
+
+describe("Pass Gold", () => {
+  it("giovedì 1/10 è giornata di rally con Service Park e PS 1 Ittiri", () => {
+    expect(data.days.find((d) => d.date === "2026-10-01")?.kind).toBe("rally");
+    const ev = eventsOfDay(data, "2026-10-01");
+    expect(ev[0]).toMatchObject({ time: "08:30", address: "Lungomare Barcellona, Alghero" });
+    expect(data.stages.find((s) => s.id === "ps1")).toMatchObject({ date: "2026-10-01", firstCar: "16:05" });
+  });
+  it("nota del pass sui quattro giorni di rally", () => {
+    const withPass = data.days.filter((d) => d.notes?.includes("Pass Gold")).map((d) => d.date);
+    expect(withPass).toEqual(["2026-10-01", "2026-10-02", "2026-10-03", "2026-10-04"]);
   });
 });

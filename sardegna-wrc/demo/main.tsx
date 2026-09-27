@@ -25,6 +25,7 @@ class DemoDate extends RealDate {
 globalThis.Date = DemoDate as DateConstructor;
 
 const PRESETS: { id: string; label: string; at: string | null }[] = [
+  { id: "gio-0800", label: "Gio 1 · 08:00 · Service Park (Pass Gold)", at: "2026-10-01T08:00" },
   { id: "ven-0600", label: "Ven 2 · 06:00 · partenza rally", at: "2026-10-02T06:00" },
   { id: "ven-0750", label: "Ven 2 · 07:50 · al parcheggio", at: "2026-10-02T07:50" },
   { id: "ven-1000", label: "Ven 2 · 10:00 · tra due prove", at: "2026-10-02T10:00" },

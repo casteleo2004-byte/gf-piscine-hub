@@ -88,6 +88,10 @@ export function TodayScreen() {
         </IconButton>
       </div>
 
+      {day.notes && (
+        <p className="mb-4 whitespace-pre-line rounded-2xl border-2 border-line px-4 py-3 text-[17px] font-semibold">{day.notes}</p>
+      )}
+
       <NextCard
         data={data}
         event={nextIdx >= 0 ? events[nextIdx] : null}

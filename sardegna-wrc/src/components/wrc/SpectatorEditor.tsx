@@ -4,7 +4,7 @@ import { useDraft } from "@/lib/hooks/useDraft";
 import { actions } from "@/lib/store/actions";
 import type { AppData, SpectatorPoint } from "@/lib/types";
 import { EditorFooter } from "../ui/EditorFooter";
-import { NumberInput, PointInput, RatingInput, TextArea, TextInput } from "../ui/fields";
+import { Chips, NumberInput, PointInput, RatingInput, TextArea, TextInput } from "../ui/fields";
 import { PhotoStrip } from "../ui/Photos";
 import { Sheet } from "../ui/Sheet";
 
@@ -36,6 +36,15 @@ export function SpectatorEditor({ point, data, onClose }: { point: SpectatorPoin
       <div className="space-y-5">
         <TextInput label="Nome" value={d.name} onChange={(v) => set("name", v)} autoFocus={isNew} placeholder="Es. Curva sx dopo dosso" />
         <PointInput label="Posizione" value={d.point} onChange={(v) => set("point", v)} />
+        <Chips
+          label="Area RIS Experience (Pass Gold)"
+          value={d.experienceArea ? "si" : "no"}
+          onChange={(v) => set("experienceArea", v === "si" ? true : undefined)}
+          options={[
+            { value: "si", label: "Sì" },
+            { value: "no", label: "No" },
+          ]}
+        />
         <TextArea
           label="Descrizione"
           value={d.description}

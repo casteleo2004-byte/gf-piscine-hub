@@ -40,6 +40,7 @@ export type EventType =
   | "piedi"
   | "spettatore"
   | "prova"
+  | "rally"
   | "pasto"
   | "visita"
   | "spiaggia"
@@ -116,6 +117,8 @@ export interface SpectatorPoint {
   safety?: number;
   roadDistanceM?: number;
   photoGear?: string;
+  /** Area riservata RIS Experience (accessibile con il Pass Gold). */
+  experienceArea?: boolean;
   photoIds: string[];
 }
 

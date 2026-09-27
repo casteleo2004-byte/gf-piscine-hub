@@ -77,6 +77,14 @@ export function SpectatorSheet({ stage, data, onClose }: { stage: RallyStage; da
   );
 }
 
+export function GoldBadge() {
+  return (
+    <span className="mb-1 inline-flex items-center rounded-full bg-accent px-3 py-1 text-[14px] font-extrabold uppercase tracking-wide text-accent-ink">
+      Area RIS Experience · Pass Gold
+    </span>
+  );
+}
+
 function PointView({ point }: { point: SpectatorPoint }) {
   const rows: [string, string | undefined][] = [
     ["Posizione consigliata", point.position],
@@ -89,6 +97,7 @@ function PointView({ point }: { point: SpectatorPoint }) {
   ];
   return (
     <div>
+      {point.experienceArea && <GoldBadge />}
       <h3 className="text-[28px] font-extrabold leading-tight">{point.name || "Punto spettatore"}</h3>
       {point.description && <p className="mt-2 text-[20px] leading-snug">{point.description}</p>}
 

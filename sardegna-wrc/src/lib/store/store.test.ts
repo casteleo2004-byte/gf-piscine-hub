@@ -6,8 +6,10 @@ describe("migrazione dati salvati", () => {
 
   it("aggiorna i giorni del traghetto e conserva il resto", async () => {
     const old = { ...createSeed(), version: 1 };
+    old.places = old.places.filter((p) => p.id !== "pl-servicepark");
+    old.stages = old.stages.filter((x) => x.id !== "ps1");
     old.events = old.events.map((e) =>
-      e.date === "2026-09-29" ? { ...e, time: "20:00", title: "vecchio" } : e.date === "2026-10-02" ? { ...e, done: true } : e,
+      e.date === "2026-09-29" ? { ...e, time: "20:00", title: "vecchio" } : e.date === "2026-10-05" ? { ...e, done: true } : e,
     );
     const stored: Record<string, string> = { "wrc-hub:data": JSON.stringify(old) };
     vi.stubGlobal("window", { addEventListener: () => {} });
@@ -18,10 +20,12 @@ describe("migrazione dati salvati", () => {
     });
     const { getState } = await import("./store");
     const s = getState();
-    expect(s.version).toBe(2);
+    expect(s.version).toBe(3);
     expect(s.events.some((e) => e.title === "vecchio")).toBe(false);
     expect(s.events.find((e) => e.title === "Partenza Moby Livorno → Olbia")?.time).toBe("22:00");
-    expect(s.events.filter((e) => e.date === "2026-10-02").every((e) => e.done)).toBe(true);
+    expect(s.events.filter((e) => e.date === "2026-10-05").every((e) => e.done)).toBe(true);
+    expect(s.places.some((p) => p.id === "pl-servicepark")).toBe(true);
+    expect(s.stages.some((x) => x.id === "ps1")).toBe(true);
     vi.unstubAllGlobals();
   });
 });

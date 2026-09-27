@@ -25,6 +25,13 @@ function migrate(data: AppData): AppData {
       ...data,
       events: [...data.events.filter((e) => !stale.has(e.date)), ...seed.events.filter((e) => stale.has(e.date))],
       days: data.days.map((d) => (stale.has(d.date) ? (seed.days.find((x) => x.date === d.date) ?? d) : d)),
+      // Nuovi luoghi e prove dei dati iniziali (per id), senza toccare quelli esistenti.
+      places: [...data.places, ...seed.places.filter((p) => !data.places.some((x) => x.id === p.id))],
+      stages: [...data.stages, ...seed.stages.filter((p) => !data.stages.some((x) => x.id === p.id))],
+      gearPresets: data.gearPresets.map((g) => ({
+        ...g,
+        items: g.items.map((i) => (i.name === "Pass WRC" ? { ...i, name: "Pass Gold RIS Experience (2)" } : i)),
+      })),
     };
   }
   // Completa eventuali campi aggiunti in versioni successive.

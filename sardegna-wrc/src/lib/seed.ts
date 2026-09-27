@@ -14,7 +14,7 @@ import type {
 // orari WRC e coordinate sono ESEMPI da sostituire con il programma
 // ufficiale direttamente dall'app (icona matita).
 
-export const DATA_VERSION = 2;
+export const DATA_VERSION = 3;
 
 /**
  * Giorni i cui dati iniziali sono cambiati in una versione: chi ha dati salvati
@@ -22,6 +22,7 @@ export const DATA_VERSION = 2;
  */
 export const SEED_UPDATES: Record<number, string[]> = {
   2: ["2026-09-29", "2026-09-30", "2026-10-07"], // biglietti Moby reali
+  3: ["2026-10-01", "2026-10-02", "2026-10-03", "2026-10-04"], // Pass Gold RIS Experience 1–4/10
 };
 
 const ALGHERO: GeoPoint = { lat: 40.558, lng: 8.319 };
@@ -37,11 +38,29 @@ const CHECKIN_VERIFICA =
 
 const DA_VERIFICARE = "ESEMPIO: verificare con il programma ufficiale WRC.";
 
+// Pass Gold RIS Experience (dai biglietti): uno per persona per ciascun giorno 1–4 ottobre,
+// sede indicata "Service Park Alghero, Lungomare Barcellona", orario sul biglietto 08:30.
+// Contenuto del pass dal sito ufficiale: accesso alle Aree Experience lungo il percorso
+// (punti spettacolari e tecnici delle prove speciali) + Welcome Box con T-shirt ufficiale.
+const SERVICE_PARK = "Lungomare Barcellona, Alghero";
+const PASS_GOLD_NOTE =
+  "Pass Gold RIS Experience valido oggi (uno a testa, portarlo con sé): accesso alle Aree Experience delle prove speciali.";
+
 function stage(s: Omit<RallyStage, "seen" | "passes"> & Partial<Pick<RallyStage, "passes">>): RallyStage {
   return { passes: [], seen: false, ...s };
 }
 
 const stages: RallyStage[] = [
+  stage({
+    id: "ps1",
+    number: 1,
+    name: "Ittiri Arena Show",
+    date: "2026-10-01",
+    firstCar: "16:05",
+    parkingName: "Ittiri Arena",
+    notes:
+      "2,08 km. Orario e nome dal percorso annunciato dagli organizzatori (ACI Sport, giugno 2026): verificare con il timetable definitivo. Parcheggio da definire.",
+  }),
   stage({
     id: "ps3",
     number: 3,
@@ -209,6 +228,13 @@ function place(p: Omit<Place, "photoIds" | "visited">): Place {
 }
 
 const places: Place[] = [
+  place({
+    id: "pl-servicepark",
+    name: "Service Park Alghero",
+    category: "rally",
+    address: SERVICE_PARK,
+    notes: "Parco assistenza WRC, sede indicata sul Pass Gold.",
+  }),
   place({ id: "pl-centro", name: "Centro storico e Bastioni", category: "visitare", point: { lat: 40.559, lng: 8.313 }, address: "Bastioni Marco Polo, Alghero" }),
   place({ id: "pl-capocaccia", name: "Belvedere Capo Caccia", category: "panorama", point: { lat: 40.569, lng: 8.163 }, notes: "Tramonto spettacolare." }),
   place({ id: "pl-nettuno", name: "Grotta di Nettuno", category: "attrazione", point: { lat: 40.5625, lng: 8.1625 }, notes: "Escala del Cabirol: 654 gradini. Verificare orari e mare." }),
@@ -262,7 +288,8 @@ const timePlus = (t: string, min: number) => timeMinus(t, -min);
 
 function buildEvents(): TripEvent[] {
   seq = 0;
-  const [ps3, ps4, ps10, ps11, ps16, ps18] = stages;
+  const byId = (id: string) => stages.find((s) => s.id === id)!;
+  const [ps3, ps4, ps10, ps11, ps16, ps18] = ["ps3", "ps4", "ps10", "ps11", "ps16", "ps18"].map(byId);
   return [
     // 29/09 — partenza (Moby, dal biglietto)
     ev("2026-09-29", "20:30", "Check-in al porto di Livorno", "traghetto", {
@@ -288,10 +315,18 @@ function buildEvents(): TripEvent[] {
     ev("2026-09-30", "20:30", "Cena", "pasto", { placeId: "pl-cena" }),
 
     // 01/10 — turismo + preparazione rally
-    ev("2026-10-01", "09:00", "Colazione e spesa (acqua, snack per il rally)", "altro"),
-    ev("2026-10-01", "10:30", "Nuraghe di Palmavera", "visita", { placeId: "pl-palmavera" }),
-    ev("2026-10-01", "12:00", "Spiaggia di Mugoni", "spiaggia", { placeId: "pl-mugoni" }),
-    ev("2026-10-01", "17:00", "Preparare zaino e batterie per il rally", "altro", { notes: "Caricare Nikon, GoPro, Osmo Pocket, powerbank. Svuotare schede." }),
+    ev("2026-10-01", "08:30", "Service Park Alghero · primo giorno Pass Gold", "rally", {
+      address: SERVICE_PARK,
+      notes:
+        "Orario e sede sono quelli stampati sul Pass Gold. Dove si ritira la Welcome Box (T-shirt ufficiale): da verificare con l'organizzazione.",
+    }),
+    ev("2026-10-01", "09:01", "Shakedown", "rally", {
+      notes: "Orario annunciato dagli organizzatori; luogo ancora da comunicare.",
+    }),
+    ev("2026-10-01", "16:05", "PS 1 Ittiri Arena Show · prima vettura", "prova", { stageId: "ps1" }),
+    ev("2026-10-01", "18:30", "Preparare zaino e batterie per domani", "altro", {
+      notes: "Caricare Nikon, GoPro, Osmo Pocket, powerbank. Svuotare schede.",
+    }),
     ev("2026-10-01", "20:30", "Cena", "pasto", { placeId: "pl-cena" }),
 
     // 02/10 — WRC giorno 1
@@ -344,10 +379,10 @@ function buildEvents(): TripEvent[] {
 const days: TripDay[] = [
   { date: "2026-09-29", title: "Traghetto Livorno → Olbia", kind: "viaggio", location: "Livorno", gearPresetId: "serata" },
   { date: "2026-09-30", title: "Sbarco a Olbia e arrivo ad Alghero", kind: "turismo", location: "Olbia → Alghero", gearPresetId: "turismo" },
-  { date: "2026-10-01", title: "Mare e preparazione rally", kind: "turismo", location: "Alghero", gearPresetId: "turismo" },
-  { date: "2026-10-02", title: "WRC · Giorno 1", kind: "rally", location: "Alghero", gearPresetId: "rally" },
-  { date: "2026-10-03", title: "WRC · Giorno 2", kind: "rally", location: "Alghero", gearPresetId: "rally" },
-  { date: "2026-10-04", title: "WRC · Giorno 3 · Power Stage", kind: "rally", location: "Alghero", gearPresetId: "rally" },
+  { date: "2026-10-01", title: "WRC · Giovedì · Shakedown e Ittiri Arena", kind: "rally", location: "Alghero", gearPresetId: "rally", notes: PASS_GOLD_NOTE },
+  { date: "2026-10-02", title: "WRC · Venerdì", kind: "rally", location: "Alghero", gearPresetId: "rally", notes: PASS_GOLD_NOTE },
+  { date: "2026-10-03", title: "WRC · Sabato", kind: "rally", location: "Alghero", gearPresetId: "rally", notes: PASS_GOLD_NOTE },
+  { date: "2026-10-04", title: "WRC · Domenica · Power Stage", kind: "rally", location: "Alghero", gearPresetId: "rally", notes: PASS_GOLD_NOTE },
   { date: "2026-10-05", title: "Stintino e La Pelosa", kind: "turismo", location: "Alghero", gearPresetId: "turismo" },
   { date: "2026-10-06", title: "Bosa e costa ovest", kind: "turismo", location: "Alghero", gearPresetId: "foto" },
   { date: "2026-10-07", title: "Rientro: traghetto Olbia → Livorno", kind: "viaggio", location: "Alghero → Olbia" },
@@ -362,7 +397,7 @@ function preset(id: string, name: string, items: string[]): GearPreset {
 }
 
 const RALLY_BASE = [
-  "Pass WRC",
+  "Pass Gold RIS Experience (2)",
   "iPhone 16 Pro Max",
   "Powerbank + cavo",
   "Nikon D3200 + 18-105",

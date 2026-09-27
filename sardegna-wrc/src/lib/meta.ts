@@ -41,6 +41,7 @@ export const EVENT_TYPES: Record<EventType, { label: string; Icon: LucideIcon; t
   piedi: { label: "A piedi", Icon: Footprints, tone: "rally" },
   spettatore: { label: "Punto spettatore", Icon: Eye, tone: "rally" },
   prova: { label: "Prova speciale", Icon: Flag, tone: "rally" },
+  rally: { label: "Rally", Icon: Flag, tone: "rally" },
   pasto: { label: "Mangiare", Icon: Utensils, tone: "warn" },
   visita: { label: "Visita", Icon: Landmark, tone: "info" },
   spiaggia: { label: "Spiaggia", Icon: Umbrella, tone: "info" },
