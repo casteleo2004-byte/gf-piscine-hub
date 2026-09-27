@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Backpack, BookOpen, Flag, Map, Sun } from "lucide-react";
 
@@ -24,9 +23,10 @@ export function BottomNav() {
           const active = href === "/" ? path === "/" : path.startsWith(href.replace(/\/$/, ""));
           return (
             <li key={href}>
-              <Link
+              {/* <a> nativo: navigazione completa servita dal service worker.
+                  Il router client di Next non rispondeva ai tocchi nella PWA su iPhone. */}
+              <a
                 href={href}
-                prefetch
                 aria-current={active ? "page" : undefined}
                 className={`flex h-[68px] flex-col items-center justify-center gap-1 text-[13px] font-semibold ${
                   active ? "text-hi" : "text-muted"
@@ -34,7 +34,7 @@ export function BottomNav() {
               >
                 <Icon size={28} strokeWidth={active ? 2.6 : 2} />
                 {label}
-              </Link>
+              </a>
             </li>
           );
         })}
