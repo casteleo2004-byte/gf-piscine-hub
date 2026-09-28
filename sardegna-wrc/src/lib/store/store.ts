@@ -42,6 +42,11 @@ function migrate(data: AppData): AppData {
       ],
     };
   }
+  if ((data.version ?? 1) < 13) {
+    // Luoghi di Livorno riscritti (cena con indirizzo vicino al porto): si prendono dal seed.
+    const fresh = new Map(seed.places.filter((p) => p.id.startsWith("pl-livorno-")).map((p) => [p.id, p]));
+    data = { ...data, places: data.places.map((p) => fresh.get(p.id) ?? p) };
+  }
   if (stale.size) {
     data = {
       ...data,
