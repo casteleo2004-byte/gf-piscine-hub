@@ -14,7 +14,7 @@ import type {
 // Dati iniziali del viaggio, solo da fonti verificabili: biglietti, prenotazioni,
 // percorso ufficiale del rally. Ciò che non è noto resta vuoto o "da verificare".
 
-export const DATA_VERSION = 15;
+export const DATA_VERSION = 16;
 
 /**
  * Giorni i cui dati iniziali sono cambiati in una versione: chi ha dati salvati
@@ -35,6 +35,7 @@ export const SEED_UPDATES: Record<number, string[]> = {
   13: ["2026-09-29"], // Livorno a rischio zero: in fila all'imbarco alle 19:30
   14: ["2026-09-30"], // spesa per il rally (allergie: niente pesce né frutta secca)
   15: ["2026-09-29", "2026-10-07"], // limite check-in Moby alle 20:00 (dato dal proprietario)
+  16: ["2026-09-29"], // partenza da casa alle 11, pranzo al Burger King di Manerba, arrivo ~16:15
 };
 
 /** Prove e punti spettatore d'esempio delle prime versioni, rimossi dalla v5. */
@@ -579,23 +580,28 @@ function ev(
 function buildEvents(): TripEvent[] {
   seq = 0;
   return [
-    // 29/09 — partenza (Moby, dal biglietto)
-    // Rischio zero: prima la meta più lontana, poi ci si avvicina al porto; dalle 18:00
-    // si resta a pochi minuti dall'imbarco e in fila alle 19:30 (30 min prima del limite delle 20:00).
-    ev("2026-09-29", "15:00", "Arrivo a Livorno", "auto", {
-      notes: "L'auto è carica di bagagli: quando la lasciate, niente in vista.\nRegola di oggi: prima la meta più lontana, poi sempre più vicini al porto.",
+    // 29/09 — partenza (Moby, dal biglietto). Orari di viaggio indicati dal proprietario
+    // (partenza 11:00, pranzo veloce al Burger King di Manerba); tempi di guida = stime.
+    // Rischio zero: dalle 18:00 si resta a pochi minuti dall'imbarco e in fila alle 19:30
+    // (30 min prima del limite delle 20:00).
+    ev("2026-09-29", "11:00", "Partenza da casa", "partenza", {
+      address: "Burger King, Manerba del Garda",
+      notes: "Prima tappa: pranzo al Burger King di Manerba (circa 40 minuti sulla Gardesana, stima).",
     }),
-    ev("2026-09-29", "15:15", "Santuario di Montenero", "panorama", {
-      placeId: "pl-livorno-montenero",
-      choices: ["pl-livorno-montenero", "pl-livorno-acquario", "pl-livorno-venezia"],
-      deadline: "16:30",
-      notes: "Montenero è la meta più lontana dal porto: se la volete vedere, questo è il momento. Ripartite entro le 16:30.",
+    ev("2026-09-29", "11:40", "Pranzo al Burger King · Manerba", "pasto", {
+      address: "Burger King, Manerba del Garda",
+      deadline: "12:15",
+      notes: `Pranzo veloce: ripartite entro le 12:15. Chiedete la tabella degli allergeni: fritti in olio separato dai prodotti di pesce? Evitate dolci e gelati con topping.\n${ALLERGIE}`,
     }),
-    ev("2026-09-29", "16:45", "Terrazza Mascagni", "panorama", {
+    ev("2026-09-29", "12:15", "Partenza per Livorno", "partenza", {
       placeId: "pl-livorno-mascagni",
-      choices: ["pl-livorno-mascagni", "pl-livorno-venezia"],
+      notes: "Circa 4 ore con una pausa (stima senza traffico). Scegliete il percorso con meno code su Maps (via Firenze o via Cisa). L'auto è carica di bagagli: alle soste, niente in vista.",
+    }),
+    ev("2026-09-29", "16:15", "Terrazza Mascagni", "panorama", {
+      placeId: "pl-livorno-mascagni",
+      choices: ["pl-livorno-mascagni", "pl-livorno-venezia", "pl-livorno-acquario"],
       deadline: "17:45",
-      notes: "Ripartite entro le 17:45: dopo c'è il traffico dell'ora di punta.",
+      notes: "Prima tappa a Livorno, se arrivate in tempo. Ripartite entro le 17:45: dopo c'è il traffico dell'ora di punta. Se arrivate dopo le 17:30, saltatela e andate a cena vicino al porto.",
     }),
     ev("2026-09-29", "18:00", "Cena vicino al porto", "pasto", {
       placeId: "pl-livorno-cena",
@@ -738,11 +744,11 @@ function buildEvents(): TripEvent[] {
 const days: TripDay[] = [
   {
     date: "2026-09-29",
-    title: "Pomeriggio a Livorno e traghetto per Olbia",
+    title: "Viaggio a Livorno e traghetto per Olbia",
     kind: "viaggio",
     location: "Livorno",
     gearPresetId: "serata",
-    notes: "Piano B: se c'è traffico o siete in ritardo, saltate la tappa successiva e andate dritti al porto. Il traghetto non aspetta, una visita sì.",
+    notes: "Piano B: se alle 17:30 non siete ancora a Livorno, niente visite: cena vicino al porto e in fila alle 19:30. Il traghetto non aspetta, una visita sì.",
   },
   { date: "2026-09-30", title: "Sbarco a Olbia e arrivo ad Alghero", kind: "turismo", location: "Olbia → Alghero", gearPresetId: "turismo" },
   { date: "2026-10-01", title: "Rally · Shakedown e Ittiri Arena", kind: "rally", location: "Alghero", gearPresetId: "rally", notes: PASS, planStageIds: ["sd", "ps1"] },

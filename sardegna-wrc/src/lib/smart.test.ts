@@ -259,7 +259,8 @@ describe("prova sul mare", () => {
 describe("martedì a Livorno", () => {
   it("pomeriggio in città e poi il porto, senza coordinate inventate", () => {
     const ev = eventsOfDay(data, "2026-09-29");
-    expect(ev.map((e) => e.time)).toEqual(["15:00", "15:15", "16:45", "18:00", "19:00", "19:30", "22:00"]);
+    expect(ev.map((e) => e.time)).toEqual(["11:00", "11:40", "12:15", "16:15", "18:00", "19:00", "19:30", "22:00"]);
+    expect(ev[nextEventIndex(ev, at("12:05"), true)].title).toBe("Pranzo al Burger King · Manerba");
     expect(data.places.filter((p) => p.id.startsWith("pl-livorno")).every((p) => !p.point)).toBe(true);
     expect(ev[nextEventIndex(ev, at("19:05"), true)].title).toBe("Partenza verso il porto");
   });
@@ -289,7 +290,7 @@ describe("allergie (pesce e frutta secca)", () => {
 describe("mete a scelta", () => {
   it("le visite di martedì e mercoledì offrono più opzioni reali", () => {
     const withChoices = data.events.filter((e) => (e.choices?.length ?? 0) > 1);
-    expect(withChoices.length).toBeGreaterThanOrEqual(4);
+    expect(withChoices.length).toBeGreaterThanOrEqual(3);
     for (const e of withChoices) {
       expect(e.choices).toContain(e.placeId);
       for (const id of e.choices!) expect(data.places.some((p) => p.id === id)).toBe(true);
