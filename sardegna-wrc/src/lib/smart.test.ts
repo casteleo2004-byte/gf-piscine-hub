@@ -259,9 +259,18 @@ describe("prova sul mare", () => {
 describe("martedì a Livorno", () => {
   it("pomeriggio in città e poi il porto, senza coordinate inventate", () => {
     const ev = eventsOfDay(data, "2026-09-29");
-    expect(ev.map((e) => e.time)).toEqual(["15:00", "15:15", "17:00", "18:15", "19:45", "20:30", "22:00"]);
+    expect(ev.map((e) => e.time)).toEqual(["15:00", "15:15", "16:45", "18:00", "19:00", "19:30", "22:00"]);
     expect(data.places.filter((p) => p.id.startsWith("pl-livorno")).every((p) => !p.point)).toBe(true);
-    expect(ev[nextEventIndex(ev, at("19:40"), true)].title).toBe("Partenza verso il porto");
+    expect(ev[nextEventIndex(ev, at("19:05"), true)].title).toBe("Partenza verso il porto");
+  });
+  it("rischio zero: ogni tappa finisce prima della successiva, in fila 60 min prima del limite", () => {
+    const ev = eventsOfDay(data, "2026-09-29");
+    ev.slice(0, -1).forEach((e, i) => {
+      if (e.deadline && ev[i + 1].type !== "traghetto") expect(e.deadline <= ev[i + 1].time).toBe(true);
+    });
+    const fila = ev.find((e) => e.title === "In fila per l'imbarco");
+    expect(fila).toMatchObject({ time: "19:30", deadline: "20:30" });
+    expect(data.days.find((d) => d.date === "2026-09-29")?.notes).toContain("Piano B");
   });
 });
 
