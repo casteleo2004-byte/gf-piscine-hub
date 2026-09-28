@@ -263,13 +263,15 @@ describe("martedì a Livorno", () => {
     expect(data.places.filter((p) => p.id.startsWith("pl-livorno")).every((p) => !p.point)).toBe(true);
     expect(ev[nextEventIndex(ev, at("19:05"), true)].title).toBe("Partenza verso il porto");
   });
-  it("rischio zero: ogni tappa finisce prima della successiva, in fila 60 min prima del limite", () => {
+  it("rischio zero: ogni tappa finisce prima della successiva, in fila 30 min prima del limite delle 20:00", () => {
     const ev = eventsOfDay(data, "2026-09-29");
     ev.slice(0, -1).forEach((e, i) => {
       if (e.deadline && ev[i + 1].type !== "traghetto") expect(e.deadline <= ev[i + 1].time).toBe(true);
     });
     const fila = ev.find((e) => e.title === "In fila per l'imbarco");
-    expect(fila).toMatchObject({ time: "19:30", deadline: "20:30" });
+    expect(fila).toMatchObject({ time: "19:30", deadline: "20:00" });
+    const olbia = eventsOfDay(data, "2026-10-07").find((e) => e.type === "traghetto" && e.deadline);
+    expect(olbia).toMatchObject({ time: "19:00", deadline: "20:00" });
     expect(data.days.find((d) => d.date === "2026-09-29")?.notes).toContain("Piano B");
   });
 });

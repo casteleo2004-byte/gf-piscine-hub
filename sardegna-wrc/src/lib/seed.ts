@@ -14,7 +14,7 @@ import type {
 // Dati iniziali del viaggio, solo da fonti verificabili: biglietti, prenotazioni,
 // percorso ufficiale del rally. Ciò che non è noto resta vuoto o "da verificare".
 
-export const DATA_VERSION = 14;
+export const DATA_VERSION = 15;
 
 /**
  * Giorni i cui dati iniziali sono cambiati in una versione: chi ha dati salvati
@@ -34,6 +34,7 @@ export const SEED_UPDATES: Record<number, string[]> = {
   12: ["2026-09-29", "2026-09-30"], // mete a scelta
   13: ["2026-09-29"], // Livorno a rischio zero: in fila all'imbarco alle 19:30
   14: ["2026-09-30"], // spesa per il rally (allergie: niente pesce né frutta secca)
+  15: ["2026-09-29", "2026-10-07"], // limite check-in Moby alle 20:00 (dato dal proprietario)
 };
 
 /** Prove e punti spettatore d'esempio delle prime versioni, rimossi dalla v5. */
@@ -54,8 +55,10 @@ const ALGHERO: GeoPoint = { lat: 40.558, lng: 8.319 };
 const LIVORNO_PORTO = "Stazione Marittima, Livorno";
 const OLBIA_PORTO = "Porto di Olbia";
 const DOCUMENTI = "All'imbarco serve la carta d'identità in originale di entrambi (indicato sul biglietto).";
-const CHECKIN_VERIFICA =
-  "Con l'auto: presentarsi circa 90 minuti prima della partenza (indicazione trovata su siti di viaggio, non sul biglietto: verificare sull'app o sul sito Moby).";
+// Limite check-in all'andata: ore 20:00, 2 ore prima della partenza (indicato dal proprietario).
+const CHECKIN_LIMITE = "Limite per il check-in: ore 20:00, 2 ore prima della partenza.";
+const CHECKIN_RITORNO =
+  "All'andata il limite era alle 20:00 (2 ore prima): qui si assume lo stesso, da verificare sull'app o sul sito Moby.";
 
 // Pass Gold RIS Experience (dai biglietti): uno per persona per ciascun giorno 1–4 ottobre,
 // sede indicata "Service Park Alghero, Lungomare Barcellona", orario sul biglietto 08:30.
@@ -578,7 +581,7 @@ function buildEvents(): TripEvent[] {
   return [
     // 29/09 — partenza (Moby, dal biglietto)
     // Rischio zero: prima la meta più lontana, poi ci si avvicina al porto; dalle 18:00
-    // si resta a pochi minuti dall'imbarco e in fila alle 19:30 (60 min prima del limite).
+    // si resta a pochi minuti dall'imbarco e in fila alle 19:30 (30 min prima del limite delle 20:00).
     ev("2026-09-29", "15:00", "Arrivo a Livorno", "auto", {
       notes: "L'auto è carica di bagagli: quando la lasciate, niente in vista.\nRegola di oggi: prima la meta più lontana, poi sempre più vicini al porto.",
     }),
@@ -606,8 +609,8 @@ function buildEvents(): TripEvent[] {
     }),
     ev("2026-09-29", "19:30", "In fila per l'imbarco", "traghetto", {
       address: LIVORNO_PORTO,
-      deadline: "20:30",
-      notes: `Arrivando alle 19:30 avete 60 minuti di margine sul limite delle 20:30.\n${CHECKIN_VERIFICA}\n${DOCUMENTI}\nCodice prenotazione: aggiungilo qui con la matita.`,
+      deadline: "20:00",
+      notes: `Arrivando alle 19:30 avete 30 minuti di margine sul limite delle 20:00.\n${CHECKIN_LIMITE}\n${DOCUMENTI}\nCodice prenotazione: aggiungilo qui con la matita.`,
     }),
     ev("2026-09-29", "22:00", "Partenza Moby Livorno → Olbia", "traghetto", {
       address: LIVORNO_PORTO,
@@ -716,14 +719,14 @@ function buildEvents(): TripEvent[] {
       deadline: "10:00",
       notes: "Check-out dalle 08:00 alle 10:00. Poi giornata libera fino alla partenza per Olbia.",
     }),
-    ev("2026-10-07", "18:00", "Partenza da Alghero verso Olbia", "partenza", {
+    ev("2026-10-07", "17:00", "Partenza da Alghero verso Olbia", "partenza", {
       address: OLBIA_PORTO,
-      notes: "Orario suggerito: controllare il tempo su Maps e tenere margine per il check-in.",
+      notes: "Orario suggerito per essere al porto verso le 19:00, con un'ora di margine sul check-in: controllare il tempo su Maps.",
     }),
-    ev("2026-10-07", "20:30", "Check-in al porto di Olbia", "traghetto", {
+    ev("2026-10-07", "19:00", "In fila per l'imbarco a Olbia", "traghetto", {
       address: OLBIA_PORTO,
-      deadline: "20:30",
-      notes: `${CHECKIN_VERIFICA}\n${DOCUMENTI}`,
+      deadline: "20:00",
+      notes: `${CHECKIN_RITORNO}\n${DOCUMENTI}`,
     }),
     ev("2026-10-07", "22:00", "Partenza Moby Olbia → Livorno", "traghetto", {
       address: OLBIA_PORTO,
