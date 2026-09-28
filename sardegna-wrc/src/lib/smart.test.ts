@@ -274,6 +274,16 @@ describe("martedì a Livorno", () => {
   });
 });
 
+describe("allergie (pesce e frutta secca)", () => {
+  it("nessun suggerimento con pesce o frutta secca, spesa del 30/09 con lista", () => {
+    const text = JSON.stringify([data.places, data.events, data.gearPresets]).toLowerCase();
+    for (const w of ["cacciucco", "zuppa di pesce", "frutta secca,", "noci", "mandorle"]) expect(text).not.toContain(w);
+    const spesa = eventsOfDay(data, "2026-09-30").find((e) => e.title === "Spesa per il rally");
+    expect(spesa?.notes).toContain("niente pesce né frutta secca");
+    expect(data.gearPresets.find((g) => g.id === "spesa")?.items.length).toBeGreaterThan(10);
+  });
+});
+
 describe("mete a scelta", () => {
   it("le visite di martedì e mercoledì offrono più opzioni reali", () => {
     const withChoices = data.events.filter((e) => (e.choices?.length ?? 0) > 1);

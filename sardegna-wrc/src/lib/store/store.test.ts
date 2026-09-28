@@ -7,6 +7,7 @@ describe("migrazione dati salvati", () => {
   it("aggiorna i giorni del traghetto e conserva il resto", async () => {
     const old = { ...createSeed(), version: 1 };
     old.places = old.places.filter((p) => p.id !== "pl-servicepark");
+    old.gearPresets = old.gearPresets.filter((g) => g.id !== "spesa");
     old.stages = [
       ...old.stages.filter((x) => x.id !== "ps1"),
       { id: "ps3", number: 3, name: "Esempio", date: "2026-10-02", firstCar: "09:12", passes: [], seen: false },
@@ -24,7 +25,8 @@ describe("migrazione dati salvati", () => {
     });
     const { getState } = await import("./store");
     const s = getState();
-    expect(s.version).toBe(13);
+    expect(s.version).toBe(14);
+    expect(s.gearPresets.some((g) => g.id === "spesa")).toBe(true);
     expect(s.events.some((e) => e.title === "vecchio")).toBe(false);
     expect(s.events.find((e) => e.title === "Partenza Moby Livorno → Olbia")?.time).toBe("22:00");
     expect(s.events.filter((e) => e.date === "2026-10-05").every((e) => e.done)).toBe(true);

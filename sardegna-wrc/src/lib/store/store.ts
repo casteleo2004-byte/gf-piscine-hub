@@ -42,8 +42,8 @@ function migrate(data: AppData): AppData {
       ],
     };
   }
-  if ((data.version ?? 1) < 13) {
-    // Luoghi di Livorno riscritti (cena con indirizzo vicino al porto): si prendono dal seed.
+  if ((data.version ?? 1) < 14) {
+    // Luoghi di Livorno riscritti (cena vicino al porto, senza pesce): si prendono dal seed.
     const fresh = new Map(seed.places.filter((p) => p.id.startsWith("pl-livorno-")).map((p) => [p.id, p]));
     data = { ...data, places: data.places.map((p) => fresh.get(p.id) ?? p) };
   }
@@ -59,14 +59,18 @@ function migrate(data: AppData): AppData {
         ...data.spectatorPoints,
         ...seed.spectatorPoints.filter((p) => !data.spectatorPoints.some((x) => x.id === p.id)),
       ],
-      gearPresets: data.gearPresets.map((g) => {
-        const items = g.items.map((i) => (i.name === "Pass WRC" ? { ...i, name: "Pass Gold RIS Experience (2)" } : i));
-        // Oggetti nuovi dei dati iniziali, aggiunti senza toccare quelli esistenti.
-        const extra = (seed.gearPresets.find((x) => x.id === g.id)?.items ?? []).filter(
-          (i) => !items.some((x) => x.name === i.name),
-        );
-        return { ...g, items: [...items, ...extra] };
-      }),
+      gearPresets: [
+        ...data.gearPresets.map((g) => {
+          const items = g.items.map((i) => (i.name === "Pass WRC" ? { ...i, name: "Pass Gold RIS Experience (2)" } : i));
+          // Oggetti nuovi dei dati iniziali, aggiunti senza toccare quelli esistenti.
+          const extra = (seed.gearPresets.find((x) => x.id === g.id)?.items ?? []).filter(
+            (i) => !items.some((x) => x.name === i.name),
+          );
+          return { ...g, items: [...items, ...extra] };
+        }),
+        // Checklist nuove dei dati iniziali (es. "Spesa rally").
+        ...seed.gearPresets.filter((g) => !data.gearPresets.some((x) => x.id === g.id)),
+      ],
     };
   }
   // Completa eventuali campi aggiunti in versioni successive.

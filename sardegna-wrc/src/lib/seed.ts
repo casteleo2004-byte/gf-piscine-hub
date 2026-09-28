@@ -14,7 +14,7 @@ import type {
 // Dati iniziali del viaggio, solo da fonti verificabili: biglietti, prenotazioni,
 // percorso ufficiale del rally. Ciò che non è noto resta vuoto o "da verificare".
 
-export const DATA_VERSION = 13;
+export const DATA_VERSION = 14;
 
 /**
  * Giorni i cui dati iniziali sono cambiati in una versione: chi ha dati salvati
@@ -33,6 +33,7 @@ export const SEED_UPDATES: Record<number, string[]> = {
   11: ["2026-09-29"], // pomeriggio a Livorno prima dell'imbarco
   12: ["2026-09-29", "2026-09-30"], // mete a scelta
   13: ["2026-09-29"], // Livorno a rischio zero: in fila all'imbarco alle 19:30
+  14: ["2026-09-30"], // spesa per il rally (allergie: niente pesce né frutta secca)
 };
 
 /** Prove e punti spettatore d'esempio delle prime versioni, rimossi dalla v5. */
@@ -62,6 +63,8 @@ const CHECKIN_VERIFICA =
 // (punti spettacolari e tecnici delle prove speciali) + Welcome Box con T-shirt ufficiale.
 const SERVICE_PARK = "Lungomare Barcellona, Alghero";
 const PASS = "Oggi serve il Pass Gold: uno a testa, sempre con voi.";
+// Allergie dichiarate dal proprietario (dato non sensibile per il viaggio: niente nomi).
+const ALLERGIE = "Allergie: niente pesce né frutta secca. Ditelo sempre al ristorante e leggete le etichette (anche \"può contenere tracce\").";
 
 function stage(s: Omit<RallyStage, "seen" | "passes"> & Partial<Pick<RallyStage, "passes">>): RallyStage {
   return { passes: [], seen: false, ...s };
@@ -527,10 +530,10 @@ const places: Place[] = [
   }),
   place({
     id: "pl-livorno-cena",
-    name: "Cena in Venezia Nuova (cacciucco o 5 e 5)",
+    name: "Cena in Venezia Nuova",
     category: "ristorante",
     address: "Venezia Nuova, Livorno",
-    notes: "Il quartiere è accanto al porto. Specialità locali: il cacciucco (zuppa di pesce) o, per qualcosa di veloce, il \"5 e 5\" (torta di ceci nel pane).",
+    notes: `Il quartiere è accanto al porto. Per qualcosa di veloce e senza pesce: il "5 e 5" (torta di ceci nel pane). ${ALLERGIE}`,
   }),
   place({
     id: ALLOGGIO,
@@ -627,6 +630,9 @@ function buildEvents(): TripEvent[] {
       choices: ["pl-centro", "pl-palmavera", "pl-mugoni"],
     }),
     ev("2026-09-30", "13:00", "Pranzo", "pasto"),
+    ev("2026-09-30", "16:00", "Spesa per il rally", "altro", {
+      notes: `Acqua e cibo per i giorni di rally: si parte prima che aprano i negozi e nelle aree i servizi possono essere pochi. Lista da spuntare: Gear → Spesa rally. Giovedì pomeriggio, ad Alghero, si può fare un secondo giro per il weekend.\n${ALLERGIE}`,
+    }),
     ev("2026-09-30", "17:30", "Capo Caccia al tramonto", "panorama", {
       placeId: "pl-capocaccia",
       choices: ["pl-capocaccia", "pl-centro"],
@@ -806,6 +812,25 @@ const gearPresets: GearPreset[] = [
     "Protezione pioggia fotocamera",
   ]),
   preset("serata", "Serata", ["iPhone", "Portafoglio e documenti", "Chiavi auto", "Giacca leggera"]),
+  // Per 2 persone e 4 giorni di rally. Niente pesce né frutta secca (allergie).
+  preset("spesa", "Spesa rally", [
+    "Acqua: 4 litri al giorno in due (di più se fa caldo)",
+    "Scorta d'acqua da lasciare in auto",
+    "Bottigliette o borracce per lo zaino",
+    "Pane o panini (il carasau dura a lungo)",
+    "Formaggio stagionato",
+    "Salumi o prosciutto",
+    "Frutta resistente (mele, banane)",
+    "Crackers o grissini",
+    "Barrette e biscotti SENZA frutta secca",
+    "Cioccolato (controllare: senza nocciole né tracce)",
+    "Colazione per le partenze all'alba",
+    "Borsa frigo e siberini",
+    "Sacchetti per la spazzatura",
+    "Salviette, fazzoletti e carta igienica",
+    "Farmaci per le allergie",
+    "Etichette controllate: niente pesce né frutta secca",
+  ]),
 ];
 
 export function createSeed(): AppData {
