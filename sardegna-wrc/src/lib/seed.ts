@@ -14,7 +14,7 @@ import type {
 // Dati iniziali del viaggio, solo da fonti verificabili: biglietti, prenotazioni,
 // percorso ufficiale del rally. Ciò che non è noto resta vuoto o "da verificare".
 
-export const DATA_VERSION = 12;
+export const DATA_VERSION = 13;
 
 /**
  * Giorni i cui dati iniziali sono cambiati in una versione: chi ha dati salvati
@@ -32,6 +32,7 @@ export const SEED_UPDATES: Record<number, string[]> = {
   10: [], // immagini: vista dall'alto delle aree e schede ufficiali
   11: ["2026-09-29"], // pomeriggio a Livorno prima dell'imbarco
   12: ["2026-09-29", "2026-09-30"], // mete a scelta
+  13: ["2026-09-29"], // Livorno a rischio zero: in fila all'imbarco alle 19:30
 };
 
 /** Prove e punti spettatore d'esempio delle prime versioni, rimossi dalla v5. */
@@ -153,7 +154,7 @@ const stages: RallyStage[] = [
     roadClosure: "07:08",
     passes: [{ label: "SS 7 · 2° passaggio", time: "16:38", roadClosure: "14:38" }],
     lengthKm: 23.23,
-    notes: `Alà Arena alla partenza: aree Experience 7 e 8, salto e Water Splash, RIS Hospitality, parcheggio Experience e parcheggio spettatori. Altre zone pubblico: Altopiano (7) e Sos Vanzos (8), accessi da Buddusò. ${ACCESSO}`,
+    notes: `Alà Arena alla partenza: aree Experience 7 e 8, salto e Water Splash, RIS Hospitality, parcheggio Experience e parcheggio spettatori. Altre zone pubblico: Altopiano (7) e Sos Vanzos (8), accessi da Buddusò. ${ACCESSO}`,
     parkingKind: "parking",
     parkingName: "Parcheggio spettatori · Alà Arena",
     parking: P(40.670986, 9.294639),
@@ -183,9 +184,9 @@ const stages: RallyStage[] = [
     roadClosure: "06:11",
     passes: [{ label: "SS 12 · 2° passaggio", time: "15:41", roadClosure: "13:41" }],
     lengthKm: 24.83,
-    notes: `Aree Experience 10 (Buddusò Arena, con parcheggio Experience) e 11 (Nuraghe Loelle). Coiluna Jump (zona 13) solo pubblico, accesso 4x4/SUV da Alà dei Sardi o Mamone. ${ACCESSO}`,
+    notes: `Aree Experience 10 (Buddusò Arena, con parcheggio Experience) e 11 (Nuraghe Loelle). Coiluna Jump (zona 13) solo pubblico, accesso 4x4/SUV da Alà dei Sardi o Mamone. ${ACCESSO}`,
     parkingKind: "parking",
-    parkingName: "Parcheggio · Buddusò Arena",
+    parkingName: "Parcheggio · Buddusò Arena",
     parking: P(40.565698, 9.326432),
     mapImage: "stages/map-ps-coiluna.jpg",
   }),
@@ -356,7 +357,7 @@ const spectatorPoints: SpectatorPoint[] = [
     wow: 5,
     cornerType: "Salto",
     walkRoute:
-      "Dall'Access Point di Buddusò seguire l'accesso segnalato verso Tandalò e Sa Jone fino alla partenza: parcheggio Experience accanto al Lerno Jump.",
+      "Dall'Access Point di Buddusò seguire l'accesso segnalato verso Tandalò e Sa Jone fino alla partenza: parcheggio Experience accanto al Lerno Jump.",
     description: "Il salto di Lerno alla partenza della prova, con area Experience dedicata.",
     source: FONTE,
     notes: DA_MYMAPS,
@@ -369,16 +370,16 @@ const spectatorPoints: SpectatorPoint[] = [
   sp({
     id: "exp-budduso-arena",
     stageId: "ps-coiluna",
-    name: "Experience 10 · Buddusò Arena",
+    name: "Experience 10 · Buddusò Arena",
     access: P(40.57065014718563, 9.26940463215951),
     experienceArea: true,
     wow: 4,
-    walkRoute: "Da Buddusò accesso segnalato fino alla Buddusò Arena: parcheggio Experience accanto.",
+    walkRoute: "Da Buddusò accesso segnalato fino alla Buddusò Arena: parcheggio Experience accanto.",
     source: FONTE,
     notes: DA_MYMAPS,
     point: P(40.568983, 9.332695),
     parking: P(40.565698, 9.326432),
-    parkingName: "Parcheggio · Buddusò Arena",
+    parkingName: "Parcheggio · Buddusò Arena",
     walkDistance: aria(P(40.565698, 9.326432), P(40.568983, 9.332695)),
     image: "stages/exp-budduso-arena.jpg",
   }),
@@ -389,12 +390,12 @@ const spectatorPoints: SpectatorPoint[] = [
     access: P(40.57065014718563, 9.26940463215951),
     experienceArea: true,
     wow: 4,
-    walkRoute: "Da Buddusò stesso accesso della Buddusò Arena, area poco prima.",
+    walkRoute: "Da Buddusò stesso accesso della Buddusò Arena, area poco prima.",
     source: FONTE,
     notes: DA_MYMAPS,
     point: P(40.568285, 9.318051),
     parking: P(40.565698, 9.326432),
-    parkingName: "Parcheggio · Buddusò Arena",
+    parkingName: "Parcheggio · Buddusò Arena",
     walkDistance: aria(P(40.565698, 9.326432), P(40.568285, 9.318051)),
     image: "stages/exp-nuraghe-loelle.jpg",
   }),
@@ -515,7 +516,7 @@ const places: Place[] = [
     name: "Santuario di Montenero",
     category: "panorama",
     address: "Santuario di Montenero, Livorno",
-    notes: "Alternativa: santuario in collina con vista su Livorno e sul mare, circa 15 minuti d'auto dal centro.",
+    notes: "Santuario in collina con vista su Livorno e sul mare, circa 15 minuti d'auto dal centro (stima, senza traffico).",
   }),
   place({
     id: "pl-livorno-acquario",
@@ -526,9 +527,10 @@ const places: Place[] = [
   }),
   place({
     id: "pl-livorno-cena",
-    name: "Cena a Livorno (cacciucco o 5 e 5)",
+    name: "Cena in Venezia Nuova (cacciucco o 5 e 5)",
     category: "ristorante",
-    notes: "Specialità locali: il cacciucco (zuppa di pesce) o, per qualcosa di veloce, il \"5 e 5\" (torta di ceci nel pane). Scegliete un posto vicino al lungomare per non allungare verso il porto.",
+    address: "Venezia Nuova, Livorno",
+    notes: "Il quartiere è accanto al porto. Specialità locali: il cacciucco (zuppa di pesce) o, per qualcosa di veloce, il \"5 e 5\" (torta di ceci nel pane).",
   }),
   place({
     id: ALLOGGIO,
@@ -572,27 +574,37 @@ function buildEvents(): TripEvent[] {
   seq = 0;
   return [
     // 29/09 — partenza (Moby, dal biglietto)
-    ev("2026-09-29", "15:00", "Arrivo a Livorno · parcheggio in centro", "auto", {
-      address: "Venezia Nuova, Livorno",
-      notes: "L'auto è carica di bagagli: lasciatela in un parcheggio in centro senza nulla in vista.",
+    // Rischio zero: prima la meta più lontana, poi ci si avvicina al porto; dalle 18:00
+    // si resta a pochi minuti dall'imbarco e in fila alle 19:30 (60 min prima del limite).
+    ev("2026-09-29", "15:00", "Arrivo a Livorno", "auto", {
+      notes: "L'auto è carica di bagagli: quando la lasciate, niente in vista.\nRegola di oggi: prima la meta più lontana, poi sempre più vicini al porto.",
     }),
-    ev("2026-09-29", "15:15", "Quartiere Venezia Nuova e Fortezza Vecchia", "visita", {
-      placeId: "pl-livorno-venezia",
-      choices: ["pl-livorno-venezia", "pl-livorno-montenero", "pl-livorno-acquario"],
+    ev("2026-09-29", "15:15", "Santuario di Montenero", "panorama", {
+      placeId: "pl-livorno-montenero",
+      choices: ["pl-livorno-montenero", "pl-livorno-acquario", "pl-livorno-venezia"],
+      deadline: "16:30",
+      notes: "Montenero è la meta più lontana dal porto: se la volete vedere, questo è il momento. Ripartite entro le 16:30.",
     }),
-    ev("2026-09-29", "17:00", "Terrazza Mascagni", "panorama", {
+    ev("2026-09-29", "16:45", "Terrazza Mascagni", "panorama", {
       placeId: "pl-livorno-mascagni",
-      choices: ["pl-livorno-mascagni", "pl-livorno-montenero"],
+      choices: ["pl-livorno-mascagni", "pl-livorno-venezia"],
+      deadline: "17:45",
+      notes: "Ripartite entro le 17:45: dopo c'è il traffico dell'ora di punta.",
     }),
-    ev("2026-09-29", "18:15", "Cena", "pasto", { placeId: "pl-livorno-cena", deadline: "19:30" }),
-    ev("2026-09-29", "19:45", "Partenza verso il porto", "partenza", {
+    ev("2026-09-29", "18:00", "Cena vicino al porto", "pasto", {
+      placeId: "pl-livorno-cena",
+      deadline: "19:00",
+      notes: "Parcheggiate vicino alla Fortezza Vecchia e restate lì: il porto è a pochi minuti.",
+    }),
+    ev("2026-09-29", "19:00", "Partenza verso il porto", "partenza", {
       address: LIVORNO_PORTO,
-      notes: "Dal lungomare al porto pochi minuti d'auto: meglio arrivare in anticipo sul check-in.",
+      deadline: "19:15",
+      notes: "Seguite i cartelli \"Imbarchi\" per la Sardegna. Obiettivo: in fila alle 19:30.",
     }),
-    ev("2026-09-29", "20:30", "Check-in al porto di Livorno", "traghetto", {
+    ev("2026-09-29", "19:30", "In fila per l'imbarco", "traghetto", {
       address: LIVORNO_PORTO,
       deadline: "20:30",
-      notes: `${CHECKIN_VERIFICA}\n${DOCUMENTI}\nCodice prenotazione: aggiungilo qui con la matita.`,
+      notes: `Arrivando alle 19:30 avete 60 minuti di margine sul limite delle 20:30.\n${CHECKIN_VERIFICA}\n${DOCUMENTI}\nCodice prenotazione: aggiungilo qui con la matita.`,
     }),
     ev("2026-09-29", "22:00", "Partenza Moby Livorno → Olbia", "traghetto", {
       address: LIVORNO_PORTO,
@@ -715,7 +727,14 @@ function buildEvents(): TripEvent[] {
 }
 
 const days: TripDay[] = [
-  { date: "2026-09-29", title: "Pomeriggio a Livorno e traghetto per Olbia", kind: "viaggio", location: "Livorno", gearPresetId: "serata" },
+  {
+    date: "2026-09-29",
+    title: "Pomeriggio a Livorno e traghetto per Olbia",
+    kind: "viaggio",
+    location: "Livorno",
+    gearPresetId: "serata",
+    notes: "Piano B: se c'è traffico o siete in ritardo, saltate la tappa successiva e andate dritti al porto. Il traghetto non aspetta, una visita sì.",
+  },
   { date: "2026-09-30", title: "Sbarco a Olbia e arrivo ad Alghero", kind: "turismo", location: "Olbia → Alghero", gearPresetId: "turismo" },
   { date: "2026-10-01", title: "Rally · Shakedown e Ittiri Arena", kind: "rally", location: "Alghero", gearPresetId: "rally", notes: PASS, planStageIds: ["sd", "ps1"] },
   { date: "2026-10-02", title: "Rally · Alà Arena", kind: "rally", location: "Alghero", gearPresetId: "rally", notes: PASS, planStageIds: ["ps-alalerno"] },
