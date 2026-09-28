@@ -14,7 +14,7 @@ import type {
 // Dati iniziali del viaggio, solo da fonti verificabili: biglietti, prenotazioni,
 // percorso ufficiale del rally. Ciò che non è noto resta vuoto o "da verificare".
 
-export const DATA_VERSION = 10;
+export const DATA_VERSION = 11;
 
 /**
  * Giorni i cui dati iniziali sono cambiati in una versione: chi ha dati salvati
@@ -30,6 +30,7 @@ export const SEED_UPDATES: Record<number, string[]> = {
   8: ["2026-10-04"], // Argentiera: punto con sfondo mare come principale
   9: [], // coordinate esatte da mappe interattive ufficiali (prove e aree)
   10: [], // immagini: vista dall'alto delle aree e schede ufficiali
+  11: ["2026-09-29"], // pomeriggio a Livorno prima dell'imbarco
 };
 
 /** Prove e punti spettatore d'esempio delle prime versioni, rimossi dalla v5. */
@@ -493,6 +494,34 @@ function place(p: Omit<Place, "photoIds" | "visited">): Place {
 const ALLOGGIO = "pl-alloggio";
 
 const places: Place[] = [
+  // Livorno, martedì 29/09 prima dell'imbarco (indirizzi: NAVIGA li cerca su Maps).
+  place({
+    id: "pl-livorno-venezia",
+    name: "Quartiere Venezia Nuova e Fortezza Vecchia",
+    category: "visitare",
+    address: "Venezia Nuova, Livorno",
+    notes: "Il quartiere dei canali (fossi medicei), ponti e palazzi sull'acqua; a pochi passi la Fortezza Vecchia sul porto mediceo. Da girare a piedi.",
+  }),
+  place({
+    id: "pl-livorno-mascagni",
+    name: "Terrazza Mascagni",
+    category: "panorama",
+    address: "Terrazza Mascagni, Livorno",
+    notes: "Il grande belvedere a scacchiera sul mare. Il tramonto è verso le 19:10.",
+  }),
+  place({
+    id: "pl-livorno-montenero",
+    name: "Santuario di Montenero",
+    category: "panorama",
+    address: "Santuario di Montenero, Livorno",
+    notes: "Alternativa: santuario in collina con vista su Livorno e sul mare, circa 15 minuti d'auto dal centro.",
+  }),
+  place({
+    id: "pl-livorno-cena",
+    name: "Cena a Livorno (cacciucco o 5 e 5)",
+    category: "ristorante",
+    notes: "Specialità locali: il cacciucco (zuppa di pesce) o, per qualcosa di veloce, il \"5 e 5\" (torta di ceci nel pane). Scegliete un posto vicino al lungomare per non allungare verso il porto.",
+  }),
   place({
     id: ALLOGGIO,
     name: "Redroom-house",
@@ -535,6 +564,17 @@ function buildEvents(): TripEvent[] {
   seq = 0;
   return [
     // 29/09 — partenza (Moby, dal biglietto)
+    ev("2026-09-29", "15:00", "Arrivo a Livorno · parcheggio in centro", "auto", {
+      address: "Venezia Nuova, Livorno",
+      notes: "L'auto è carica di bagagli: lasciatela in un parcheggio in centro senza nulla in vista.",
+    }),
+    ev("2026-09-29", "15:15", "A piedi: Venezia Nuova e Fortezza Vecchia", "visita", { placeId: "pl-livorno-venezia" }),
+    ev("2026-09-29", "17:00", "Lungomare e Terrazza Mascagni", "panorama", { placeId: "pl-livorno-mascagni" }),
+    ev("2026-09-29", "18:15", "Cena", "pasto", { placeId: "pl-livorno-cena", deadline: "19:30" }),
+    ev("2026-09-29", "19:45", "Partenza verso il porto", "partenza", {
+      address: LIVORNO_PORTO,
+      notes: "Dal lungomare al porto pochi minuti d'auto: meglio arrivare in anticipo sul check-in.",
+    }),
     ev("2026-09-29", "20:30", "Check-in al porto di Livorno", "traghetto", {
       address: LIVORNO_PORTO,
       deadline: "20:30",
@@ -655,7 +695,7 @@ function buildEvents(): TripEvent[] {
 }
 
 const days: TripDay[] = [
-  { date: "2026-09-29", title: "Traghetto Livorno → Olbia", kind: "viaggio", location: "Livorno", gearPresetId: "serata" },
+  { date: "2026-09-29", title: "Pomeriggio a Livorno e traghetto per Olbia", kind: "viaggio", location: "Livorno", gearPresetId: "serata" },
   { date: "2026-09-30", title: "Sbarco a Olbia e arrivo ad Alghero", kind: "turismo", location: "Olbia → Alghero", gearPresetId: "turismo" },
   { date: "2026-10-01", title: "Rally · Shakedown e Ittiri Arena", kind: "rally", location: "Alghero", gearPresetId: "rally", notes: PASS, planStageIds: ["sd", "ps1"] },
   { date: "2026-10-02", title: "Rally · Alà Arena", kind: "rally", location: "Alghero", gearPresetId: "rally", notes: PASS, planStageIds: ["ps-alalerno"] },

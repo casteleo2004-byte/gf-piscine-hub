@@ -255,3 +255,12 @@ describe("prova sul mare", () => {
     expect(data.days.find((d) => d.date === "2026-10-04")?.planStageIds).toEqual(["ps-argentiera"]);
   });
 });
+
+describe("martedì a Livorno", () => {
+  it("pomeriggio in città e poi il porto, senza coordinate inventate", () => {
+    const ev = eventsOfDay(data, "2026-09-29");
+    expect(ev.map((e) => e.time)).toEqual(["15:00", "15:15", "17:00", "18:15", "19:45", "20:30", "22:00"]);
+    expect(data.places.filter((p) => p.id.startsWith("pl-livorno")).every((p) => !p.point)).toBe(true);
+    expect(ev[nextEventIndex(ev, at("19:40"), true)].title).toBe("Partenza verso il porto");
+  });
+});
