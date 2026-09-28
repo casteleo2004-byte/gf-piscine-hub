@@ -14,7 +14,7 @@ import type {
 // Dati iniziali del viaggio, solo da fonti verificabili: biglietti, prenotazioni,
 // percorso ufficiale del rally. Ciò che non è noto resta vuoto o "da verificare".
 
-export const DATA_VERSION = 11;
+export const DATA_VERSION = 12;
 
 /**
  * Giorni i cui dati iniziali sono cambiati in una versione: chi ha dati salvati
@@ -31,6 +31,7 @@ export const SEED_UPDATES: Record<number, string[]> = {
   9: [], // coordinate esatte da mappe interattive ufficiali (prove e aree)
   10: [], // immagini: vista dall'alto delle aree e schede ufficiali
   11: ["2026-09-29"], // pomeriggio a Livorno prima dell'imbarco
+  12: ["2026-09-29", "2026-09-30"], // mete a scelta
 };
 
 /** Prove e punti spettatore d'esempio delle prime versioni, rimossi dalla v5. */
@@ -517,6 +518,13 @@ const places: Place[] = [
     notes: "Alternativa: santuario in collina con vista su Livorno e sul mare, circa 15 minuti d'auto dal centro.",
   }),
   place({
+    id: "pl-livorno-acquario",
+    name: "Acquario di Livorno",
+    category: "attrazione",
+    address: "Acquario di Livorno, Piazzale Mascagni, Livorno",
+    notes: "Accanto alla Terrazza Mascagni: buona alternativa se piove. Orari e biglietti da verificare.",
+  }),
+  place({
     id: "pl-livorno-cena",
     name: "Cena a Livorno (cacciucco o 5 e 5)",
     category: "ristorante",
@@ -568,8 +576,14 @@ function buildEvents(): TripEvent[] {
       address: "Venezia Nuova, Livorno",
       notes: "L'auto è carica di bagagli: lasciatela in un parcheggio in centro senza nulla in vista.",
     }),
-    ev("2026-09-29", "15:15", "A piedi: Venezia Nuova e Fortezza Vecchia", "visita", { placeId: "pl-livorno-venezia" }),
-    ev("2026-09-29", "17:00", "Lungomare e Terrazza Mascagni", "panorama", { placeId: "pl-livorno-mascagni" }),
+    ev("2026-09-29", "15:15", "Quartiere Venezia Nuova e Fortezza Vecchia", "visita", {
+      placeId: "pl-livorno-venezia",
+      choices: ["pl-livorno-venezia", "pl-livorno-montenero", "pl-livorno-acquario"],
+    }),
+    ev("2026-09-29", "17:00", "Terrazza Mascagni", "panorama", {
+      placeId: "pl-livorno-mascagni",
+      choices: ["pl-livorno-mascagni", "pl-livorno-montenero"],
+    }),
     ev("2026-09-29", "18:15", "Cena", "pasto", { placeId: "pl-livorno-cena", deadline: "19:30" }),
     ev("2026-09-29", "19:45", "Partenza verso il porto", "partenza", {
       address: LIVORNO_PORTO,
@@ -596,9 +610,15 @@ function buildEvents(): TripEvent[] {
       deadline: "23:30",
       notes: "Check-in dalle 15:00 alle 23:30. Fino ad allora i bagagli restano in auto.",
     }),
-    ev("2026-09-30", "11:00", "Centro storico e Bastioni", "visita", { placeId: "pl-centro" }),
+    ev("2026-09-30", "11:00", "Centro storico e Bastioni", "visita", {
+      placeId: "pl-centro",
+      choices: ["pl-centro", "pl-palmavera", "pl-mugoni"],
+    }),
     ev("2026-09-30", "13:00", "Pranzo", "pasto"),
-    ev("2026-09-30", "17:30", "Capo Caccia al tramonto", "panorama", { placeId: "pl-capocaccia", driveMinutes: 35 }),
+    ev("2026-09-30", "17:30", "Capo Caccia al tramonto", "panorama", {
+      placeId: "pl-capocaccia",
+      choices: ["pl-capocaccia", "pl-centro"],
+    }),
     ev("2026-09-30", "20:30", "Cena", "pasto", { placeId: "pl-cena" }),
 
     // 01/10 — giovedì. Piano: shakedown (Olmedo) + Ittiri Arena. Orari: timetable ufficiale.

@@ -1,7 +1,8 @@
 "use client";
 
-import { AlertTriangle, Info, ListChecks, Moon } from "lucide-react";
-import Link from "next/link";
+import { AlertTriangle, Info, ListChecks, Moon, Shuffle } from "lucide-react";
+import { useState } from "react";
+import { ChoiceSheet } from "./ChoiceSheet";
 import { EVENT_TYPES, toneText } from "@/lib/meta";
 import { eventInfo, headline, spectatorPointOf, whatToDo } from "@/lib/smart";
 import { formatDuration } from "@/lib/time";
@@ -39,6 +40,7 @@ export function NextCard({
   tomorrowFirst?: TripEvent;
   onDetails: (e: TripEvent) => void;
 }) {
+  const [choosing, setChoosing] = useState(false);
   if (!event) {
     return (
       <section className="rounded-3xl bg-surface p-5">
@@ -72,7 +74,15 @@ export function NextCard({
       <div className={`mt-1 flex items-center gap-1.5 text-[17px] font-semibold ${toneText[meta.tone]}`}>
         <meta.Icon size={20} className="shrink-0" /> <span className="shrink-0">{meta.label}</span>
       </div>
-      {info.target && <div className="mt-0.5 text-[16px] font-semibold text-muted">→ {info.target.label}</div>}
+      {info.target && info.target.label !== event.title && (
+        <div className="mt-0.5 text-[16px] font-semibold text-muted">→ {info.target.label}</div>
+      )}
+      {(event.choices?.length ?? 0) > 1 && (
+        <button type="button" onClick={() => setChoosing(true)} className={buttonClass("secondary", "md", "mt-3 w-full")}>
+          <Shuffle size={20} /> Cambia meta ({event.choices!.length} opzioni)
+        </button>
+      )}
+      {choosing && <ChoiceSheet event={event} data={data} onClose={() => setChoosing(false)} />}
       {hint && <p className="mt-3 rounded-xl bg-surface-2 px-3 py-2.5 text-[17px] font-semibold leading-snug">{hint}</p>}
 
       <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3">
@@ -107,9 +117,9 @@ export function NextCard({
       )}
 
       <div className="mt-3 grid grid-cols-2 gap-3">
-        <Link href={presetId ? `/gear/?p=${presetId}` : "/gear/"} className={buttonClass("secondary", "lg")}>
+        <a href={presetId ? `/gear/?p=${presetId}` : "/gear/"} className={buttonClass("secondary", "lg")}>
           <ListChecks size={22} /> Checklist
-        </Link>
+        </a>
         <button type="button" className={buttonClass("secondary", "lg")} onClick={() => onDetails(event)}>
           <Info size={22} /> Dettagli
         </button>

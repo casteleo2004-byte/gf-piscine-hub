@@ -9,7 +9,7 @@ import { PlacesScreen } from "@/components/places/PlacesScreen";
 import { TodayScreen } from "@/components/today/TodayScreen";
 import { WrcScreen } from "@/components/wrc/WrcScreen";
 import { useData } from "@/lib/store/hooks";
-import { useUrl } from "./shims/router";
+import { push, useUrl } from "./shims/router";
 
 function Screen() {
   const { pathname } = useUrl();
@@ -42,5 +42,14 @@ function App() {
 try {
   localStorage.removeItem("wrc-demo:preset");
 } catch {}
+
+// L'app usa link <a> nativi: nella demo a pagina singola li instradiamo in memoria.
+document.addEventListener("click", (e) => {
+  const a = (e.target as HTMLElement).closest("a");
+  const href = a?.getAttribute("href");
+  if (!a || !href || !href.startsWith("/") || a.target === "_blank") return;
+  e.preventDefault();
+  push(href);
+});
 
 createRoot(document.getElementById("root")!).render(<App />);

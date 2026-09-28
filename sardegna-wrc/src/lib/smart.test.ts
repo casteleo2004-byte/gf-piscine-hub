@@ -264,3 +264,14 @@ describe("martedì a Livorno", () => {
     expect(ev[nextEventIndex(ev, at("19:40"), true)].title).toBe("Partenza verso il porto");
   });
 });
+
+describe("mete a scelta", () => {
+  it("le visite di martedì e mercoledì offrono più opzioni reali", () => {
+    const withChoices = data.events.filter((e) => (e.choices?.length ?? 0) > 1);
+    expect(withChoices.length).toBeGreaterThanOrEqual(4);
+    for (const e of withChoices) {
+      expect(e.choices).toContain(e.placeId);
+      for (const id of e.choices!) expect(data.places.some((p) => p.id === id)).toBe(true);
+    }
+  });
+});

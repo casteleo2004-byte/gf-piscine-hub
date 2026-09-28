@@ -72,6 +72,8 @@ export interface TripEvent {
   notes?: string;
   /** Fuori dal piano del giorno: mostrata in un gruppo a parte, mai come "prossima". */
   optional?: boolean;
+  /** Mete alternative tra cui scegliere (id dei luoghi); quella scelta è placeId. */
+  choices?: string[];
   done: boolean;
 }
 

@@ -1,7 +1,6 @@
 "use client";
 
 import { AlertTriangle, Car, Check, ChevronDown, Eye, ListChecks, Pencil, Star } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
 import { formatPoint } from "@/lib/geo";
 import { isInPlan, spectatorPointOf, stageCode, stageTiming } from "@/lib/smart";
@@ -145,9 +144,9 @@ export function StageCard({
           <button type="button" onClick={onSpectator} className={buttonClass("rally", "lg", "whitespace-nowrap !px-3")}>
             <Eye size={20} className="shrink-0" /> Dove guardare
           </button>
-          <Link href={`/gear/?p=${checklist}`} className={buttonClass("secondary", "lg")}>
+          <a href={`/gear/?p=${checklist}`} className={buttonClass("secondary", "lg")}>
             <ListChecks size={22} /> Checklist
-          </Link>
+          </a>
         </div>
 
         {sp && (

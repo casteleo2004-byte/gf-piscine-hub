@@ -36,6 +36,17 @@ export const actions = {
       d.events = d.events.filter((x) => x.id !== id);
     });
   },
+  /** Sceglie la meta di un'attività tra le opzioni: aggiorna luogo e titolo. */
+  chooseEventPlace(id: string, placeId: string) {
+    update((d) => {
+      const e = d.events.find((x) => x.id === id);
+      const p = d.places.find((x) => x.id === placeId);
+      if (e && p) {
+        e.placeId = p.id;
+        e.title = p.name;
+      }
+    });
+  },
   resetDay(date: string) {
     update((d) => {
       for (const e of d.events) if (e.date === date) e.done = false;
