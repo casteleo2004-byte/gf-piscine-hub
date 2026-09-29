@@ -14,7 +14,7 @@ import type {
 // Dati iniziali del viaggio, solo da fonti verificabili: biglietti, prenotazioni,
 // percorso ufficiale del rally. Ciò che non è noto resta vuoto o "da verificare".
 
-export const DATA_VERSION = 18;
+export const DATA_VERSION = 19;
 
 /**
  * Giorni i cui dati iniziali sono cambiati in una versione: chi ha dati salvati
@@ -38,6 +38,7 @@ export const SEED_UPDATES: Record<number, string[]> = {
   16: ["2026-09-29"], // partenza da casa alle 11, pranzo al Burger King di Manerba, arrivo ~16:15
   17: ["2026-09-29"], // NAVIGA ai parcheggi e all'imbarco Moby ufficiale (Via Donegani)
   18: ["2026-09-29"], // avviso ZTL di Livorno
+  19: ["2026-09-29"], // Livorno senza città: uscita Porto, parcheggio P1, tutto a piedi, imbarco diretto
 };
 
 /** Prove e punti spettatore d'esempio delle prime versioni, rimossi dalla v5. */
@@ -611,15 +612,14 @@ function buildEvents(): TripEvent[] {
       deadline: "12:15",
       notes: `Pranzo veloce: ripartite entro le 12:15. Chiedete la tabella degli allergeni: fritti in olio separato dai prodotti di pesce? Evitate dolci e gelati con topping.\n${ALLERGIE}`,
     }),
-    ev("2026-09-29", "12:15", "Partenza per Livorno", "partenza", {
-      placeId: "pl-livorno-mascagni",
-      notes: "Circa 4 ore con una pausa (stima senza traffico). Scegliete il percorso con meno code su Maps (via Firenze o via Cisa). L'auto è carica di bagagli: alle soste, niente in vista.",
+    ev("2026-09-29", "12:15", "Partenza per il parcheggio del porto di Livorno", "partenza", {
+      address: PARCHEGGIO_PORTO,
+      notes: "Circa 3 ore e mezza con una pausa. Niente città: in autostrada prendete l'uscita \"Porto\" e seguite \"Imbarco passeggeri\" e \"Via Guido Donegani\": NAVIGA porta al parcheggio P1 del porto (Piazza del Portuale, 1 €/ora, 24h dal Varco Donegani). L'auto è carica di bagagli: alle soste, niente in vista.",
     }),
-    ev("2026-09-29", "16:15", "Terrazza Mascagni", "panorama", {
-      placeId: "pl-livorno-mascagni",
-      choices: ["pl-livorno-mascagni", "pl-livorno-venezia", "pl-livorno-acquario"],
-      deadline: "17:45",
-      notes: "Il parcheggio è sul lungomare (Viale Italia), fuori dalla ZTL. Prima tappa a Livorno, se arrivate in tempo. Ripartite entro le 17:45: dopo c'è il traffico dell'ora di punta. Se arrivate dopo le 17:30, saltatela e andate a cena vicino al porto.",
+    ev("2026-09-29", "16:15", "Passeggiata in Venezia Nuova e Fortezza Vecchia", "visita", {
+      placeId: "pl-livorno-venezia",
+      choices: ["pl-livorno-venezia", "pl-livorno-mascagni", "pl-livorno-acquario"],
+      notes: "Auto al parcheggio P1 del porto e tutto a piedi: Venezia Nuova è accanto (in auto è ZTL). Terrazza Mascagni e Acquario sono alternative in auto, sul lungomare: solo se arrivate presto, ripartendo entro le 17:45.",
     }),
     ev("2026-09-29", "18:00", "Cena vicino al porto", "pasto", {
       placeId: "pl-livorno-cena",
@@ -629,7 +629,7 @@ function buildEvents(): TripEvent[] {
     ev("2026-09-29", "19:00", "Dal parcheggio all'imbarco Moby", "partenza", {
       address: LIVORNO_PORTO,
       deadline: "19:15",
-      notes: `Pagate il parcheggio e uscite verso l'imbarco. ${IMBARCO_LIVORNO} Obiettivo: in fila alle 19:30.`,
+      notes: `Non serve passare dalla biglietteria: con il biglietto andate direttamente all'imbarco. Pagate il parcheggio e seguite i cartelli. ${IMBARCO_LIVORNO} Tenete pronti biglietto e carte d'identità in originale. Obiettivo: in fila alle 19:30.`,
     }),
     ev("2026-09-29", "19:30", "In fila per l'imbarco", "traghetto", {
       address: LIVORNO_PORTO,
@@ -766,7 +766,7 @@ const days: TripDay[] = [
     kind: "viaggio",
     location: "Livorno",
     gearPresetId: "serata",
-    notes: "Occhio alle ZTL: in Venezia Nuova solo a piedi, il centro è ZTL dalle 7:30 alle 20:00. Piano B: se alle 17:30 non siete ancora a Livorno, niente visite: cena vicino al porto e in fila alle 19:30. Il traghetto non aspetta, una visita sì.",
+    notes: "Livorno senza traffico cittadino: uscita \"Porto\", parcheggio P1 del porto, poi tutto a piedi. Occhio alle ZTL: in Venezia Nuova solo a piedi, il centro è ZTL dalle 7:30 alle 20:00. All'imbarco si va direttamente, check-in nel piazzale davanti alla nave. Piano B: se alle 17:30 non siete ancora a Livorno, niente visite: cena vicino al porto e in fila alle 19:30. Il traghetto non aspetta, una visita sì.",
   },
   { date: "2026-09-30", title: "Sbarco a Olbia e arrivo ad Alghero", kind: "turismo", location: "Olbia → Alghero", gearPresetId: "turismo" },
   { date: "2026-10-01", title: "Rally · Shakedown e Ittiri Arena", kind: "rally", location: "Alghero", gearPresetId: "rally", notes: PASS, planStageIds: ["sd", "ps1"] },
