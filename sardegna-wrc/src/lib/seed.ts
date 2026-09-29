@@ -14,7 +14,7 @@ import type {
 // Dati iniziali del viaggio, solo da fonti verificabili: biglietti, prenotazioni,
 // percorso ufficiale del rally. Ciò che non è noto resta vuoto o "da verificare".
 
-export const DATA_VERSION = 17;
+export const DATA_VERSION = 18;
 
 /**
  * Giorni i cui dati iniziali sono cambiati in una versione: chi ha dati salvati
@@ -37,6 +37,7 @@ export const SEED_UPDATES: Record<number, string[]> = {
   15: ["2026-09-29", "2026-10-07"], // limite check-in Moby alle 20:00 (dato dal proprietario)
   16: ["2026-09-29"], // partenza da casa alle 11, pranzo al Burger King di Manerba, arrivo ~16:15
   17: ["2026-09-29"], // NAVIGA ai parcheggi e all'imbarco Moby ufficiale (Via Donegani)
+  18: ["2026-09-29"], // avviso ZTL di Livorno
 };
 
 /** Prove e punti spettatore d'esempio delle prime versioni, rimossi dalla v5. */
@@ -64,6 +65,11 @@ const IMBARCO_LIVORNO =
 // Parcheggio auto P1 del porto passeggeri (sito Porto di Livorno 2000): Piazza del Portuale,
 // 111 posti, a pagamento (1 €/ora), accesso 24h dal Varco Donegani e 06–22 dal Varco Fortezza.
 const PARCHEGGIO_PORTO = "Piazza del Portuale, 57100 Livorno";
+// ZTL (Comune di Livorno e fonti di mobilità): centro 7:30–20:00 nei feriali; quartiere
+// La Venezia 24 ore, con varchi in Via della Venezia (Via Borra), Piazza del Luogo Pio e
+// Via Forte San Pietro. In Venezia Nuova si entra solo a piedi.
+const ZTL_LIVORNO =
+  "ZTL: in Venezia Nuova non entrate in auto (varchi con telecamere, attivi sempre); il centro è ZTL dalle 7:30 alle 20:00. Lasciate l'auto al parcheggio del porto e seguite i cartelli \"Porto\" e \"Imbarco passeggeri\", non le scorciatoie del navigatore nel centro.";
 const OLBIA_PORTO = "Porto di Olbia";
 const DOCUMENTI = "All'imbarco serve la carta d'identità in originale di entrambi (indicato sul biglietto).";
 // Limite check-in all'andata: ore 20:00, 2 ore prima della partenza (indicato dal proprietario).
@@ -613,12 +619,12 @@ function buildEvents(): TripEvent[] {
       placeId: "pl-livorno-mascagni",
       choices: ["pl-livorno-mascagni", "pl-livorno-venezia", "pl-livorno-acquario"],
       deadline: "17:45",
-      notes: "Prima tappa a Livorno, se arrivate in tempo. Ripartite entro le 17:45: dopo c'è il traffico dell'ora di punta. Se arrivate dopo le 17:30, saltatela e andate a cena vicino al porto.",
+      notes: "Il parcheggio è sul lungomare (Viale Italia), fuori dalla ZTL. Prima tappa a Livorno, se arrivate in tempo. Ripartite entro le 17:45: dopo c'è il traffico dell'ora di punta. Se arrivate dopo le 17:30, saltatela e andate a cena vicino al porto.",
     }),
     ev("2026-09-29", "18:00", "Cena vicino al porto", "pasto", {
       placeId: "pl-livorno-cena",
       deadline: "19:00",
-      notes: "NAVIGA porta al parcheggio P1 del porto passeggeri (Piazza del Portuale, 1 €/ora, non custodito: niente in vista). Da lì a piedi in Venezia Nuova per cena, poi di nuovo all'auto: l'imbarco è nello stesso porto.",
+      notes: `NAVIGA porta al parcheggio P1 del porto passeggeri (Piazza del Portuale, 1 €/ora, non custodito: niente in vista). Da lì a piedi in Venezia Nuova per cena, poi di nuovo all'auto: l'imbarco è nello stesso porto.\n${ZTL_LIVORNO}`,
     }),
     ev("2026-09-29", "19:00", "Dal parcheggio all'imbarco Moby", "partenza", {
       address: LIVORNO_PORTO,
@@ -760,7 +766,7 @@ const days: TripDay[] = [
     kind: "viaggio",
     location: "Livorno",
     gearPresetId: "serata",
-    notes: "Piano B: se alle 17:30 non siete ancora a Livorno, niente visite: cena vicino al porto e in fila alle 19:30. Il traghetto non aspetta, una visita sì.",
+    notes: "Occhio alle ZTL: in Venezia Nuova solo a piedi, il centro è ZTL dalle 7:30 alle 20:00. Piano B: se alle 17:30 non siete ancora a Livorno, niente visite: cena vicino al porto e in fila alle 19:30. Il traghetto non aspetta, una visita sì.",
   },
   { date: "2026-09-30", title: "Sbarco a Olbia e arrivo ad Alghero", kind: "turismo", location: "Olbia → Alghero", gearPresetId: "turismo" },
   { date: "2026-10-01", title: "Rally · Shakedown e Ittiri Arena", kind: "rally", location: "Alghero", gearPresetId: "rally", notes: PASS, planStageIds: ["sd", "ps1"] },
