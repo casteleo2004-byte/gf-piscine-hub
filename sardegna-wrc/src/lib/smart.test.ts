@@ -180,7 +180,9 @@ describe("traghetto", () => {
   it("andata Moby Livorno → Olbia alle 22:00 del 29/09", () => {
     const e = eventsOfDay(data, "2026-09-29").find((x) => x.title.startsWith("Partenza Moby"));
     expect(e?.time).toBe("22:00");
-    expect(resolveTarget(e!, data)?.address).toBe("Stazione Marittima, Livorno");
+    expect(resolveTarget(e!, data)?.address).toBe("Via Guido Donegani, 57100 Livorno");
+    const cena = eventsOfDay(data, "2026-09-29").find((x) => x.title === "Cena vicino al porto")!;
+    expect(resolveTarget(cena, data)?.address).toBe("Piazza del Portuale, 57100 Livorno");
   });
   it("ritorno Olbia → Livorno alle 22:00 del 07/10", () => {
     const e = eventsOfDay(data, "2026-10-07").find((x) => x.title.startsWith("Partenza Moby"));
@@ -262,7 +264,7 @@ describe("martedì a Livorno", () => {
     expect(ev.map((e) => e.time)).toEqual(["11:00", "11:40", "12:15", "16:15", "18:00", "19:00", "19:30", "22:00"]);
     expect(ev[nextEventIndex(ev, at("12:05"), true)].title).toBe("Pranzo al Burger King · Manerba");
     expect(data.places.filter((p) => p.id.startsWith("pl-livorno")).every((p) => !p.point)).toBe(true);
-    expect(ev[nextEventIndex(ev, at("19:05"), true)].title).toBe("Partenza verso il porto");
+    expect(ev[nextEventIndex(ev, at("19:05"), true)].title).toBe("Dal parcheggio all'imbarco Moby");
   });
   it("rischio zero: ogni tappa finisce prima della successiva, in fila 30 min prima del limite delle 20:00", () => {
     const ev = eventsOfDay(data, "2026-09-29");

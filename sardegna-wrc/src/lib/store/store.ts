@@ -42,8 +42,8 @@ function migrate(data: AppData): AppData {
       ],
     };
   }
-  if ((data.version ?? 1) < 14) {
-    // Luoghi di Livorno riscritti (cena vicino al porto, senza pesce): si prendono dal seed.
+  if ((data.version ?? 1) < 17) {
+    // Luoghi di Livorno riscritti (parcheggi, cena senza pesce): si prendono dal seed.
     const fresh = new Map(seed.places.filter((p) => p.id.startsWith("pl-livorno-")).map((p) => [p.id, p]));
     data = { ...data, places: data.places.map((p) => fresh.get(p.id) ?? p) };
   }

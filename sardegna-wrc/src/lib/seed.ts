@@ -14,7 +14,7 @@ import type {
 // Dati iniziali del viaggio, solo da fonti verificabili: biglietti, prenotazioni,
 // percorso ufficiale del rally. Ciò che non è noto resta vuoto o "da verificare".
 
-export const DATA_VERSION = 16;
+export const DATA_VERSION = 17;
 
 /**
  * Giorni i cui dati iniziali sono cambiati in una versione: chi ha dati salvati
@@ -36,6 +36,7 @@ export const SEED_UPDATES: Record<number, string[]> = {
   14: ["2026-09-30"], // spesa per il rally (allergie: niente pesce né frutta secca)
   15: ["2026-09-29", "2026-10-07"], // limite check-in Moby alle 20:00 (dato dal proprietario)
   16: ["2026-09-29"], // partenza da casa alle 11, pranzo al Burger King di Manerba, arrivo ~16:15
+  17: ["2026-09-29"], // NAVIGA ai parcheggi e all'imbarco Moby ufficiale (Via Donegani)
 };
 
 /** Prove e punti spettatore d'esempio delle prime versioni, rimossi dalla v5. */
@@ -53,7 +54,16 @@ const ALGHERO: GeoPoint = { lat: 40.558, lng: 8.319 };
 // Traghetto Moby (dai biglietti): Livorno → Olbia 29/09 22:00, Olbia → Livorno 07/10 22:00,
 // cabina doppia interna C2, 2 adulti, auto al seguito. Dati personali (nomi, targa,
 // codice prenotazione) NON vanno qui: il repository è pubblico, si inseriscono dall'app.
-const LIVORNO_PORTO = "Stazione Marittima, Livorno";
+// Imbarco Moby a Livorno dal sito ufficiale Moby (moby.it, porto di Livorno):
+// "Imbarchi Stazione Marittima, Via Donegani, 57100 Livorno LI"; dall'uscita autostradale
+// "Porto" seguire "Imbarco passeggeri", "Via Guido Donegani" e "MOBY"; check-in elettronico
+// nel piazzale davanti alla nave.
+const LIVORNO_PORTO = "Via Guido Donegani, 57100 Livorno";
+const IMBARCO_LIVORNO =
+  "Imbarco Moby: Stazione Marittima, Via Donegani (sito Moby). Seguite i cartelli \"Imbarco passeggeri\", \"Via Guido Donegani\" e \"MOBY\". Il check-in è elettronico nel piazzale davanti alla nave.";
+// Parcheggio auto P1 del porto passeggeri (sito Porto di Livorno 2000): Piazza del Portuale,
+// 111 posti, a pagamento (1 €/ora), accesso 24h dal Varco Donegani e 06–22 dal Varco Fortezza.
+const PARCHEGGIO_PORTO = "Piazza del Portuale, 57100 Livorno";
 const OLBIA_PORTO = "Porto di Olbia";
 const DOCUMENTI = "All'imbarco serve la carta d'identità in originale di entrambi (indicato sul biglietto).";
 // Limite check-in all'andata: ore 20:00, 2 ore prima della partenza (indicato dal proprietario).
@@ -508,15 +518,16 @@ const places: Place[] = [
     id: "pl-livorno-venezia",
     name: "Quartiere Venezia Nuova e Fortezza Vecchia",
     category: "visitare",
-    address: "Venezia Nuova, Livorno",
-    notes: "Il quartiere dei canali (fossi medicei), ponti e palazzi sull'acqua; a pochi passi la Fortezza Vecchia sul porto mediceo. Da girare a piedi.",
+    address: PARCHEGGIO_PORTO,
+    hours: "Parcheggio P1 del porto: 24h dal Varco Donegani, 06–22 dal Varco Fortezza",
+    notes: "NAVIGA porta al parcheggio P1 del porto (Piazza del Portuale, 1 €/ora), a due passi a piedi. Il quartiere dei canali (fossi medicei), ponti e palazzi sull'acqua; a pochi passi la Fortezza Vecchia sul porto mediceo. Da girare a piedi.",
   }),
   place({
     id: "pl-livorno-mascagni",
     name: "Terrazza Mascagni",
     category: "panorama",
-    address: "Terrazza Mascagni, Livorno",
-    notes: "Il grande belvedere a scacchiera sul mare. Il tramonto è verso le 19:10.",
+    address: "Viale Italia 36, 57127 Livorno",
+    notes: "NAVIGA porta al parcheggio a pagamento della Terrazza Mascagni (Viale Italia 36). Se è pieno: parcheggio di Via Forte dei Cavalleggeri 49, a circa 500 m. Il grande belvedere a scacchiera sul mare.",
   }),
   place({
     id: "pl-livorno-montenero",
@@ -530,14 +541,15 @@ const places: Place[] = [
     name: "Acquario di Livorno",
     category: "attrazione",
     address: "Acquario di Livorno, Piazzale Mascagni, Livorno",
-    notes: "Accanto alla Terrazza Mascagni: buona alternativa se piove. Orari e biglietti da verificare.",
+    notes: "Parcheggio proprio davanti all'Acquario (circa 120 posti, dal sito dell'Acquario). Accanto alla Terrazza Mascagni: buona alternativa se piove. Orari e biglietti da verificare.",
   }),
   place({
     id: "pl-livorno-cena",
     name: "Cena in Venezia Nuova",
     category: "ristorante",
-    address: "Venezia Nuova, Livorno",
-    notes: `Il quartiere è accanto al porto. Per qualcosa di veloce e senza pesce: il "5 e 5" (torta di ceci nel pane). ${ALLERGIE}`,
+    address: PARCHEGGIO_PORTO,
+    hours: "Parcheggio P1 del porto: 24h dal Varco Donegani, 06–22 dal Varco Fortezza",
+    notes: `NAVIGA porta al parcheggio P1 del porto (Piazza del Portuale): lasciate lì l'auto e andate a piedi in Venezia Nuova, accanto alla Fortezza Vecchia. Per qualcosa di veloce e senza pesce: il "5 e 5" (torta di ceci nel pane). ${ALLERGIE}`,
   }),
   place({
     id: ALLOGGIO,
@@ -606,17 +618,17 @@ function buildEvents(): TripEvent[] {
     ev("2026-09-29", "18:00", "Cena vicino al porto", "pasto", {
       placeId: "pl-livorno-cena",
       deadline: "19:00",
-      notes: "Parcheggiate vicino alla Fortezza Vecchia e restate lì: il porto è a pochi minuti.",
+      notes: "NAVIGA porta al parcheggio P1 del porto passeggeri (Piazza del Portuale, 1 €/ora, non custodito: niente in vista). Da lì a piedi in Venezia Nuova per cena, poi di nuovo all'auto: l'imbarco è nello stesso porto.",
     }),
-    ev("2026-09-29", "19:00", "Partenza verso il porto", "partenza", {
+    ev("2026-09-29", "19:00", "Dal parcheggio all'imbarco Moby", "partenza", {
       address: LIVORNO_PORTO,
       deadline: "19:15",
-      notes: "Seguite i cartelli \"Imbarchi\" per la Sardegna. Obiettivo: in fila alle 19:30.",
+      notes: `Pagate il parcheggio e uscite verso l'imbarco. ${IMBARCO_LIVORNO} Obiettivo: in fila alle 19:30.`,
     }),
     ev("2026-09-29", "19:30", "In fila per l'imbarco", "traghetto", {
       address: LIVORNO_PORTO,
       deadline: "20:00",
-      notes: `Arrivando alle 19:30 avete 30 minuti di margine sul limite delle 20:00.\n${CHECKIN_LIMITE}\n${DOCUMENTI}\nCodice prenotazione: aggiungilo qui con la matita.`,
+      notes: `${IMBARCO_LIVORNO}\nArrivando alle 19:30 avete 30 minuti di margine sul limite delle 20:00.\n${CHECKIN_LIMITE}\n${DOCUMENTI}\nCodice prenotazione: aggiungilo qui con la matita.`,
     }),
     ev("2026-09-29", "22:00", "Partenza Moby Livorno → Olbia", "traghetto", {
       address: LIVORNO_PORTO,
