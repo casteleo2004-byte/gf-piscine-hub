@@ -14,7 +14,7 @@ import type {
 // Dati iniziali del viaggio, solo da fonti verificabili: biglietti, prenotazioni,
 // percorso ufficiale del rally. Ciò che non è noto resta vuoto o "da verificare".
 
-export const DATA_VERSION = 24;
+export const DATA_VERSION = 25;
 
 /**
  * Giorni i cui dati iniziali sono cambiati in una versione: chi ha dati salvati
@@ -44,6 +44,7 @@ export const SEED_UPDATES: Record<number, string[]> = {
   22: [], // guida ufficiale: Tula–Erula (accessi da Tula e da Erula)
   23: [], // guida ufficiale: Su Filigosu–Lerno (solo 4x4, divieto 30 min prima dello start)
   24: [], // guida ufficiale: Lerno Jump solo dalla pista forestale di Sa Conchedda (SS389dir.A)
+  25: [], // guida ufficiale: Coiluna–Loelle (Coiluna Jump solo 4x4, kart cross di Loelle)
 };
 
 /** Prove e punti spettatore d'esempio delle prime versioni, rimossi dalla v5. */
@@ -213,7 +214,7 @@ const stages: RallyStage[] = [
     roadClosure: "06:11",
     passes: [{ label: "SS 12 · 2° passaggio", time: "15:41", roadClosure: "13:41" }],
     lengthKm: 24.83,
-    notes: `Aree Experience 10 (Buddusò Arena, con parcheggio Experience) e 11 (Nuraghe Loelle). Coiluna Jump (zona 13) solo pubblico, accesso 4x4/SUV da Alà dei Sardi o Mamone. ${ACCESSO}`,
+    notes: `Aree Experience 10 (Buddusò Arena, con parcheggio Experience) e 11 (Nuraghe Loelle). Guida ufficiale: a Loelle le auto passano accanto al nuraghe dopo la pista di kart cross, con ampia visuale su traversi e cambi di direzione. Coiluna Jump (zona 13) solo pubblico: accesso in auto SOLO con 4x4 o auto alte da terra, da Alà dei Sardi o da Mamone. ${ACCESSO}`,
     parkingKind: "parking",
     parkingName: "Parcheggio · Buddusò Arena",
     parking: P(40.565698, 9.326432),
@@ -421,6 +422,7 @@ const spectatorPoints: SpectatorPoint[] = [
     experienceArea: true,
     wow: 4,
     walkRoute: "Da Buddusò stesso accesso della Buddusò Arena, area poco prima.",
+    description: "Le auto passano accanto al nuraghe dopo la pista di kart cross: ampia visuale su traversi e rapidi cambi di direzione (guida ufficiale).",
     source: FONTE,
     notes: DA_MYMAPS,
     point: P(40.568285, 9.318051),
@@ -436,8 +438,8 @@ const spectatorPoints: SpectatorPoint[] = [
     access: P(40.57164889280999, 9.410081421503556),
     wow: 5,
     cornerType: "Salto",
-    walkRoute: "Accesso da Mamone (o da Alà dei Sardi); ultimo tratto solo 4x4/SUV.",
-    description: "Non è un'area Experience: solo pubblico.",
+    walkRoute: "Due accessi, da Alà dei Sardi o da Mamone: in auto SOLO con 4x4 o auto alte da terra (guida ufficiale). Parcheggi non delimitati prima di arrivare alla prova.",
+    description: "Salto nel percorso da oltre vent'anni: i migliori lo affrontano in pieno. Non è un'area Experience: solo pubblico, e serve un 4x4.",
     source: FONTE,
     point: P(40.595968, 9.363383),
     parking: P(40.596437, 9.367404),
