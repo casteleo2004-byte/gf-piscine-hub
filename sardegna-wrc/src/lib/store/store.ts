@@ -43,6 +43,22 @@ function migrate(data: AppData): AppData {
       ],
     };
   }
+  if ((data.version ?? 1) < 27) {
+    // Ritiro dei Pass Gold oggi: nuova attività del 30/09 e note aggiornate, senza toccare le spunte.
+    const ritiro = seed.events.find((e) => e.date === "2026-09-30" && e.type === "rally");
+    const sp = seed.places.find((p) => p.id === "pl-servicepark");
+    const sp830 = seed.events.find((e) => e.date === "2026-10-01" && e.time === "08:30");
+    data = {
+      ...data,
+      places: data.places.map((p) => (sp && p.id === sp.id ? { ...p, notes: sp.notes } : p)),
+      events: [
+        ...data.events.map((e) =>
+          sp830 && e.date === "2026-10-01" && e.time === "08:30" && e.type === "rally" ? { ...e, notes: sp830.notes } : e,
+        ),
+        ...(ritiro && !data.events.some((e) => e.id === ritiro.id) ? [ritiro] : []),
+      ],
+    };
+  }
   if ((data.version ?? 1) < 26) {
     // Ristoranti ad Alghero: nuovi luoghi e cena di stasera a scelta, senza rinfrescare
     // tutto il 30/09 (le spunte già messe oggi restano).

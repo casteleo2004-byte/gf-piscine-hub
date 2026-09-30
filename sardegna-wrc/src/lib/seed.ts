@@ -14,7 +14,7 @@ import type {
 // Dati iniziali del viaggio, solo da fonti verificabili: biglietti, prenotazioni,
 // percorso ufficiale del rally. Ciò che non è noto resta vuoto o "da verificare".
 
-export const DATA_VERSION = 26;
+export const DATA_VERSION = 27;
 
 /**
  * Giorni i cui dati iniziali sono cambiati in una versione: chi ha dati salvati
@@ -46,6 +46,7 @@ export const SEED_UPDATES: Record<number, string[]> = {
   24: [], // guida ufficiale: Lerno Jump solo dalla pista forestale di Sa Conchedda (SS389dir.A)
   25: [], // guida ufficiale: Coiluna–Loelle (Coiluna Jump solo 4x4, kart cross di Loelle)
   26: [], // ristoranti ad Alghero (cena del 30/09 a scelta), aggiunti dalla migrazione
+  27: [], // ritiro fisico dei Pass Gold all'ufficio accrediti (pagina biglietti ufficiale)
 };
 
 /** Prove e punti spettatore d'esempio delle prime versioni, rimossi dalla v5. */
@@ -91,6 +92,12 @@ const CHECKIN_RITORNO =
 // (punti spettacolari e tecnici delle prove speciali) + Welcome Box con T-shirt ufficiale.
 const SERVICE_PARK = "Lungomare Barcellona, Alghero";
 const PASS = "Oggi serve il Pass Gold: uno a testa, sempre con voi.";
+// Pagina ufficiale di vendita (oooh.events, organizzatore Zeroelevents): "Tutti i Pass RIS
+// Experience 2026 vanno ... ritirati fisicamente all'ufficio accrediti presso Casa ACI /
+// Sardegna (Service Park, Banchina Millelire, Alghero)". Orari dell'ufficio non indicati.
+const ACCREDITI = "Banchina Millelire, Alghero";
+const RITIRO_PASS =
+  "I Pass Gold vanno ritirati di persona all'ufficio accrediti di Casa ACI / Sardegna, nel Service Park (Banchina Millelire, Alghero): lo dice la pagina ufficiale dei biglietti. Portate i biglietti (sul telefono) e i documenti. Orari dell'ufficio non indicati: scrivete a info@zeroelevents.it se è chiuso. Lì si ritira anche la Welcome Box.";
 // Allergie dichiarate dal proprietario (dato non sensibile per il viaggio: niente nomi).
 const ALLERGIE = "Allergie: niente pesce né frutta secca. Ditelo sempre al ristorante e leggete le etichette (anche \"può contenere tracce\").";
 
@@ -580,7 +587,7 @@ const places: Place[] = [
     name: "Service Park Alghero",
     category: "rally",
     address: SERVICE_PARK,
-    notes: "Parco assistenza WRC, sede indicata sul Pass Gold.",
+    notes: `Parco assistenza WRC, sede indicata sul Pass Gold. ${RITIRO_PASS}`,
   }),
   place({ id: "pl-centro", name: "Centro storico e Bastioni", category: "visitare", point: { lat: 40.559, lng: 8.313 }, address: "Bastioni Marco Polo, Alghero" }),
   place({ id: "pl-capocaccia", name: "Belvedere Capo Caccia", category: "panorama", point: { lat: 40.569, lng: 8.163 }, notes: "Tramonto spettacolare." }),
@@ -697,6 +704,10 @@ function buildEvents(): TripEvent[] {
       placeId: "pl-centro",
       choices: ["pl-centro", "pl-palmavera", "pl-mugoni"],
     }),
+    ev("2026-09-30", "", "Ritiro Pass Gold · ufficio accrediti Casa ACI / Sardegna", "rally", {
+      address: ACCREDITI,
+      notes: `Da fare OGGI: domani allo shakedown le strade chiudono alle 06:00, prima che apra il Service Park (08:30). ${RITIRO_PASS}`,
+    }),
     ev("2026-09-30", "13:00", "Pranzo", "pasto"),
     ev("2026-09-30", "16:00", "Spesa per il rally", "altro", {
       notes: `Acqua e cibo per i giorni di rally: si parte prima che aprano i negozi e nelle aree i servizi possono essere pochi. Lista da spuntare: Gear → Spesa rally. Giovedì pomeriggio, ad Alghero, si può fare un secondo giro per il weekend.\n${ALLERGIE}`,
@@ -722,7 +733,7 @@ function buildEvents(): TripEvent[] {
     ev("2026-10-01", "08:30", "Service Park Alghero (orario sul Pass Gold)", "rally", {
       address: SERVICE_PARK,
       optional: true,
-      notes: "Orario e sede stampati sul Pass Gold. Dove si ritira la Welcome Box: da verificare con l'organizzazione.",
+      notes: `Orario e sede stampati sul Pass Gold. ${RITIRO_PASS}`,
     }),
     ev("2026-10-01", "15:00", "Partenza ufficiale del rally · Alghero", "rally", { address: SERVICE_PARK, optional: true }),
 
