@@ -14,7 +14,7 @@ import type {
 // Dati iniziali del viaggio, solo da fonti verificabili: biglietti, prenotazioni,
 // percorso ufficiale del rally. Ciò che non è noto resta vuoto o "da verificare".
 
-export const DATA_VERSION = 22;
+export const DATA_VERSION = 23;
 
 /**
  * Giorni i cui dati iniziali sono cambiati in una versione: chi ha dati salvati
@@ -42,6 +42,7 @@ export const SEED_UPDATES: Record<number, string[]> = {
   20: [], // guida ufficiale alle PS per spettatori (rallyitaliasardegna.com): dettagli delle aree
   21: [], // guida ufficiale: Ittiri Arena (parcheggi lungo la NSA 167, accesso da est lato Tiesi)
   22: [], // guida ufficiale: Tula–Erula (accessi da Tula e da Erula)
+  23: [], // guida ufficiale: Su Filigosu–Lerno (solo 4x4, divieto 30 min prima dello start)
 };
 
 /** Prove e punti spettatore d'esempio delle prime versioni, rimossi dalla v5. */
@@ -169,7 +170,7 @@ const stages: RallyStage[] = [
     parkingKind: "access",
     parkingName: "Ingresso Oschiri",
     parking: P(40.72157726858769, 9.11652993606414),
-    notes: "Nessuna area Experience su questa prova. Unica zona pubblico: Filigosu (area 5) vicino alla partenza, ultimo tratto solo 4x4.",
+    notes: "Nessuna area Experience su questa prova. Unica zona pubblico: Filigosu (area 5), su una fascia tagliafuoco del cantiere forestale, con tratto molto veloce e ottima visibilità. Guida ufficiale: parcheggio e accesso in auto SOLO con 4x4 o auto alte da terra; senza, arrivare con largo anticipo a piedi seguendo il personale. Nei 30 minuti prima dello start sono vietati transito pedonale e accesso al percorso.",
     mapImage: "stages/map-ps-filigosu.jpg",
   }),
   stage({
@@ -351,8 +352,8 @@ const spectatorPoints: SpectatorPoint[] = [
     name: "Zona pubblico 5 · Filigosu",
     access: P(40.72157726858769, 9.11652993606414),
     wow: 3,
-    walkRoute: "Da Oschiri accesso segnalato; ultimo tratto solo con 4x4.",
-    description: "Nessuna area Experience su questa prova.",
+    walkRoute: "Da Oschiri accesso segnalato. Accesso in auto e parcheggio solo per 4x4 o auto alte da terra (guida ufficiale); senza, arrivare con largo anticipo e seguire il personale. Nei 30 minuti prima dello start è vietato anche il transito a piedi.",
+    description: "Fascia tagliafuoco del cantiere forestale di Filigosu: spazio ampio e aperto, ottima visibilità su un tratto veloce. Nessuna area Experience su questa prova.",
     source: FONTE,
     point: P(40.700626, 9.151407),
     image: "stages/zona-filigosu.jpg",
