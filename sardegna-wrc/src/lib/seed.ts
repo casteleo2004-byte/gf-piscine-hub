@@ -14,7 +14,7 @@ import type {
 // Dati iniziali del viaggio, solo da fonti verificabili: biglietti, prenotazioni,
 // percorso ufficiale del rally. Ciò che non è noto resta vuoto o "da verificare".
 
-export const DATA_VERSION = 20;
+export const DATA_VERSION = 21;
 
 /**
  * Giorni i cui dati iniziali sono cambiati in una versione: chi ha dati salvati
@@ -40,6 +40,7 @@ export const SEED_UPDATES: Record<number, string[]> = {
   18: ["2026-09-29"], // avviso ZTL di Livorno
   19: ["2026-09-29"], // Livorno senza città: uscita Porto, parcheggio P1, tutto a piedi, imbarco diretto
   20: [], // guida ufficiale alle PS per spettatori (rallyitaliasardegna.com): dettagli delle aree
+  21: [], // guida ufficiale: Ittiri Arena (parcheggi lungo la NSA 167, accesso da est lato Tiesi)
 };
 
 /** Prove e punti spettatore d'esempio delle prime versioni, rimossi dalla v5. */
@@ -133,7 +134,7 @@ const stages: RallyStage[] = [
     departAt: "14:45",
     lengthKm: 2.08,
     notes:
-      "Partenza da Alghero suggerita alle 14:45, per arrivare con un'ora di anticipo (la chiusura delle 06:00 riguarda il tracciato). Super speciale in arena (km 2,08 sulla mappa, 2,21 nel timetable). Area Experience 3 accanto al salto, RIS Hospitality. Parcheggi spettatori lungo la strada a nord, con percorso pedonale segnalato.",
+      "Partenza da Alghero suggerita alle 14:45, per arrivare con un'ora di anticipo (la chiusura delle 06:00 riguarda il tracciato). Super speciale in arena (km 2,08 sulla mappa, 2,21 nel timetable): le auto partono due alla volta e fanno 2 giri inseguendosi, con due salti e un guado (water splash). Area Experience 3 accanto al salto, RIS Hospitality. Parcheggi (guida ufficiale): ai lati della Nuova Strada ANAS 167 di Ittiri (NSA 167), con accesso da est, lato Tiesi; poi ingresso pedonale segnalato all'arena.",
     parkingKind: "parking",
     parkingName: "Parcheggio spettatori · Ittiri Arena",
     parking: P(40.586806, 8.566995),
@@ -299,8 +300,8 @@ const spectatorPoints: SpectatorPoint[] = [
     experienceArea: true,
     wow: 4,
     cornerType: "Arena con salto e water splash",
-    walkRoute: "Dai parcheggi spettatori lungo la strada a nord, percorso pedonale segnalato fino all'arena. Area Experience 3 accanto al salto.",
-    description: "Tutto il tracciato sotto gli occhi, auto vicinissime: il modo perfetto per il primo rally.",
+    walkRoute: "Parcheggio ai lati della Nuova Strada ANAS 167 (NSA 167), con accesso da est, lato Tiesi (guida ufficiale): se Maps vi fa arrivare da un'altra parte, seguite i cartelli. Poi ingresso pedonale segnalato fino all'arena. Area Experience 3 accanto al salto.",
+    description: "Le auto partono due alla volta e si inseguono per 2 giri, con due salti e un guado: si segue quasi tutta la gara da un unico punto. Dalle gradinate naturali intorno all'arena la visuale è ampia e rialzata. Il modo perfetto per il primo rally.",
     source: FONTE,
     point: P(40.586, 8.564584),
     parking: P(40.586806, 8.566995),
