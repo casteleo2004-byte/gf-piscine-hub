@@ -14,7 +14,7 @@ import type {
 // Dati iniziali del viaggio, solo da fonti verificabili: biglietti, prenotazioni,
 // percorso ufficiale del rally. Ciò che non è noto resta vuoto o "da verificare".
 
-export const DATA_VERSION = 27;
+export const DATA_VERSION = 28;
 
 /**
  * Giorni i cui dati iniziali sono cambiati in una versione: chi ha dati salvati
@@ -47,6 +47,7 @@ export const SEED_UPDATES: Record<number, string[]> = {
   25: [], // guida ufficiale: Coiluna–Loelle (Coiluna Jump solo 4x4, kart cross di Loelle)
   26: [], // ristoranti ad Alghero (cena del 30/09 a scelta), aggiunti dalla migrazione
   27: [], // ritiro fisico dei Pass Gold all'ufficio accrediti (pagina biglietti ufficiale)
+  28: [], // rientro ad Alghero dopo le prove di giovedì e domenica (aggiunti dalla migrazione)
 };
 
 /** Prove e punti spettatore d'esempio delle prime versioni, rimossi dalla v5. */
@@ -91,6 +92,8 @@ const CHECKIN_RITORNO =
 // Contenuto del pass dal sito ufficiale: accesso alle Aree Experience lungo il percorso
 // (punti spettacolari e tecnici delle prove speciali) + Welcome Box con T-shirt ufficiale.
 const SERVICE_PARK = "Lungomare Barcellona, Alghero";
+const RIENTRO =
+  "Orario indicativo: si riparte quando la strada riapre, dopo l'ultima auto, seguendo le indicazioni dei commissari. Mettete in conto un po' di coda all'uscita.";
 const PASS = "Oggi serve il Pass Gold: uno a testa, sempre con voi.";
 // Pagina ufficiale di vendita (oooh.events, organizzatore Zeroelevents): "Tutti i Pass RIS
 // Experience 2026 vanno ... ritirati fisicamente all'ufficio accrediti presso Casa ACI /
@@ -726,9 +729,19 @@ function buildEvents(): TripEvent[] {
     ev("2026-10-01", "", "Partenza da Alghero verso lo shakedown (Olmedo)", "partenza", { stageId: "sd" }),
     ev("2026-10-01", "06:00", "Strade chiuse allo shakedown", "parcheggio", { stageId: "sd", roadClosure: "06:00" }),
     ev("2026-10-01", "09:01", "Shakedown · passano le prime auto", "prova", { stageId: "sd", roadClosure: "06:00" }),
+    ev("2026-10-01", "11:30", "Rientro ad Alghero dallo shakedown", "auto", {
+      id: "ev-rientro-2026-10-01-sd",
+      placeId: ALLOGGIO,
+      notes: `${RIENTRO} Poi pranzo e riposo ad Alghero (o un giro al Service Park) prima di ripartire per Ittiri.`,
+    }),
     ev("2026-10-01", "12:30", "Pranzo", "pasto"),
     ev("2026-10-01", "", "Partenza da Alghero verso Ittiri Arena", "partenza", { stageId: "ps1" }),
     ev("2026-10-01", "16:05", "PS 1 · Ittiri Arena Show", "prova", { stageId: "ps1" }),
+    ev("2026-10-01", "17:45", "Rientro all'alloggio da Ittiri", "auto", {
+      id: "ev-rientro-2026-10-01-ittiri",
+      placeId: ALLOGGIO,
+      notes: RIENTRO,
+    }),
     ev("2026-10-01", "20:30", "Cena", "pasto", { placeId: "pl-cena" }),
     ev("2026-10-01", "08:30", "Service Park Alghero (orario sul Pass Gold)", "rally", {
       address: SERVICE_PARK,
@@ -775,6 +788,11 @@ function buildEvents(): TripEvent[] {
     ev("2026-10-04", "10:05", "PS 15 · 1° passaggio all'Argentiera", "prova", { stageId: "ps-argentiera", roadClosure: "07:05" }),
     ev("2026-10-04", "12:30", "Pranzo", "pasto", { notes: "Portare cibo e acqua: le strade restano chiuse fino alla Power Stage." }),
     ev("2026-10-04", "14:15", "PS 17 · Power Stage: si decide il mondiale", "prova", { stageId: "ps-argentiera", roadClosure: "07:05" }),
+    ev("2026-10-04", "15:30", "Rientro ad Alghero per il podio", "auto", {
+      id: "ev-rientro-2026-10-04",
+      placeId: "pl-servicepark",
+      notes: `${RIENTRO} Dall'Argentiera ad Alghero circa 45 minuti (stima). NAVIGA porta al Service Park; il luogo esatto del podio è da verificare sul posto.`,
+    }),
     ev("2026-10-04", "17:00", "Podio · Alghero", "rally", { notes: "Festa finale con le premiazioni." }),
     ev("2026-10-04", "20:30", "Cena", "pasto", { placeId: "pl-cena" }),
     ev("2026-10-04", "08:31", "PS 14 · Osilo – Tergu 1", "prova", { stageId: "ps-osilo", roadClosure: "05:31", optional: true }),

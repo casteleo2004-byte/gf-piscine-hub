@@ -43,6 +43,11 @@ function migrate(data: AppData): AppData {
       ],
     };
   }
+  if ((data.version ?? 1) < 28) {
+    // Rientri ad Alghero dopo le prove (giovedì e domenica), aggiunti senza toccare le spunte.
+    const rientri = seed.events.filter((e) => e.id.startsWith("ev-rientro-"));
+    data = { ...data, events: [...data.events, ...rientri.filter((r) => !data.events.some((e) => e.id === r.id))] };
+  }
   if ((data.version ?? 1) < 27) {
     // Ritiro dei Pass Gold oggi: nuova attività del 30/09 e note aggiornate, senza toccare le spunte.
     const ritiro = seed.events.find((e) => e.date === "2026-09-30" && e.type === "rally");

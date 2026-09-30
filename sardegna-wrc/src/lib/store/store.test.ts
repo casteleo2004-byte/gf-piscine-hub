@@ -25,7 +25,7 @@ describe("migrazione dati salvati", () => {
     });
     const { getState } = await import("./store");
     const s = getState();
-    expect(s.version).toBe(27);
+    expect(s.version).toBe(28);
     expect(s.gearPresets.some((g) => g.id === "spesa")).toBe(true);
     expect(s.events.some((e) => e.title === "vecchio")).toBe(false);
     expect(s.events.find((e) => e.title === "Partenza Moby Livorno → Olbia")?.time).toBe("22:00");
@@ -45,7 +45,7 @@ describe("migrazione dati salvati", () => {
     old.events = old.events.map((e, i) => ({ ...e, id: `ev${i + 1}` }));
     old.events.find((e) => e.date === "2026-09-30")!.id = "ev1";
     old.places = old.places.filter((p) => p.id !== "pl-cajo");
-    old.events = old.events.filter((e) => !e.title.startsWith("Ritiro Pass Gold"));
+    old.events = old.events.filter((e) => !e.title.startsWith("Ritiro Pass Gold") && !e.id.startsWith("ev-rientro-"));
     old.events = old.events.map((e) =>
       e.date === "2026-09-30" && e.type === "pasto" && e.choices
         ? { ...e, time: "20:30", title: "Cena", placeId: "pl-cena", choices: undefined, notes: undefined }
@@ -70,6 +70,7 @@ describe("migrazione dati salvati", () => {
     expect(cena).toMatchObject({ time: "19:30", placeId: "pl-samesa" });
     expect(getState().places.some((p) => p.id === "pl-cajo")).toBe(true);
     expect(getState().events.filter((e) => e.title.startsWith("Ritiro Pass Gold"))).toHaveLength(1);
+    expect(getState().events.filter((e) => e.id.startsWith("ev-rientro-"))).toHaveLength(3);
     for (const g of getState().gearPresets) expect(new Set(g.items.map((x) => x.id)).size).toBe(g.items.length);
     vi.unstubAllGlobals();
   });

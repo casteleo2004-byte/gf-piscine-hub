@@ -289,6 +289,16 @@ describe("allergie (pesce e frutta secca)", () => {
   });
 });
 
+describe("rientro ad Alghero", () => {
+  it("ogni giorno di rally finisce con il rientro dopo l'ultima prova del piano", () => {
+    for (const d of ["2026-10-01", "2026-10-02", "2026-10-03", "2026-10-04"]) {
+      const ev = eventsOfDay(data, d).filter((e) => !e.optional);
+      const lastProva = Math.max(...ev.filter((e) => e.type === "prova").map((e) => toMinutes(e.time)));
+      expect(ev.some((e) => e.type === "auto" && e.title.startsWith("Rientro") && toMinutes(e.time) > lastProva)).toBe(true);
+    }
+  });
+});
+
 describe("mete a scelta", () => {
   it("le visite di martedì e mercoledì offrono più opzioni reali", () => {
     const withChoices = data.events.filter((e) => (e.choices?.length ?? 0) > 1);
