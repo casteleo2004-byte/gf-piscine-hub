@@ -10,6 +10,8 @@ export interface Target {
   address?: string;
   label: string;
   mode: TravelMode;
+  /** Punto da cui passare prima della destinazione (ingresso ufficiale). */
+  via?: GeoPoint;
 }
 
 const WALK_TYPES = new Set(["piedi", "spettatore", "prova"]);
@@ -62,7 +64,12 @@ export function resolveTarget(event: TripEvent, data: AppData): Target | null {
       if (sp?.address) return { address: sp.address, label: sp.name, mode: "driving" };
     }
     if (stage.parking) {
-      return { point: stage.parking, label: stage.parkingName || `Parcheggio ${stageCode(stage)}`, mode: "driving" };
+      return {
+        point: stage.parking,
+        label: stage.parkingName || `Parcheggio ${stageCode(stage)}`,
+        mode: "driving",
+        via: stage.accessVia,
+      };
     }
   }
   return null;

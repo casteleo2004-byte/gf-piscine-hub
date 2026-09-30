@@ -14,7 +14,7 @@ import type {
 // Dati iniziali del viaggio, solo da fonti verificabili: biglietti, prenotazioni,
 // percorso ufficiale del rally. Ciò che non è noto resta vuoto o "da verificare".
 
-export const DATA_VERSION = 28;
+export const DATA_VERSION = 29;
 
 /**
  * Giorni i cui dati iniziali sono cambiati in una versione: chi ha dati salvati
@@ -48,6 +48,7 @@ export const SEED_UPDATES: Record<number, string[]> = {
   26: [], // ristoranti ad Alghero (cena del 30/09 a scelta), aggiunti dalla migrazione
   27: [], // ritiro fisico dei Pass Gold all'ufficio accrediti (pagina biglietti ufficiale)
   28: [], // rientro ad Alghero dopo le prove di giovedì e domenica (aggiunti dalla migrazione)
+  29: [], // shakedown: NAVIGA passa dall'ingresso ufficiale di Olmedo (percorso "01 Access")
 };
 
 /** Prove e punti spettatore d'esempio delle prime versioni, rimossi dalla v5. */
@@ -133,10 +134,11 @@ const stages: RallyStage[] = [
     firstCar: "09:01",
     roadClosure: "06:00",
     lengthKm: 3.27,
-    notes: `Ex Miniera di Bauxite, vicino a Olmedo. Aree Experience 1 e 2 alla partenza, con parcheggio Experience. ${ACCESSO}`,
+    notes: `Ex Miniera di Bauxite, vicino a Olmedo. Aree Experience 1 e 2 alla partenza, con parcheggio Experience. Percorso ufficiale (mappa interattiva, linea "01 Access"): dall'ingresso a ovest di Olmedo si sale verso nord, si prende la SP158 al cartello "01" e si arriva ai parcheggi spettatori (circa 2,5 km). NAVIGA con Google Maps passa dall'ingresso; con Apple Maps va diretto al parcheggio: all'arrivo a Olmedo seguite i cartelli "01" e le indicazioni dei commissari. ${ACCESSO}`,
     parkingKind: "parking",
     parkingName: "Parcheggio spettatori · Ex Miniera Bauxite",
     parking: P(40.660558, 8.39582),
+    accessVia: P(40.65178190753158, 8.37644763855414),
     mapImage: "stages/map-sd.jpg",
   }),
   stage({

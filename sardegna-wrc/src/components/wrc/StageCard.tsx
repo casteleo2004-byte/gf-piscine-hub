@@ -126,14 +126,22 @@ export function StageCard({
         )}
 
         <div>
-          <NavButton size="xl" className="w-full" point={stage.parking} label={stage.parkingName || `Parcheggio ${stageCode(stage)}`}>
+          <NavButton
+            size="xl"
+            className="w-full"
+            point={stage.parking}
+            via={stage.accessVia}
+            label={stage.parkingName || `Parcheggio ${stageCode(stage)}`}
+          >
             <span className="whitespace-nowrap text-[20px]">
               {stage.parkingKind === "access" ? "NAVIGA ALL'INGRESSO" : "NAVIGA AL PARCHEGGIO"}
             </span>
           </NavButton>
           {stage.parking && (
             <p className="mt-1.5 text-center text-[15px] font-semibold text-muted">
-              {stage.parkingKind === "access"
+              {stage.accessVia
+                ? `${stage.parkingName ?? "Parcheggio"} · passando dall'ingresso ufficiale per il pubblico. Seguite i cartelli dell'organizzazione.`
+                : stage.parkingKind === "access"
                 ? "Ingresso ufficiale per il pubblico: da lì seguite i cartelli fino al parcheggio."
                 : `${stage.parkingName ?? "Parcheggio"} · arrivate seguendo i cartelli dall'ingresso ufficiale.`}
             </p>

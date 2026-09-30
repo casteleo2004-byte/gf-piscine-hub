@@ -111,6 +111,7 @@ export function NextCard({
           address={info.target.address}
           label={info.target.label}
           mode={info.target.mode}
+          via={info.target.via}
         >
           {info.target.mode === "walking" ? "NAVIGA A PIEDI" : "NAVIGA"}
         </NavButton>

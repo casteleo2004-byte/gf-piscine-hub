@@ -44,6 +44,6 @@ Dopo ogni modifica: `npx tsc --noEmit && npx vitest run`, poi `npm run demo` e r
 Chi ha già aperto l'app ha i dati salvati in locale. Quando modifichi `seed.ts`:
 1. incrementa `DATA_VERSION`;
 2. aggiungi in `SEED_UPDATES` le date i cui eventi/giorni vanno rinfrescati;
-3. per prove/aree/checklist aggiorna la migrazione in `src/lib/store/store.ts` (oggi: `version < 20`
+3. per prove/aree/checklist aggiorna la migrazione in `src/lib/store/store.ts` (oggi: `version < 29`
    sostituisce prove e punti spettatore con quelli del seed, tenendo quelli aggiunti dall'utente);
 4. aggiorna i test in `src/lib/store/store.test.ts`.

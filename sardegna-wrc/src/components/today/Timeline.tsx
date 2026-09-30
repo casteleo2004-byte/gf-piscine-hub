@@ -153,6 +153,7 @@ function EventDetails({ data, event, onEdit }: { data: AppData; event: TripEvent
             address={info.target.address}
             label={info.target.label}
             mode={info.target.mode}
+            via={info.target.via}
           />
         )}
         <IconButton label="Modifica" onClick={onEdit} className="h-14 w-14">

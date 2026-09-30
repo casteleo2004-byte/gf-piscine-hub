@@ -289,6 +289,18 @@ describe("allergie (pesce e frutta secca)", () => {
   });
 });
 
+describe("shakedown: percorso ufficiale", () => {
+  it("la partenza di giovedì va al parcheggio passando dall'ingresso ufficiale di Olmedo", () => {
+    const dep = eventsOfDay(data, "2026-10-01").find((e) => e.type === "partenza" && e.stageId === "sd")!;
+    const t = resolveTarget(dep, data)!;
+    expect(t).toMatchObject({ point: { lat: 40.660558, lng: 8.39582 }, via: { lat: 40.65178190753158, lng: 8.37644763855414 } });
+    const g = navigationUrl("google", t, "driving")!;
+    expect(g).toContain("destination=40.660558%2C8.39582");
+    expect(g).toContain("waypoints=40.65178190753158%2C8.37644763855414");
+    expect(navigationUrl("apple", t, "driving")).toContain("daddr=40.660558%2C8.39582");
+  });
+});
+
 describe("rientro ad Alghero", () => {
   it("ogni giorno di rally finisce con il rientro dopo l'ultima prova del piano", () => {
     for (const d of ["2026-10-01", "2026-10-02", "2026-10-03", "2026-10-04"]) {

@@ -99,6 +99,8 @@ export interface RallyStage {
   parking?: GeoPoint;
   /** "access" = Access Point ufficiale (poi accesso segnalato), "parking" = parcheggio esatto. */
   parkingKind?: "access" | "parking";
+  /** Ingresso ufficiale da cui passare per arrivare al parcheggio (percorso di accesso delle mappe ufficiali). */
+  accessVia?: GeoPoint;
   lengthKm?: number;
   /** Scheda ufficiale della prova (asset statico in public/). */
   mapImage?: string;

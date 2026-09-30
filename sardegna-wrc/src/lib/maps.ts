@@ -9,7 +9,7 @@ export type TravelMode = "driving" | "walking";
  */
 export function navigationUrl(
   app: MapsApp,
-  dest: { point?: GeoPoint; address?: string; label?: string },
+  dest: { point?: GeoPoint; address?: string; label?: string; via?: GeoPoint },
   mode: TravelMode = "driving",
   /** Partenza diversa dalla posizione attuale (es. parcheggio → punto spettatore). */
   origin?: GeoPoint,
@@ -25,6 +25,8 @@ export function navigationUrl(
   }
   const params = new URLSearchParams({ api: "1", destination: target, travelmode: mode });
   if (from) params.set("origin", from);
+  // Google Maps passa dall'ingresso ufficiale; Apple Maps non ha tappe intermedie via URL.
+  if (dest.via) params.set("waypoints", `${dest.via.lat},${dest.via.lng}`);
   return `https://www.google.com/maps/dir/?${params.toString()}`;
 }
 
