@@ -14,7 +14,7 @@ import type {
 // Dati iniziali del viaggio, solo da fonti verificabili: biglietti, prenotazioni,
 // percorso ufficiale del rally. Ciò che non è noto resta vuoto o "da verificare".
 
-export const DATA_VERSION = 25;
+export const DATA_VERSION = 26;
 
 /**
  * Giorni i cui dati iniziali sono cambiati in una versione: chi ha dati salvati
@@ -45,6 +45,7 @@ export const SEED_UPDATES: Record<number, string[]> = {
   23: [], // guida ufficiale: Su Filigosu–Lerno (solo 4x4, divieto 30 min prima dello start)
   24: [], // guida ufficiale: Lerno Jump solo dalla pista forestale di Sa Conchedda (SS389dir.A)
   25: [], // guida ufficiale: Coiluna–Loelle (Coiluna Jump solo 4x4, kart cross di Loelle)
+  26: [], // ristoranti ad Alghero (cena del 30/09 a scelta), aggiunti dalla migrazione
 };
 
 /** Prove e punti spettatore d'esempio delle prime versioni, rimossi dalla v5. */
@@ -590,6 +591,37 @@ const places: Place[] = [
   place({ id: "pl-bosa", name: "Bosa", category: "visitare", point: { lat: 40.298, lng: 8.498 } }),
   place({ id: "pl-castelsardo", name: "Castelsardo", category: "visitare", point: { lat: 40.914, lng: 8.713 } }),
   place({ id: "pl-cena", name: "Ristorante per cena (da scegliere)", category: "ristorante", notes: "Aggiungere indirizzo e prenotazione." }),
+  // Ristoranti ad Alghero da recensioni online (TripAdvisor, TheFork, guide): cucina di terra
+  // o pizza, adatti ad allergie a pesce e frutta secca solo dopo averlo detto al locale.
+  // Solo nome (NAVIGA li cerca su Maps): indirizzi e orari da verificare.
+  place({
+    id: "pl-samesa",
+    name: "Ristorante Sa Mesa",
+    category: "ristorante",
+    address: "Ristorante Sa Mesa, Alghero",
+    notes: `In città. Cucina sarda di terra e di mare, anche pizza: nelle recensioni lodati culurgiones e porceddu con patate. ${ALLERGIE}`,
+  }),
+  place({
+    id: "pl-cajo",
+    name: "Cajò Mozzarella & Pizza",
+    category: "ristorante",
+    address: "Cajò Mozzarella & Pizza, Alghero",
+    notes: `Pizzeria tra le più apprezzate di Alghero nelle recensioni online. La scelta più veloce e semplice con le allergie. ${ALLERGIE}`,
+  }),
+  place({
+    id: "pl-samandra",
+    name: "Agriturismo Sa Mandra",
+    category: "ristorante",
+    address: "Agriturismo Sa Mandra, Alghero",
+    notes: `Agriturismo fuori città, famoso per il porceddu. Menù fisso abbondante (circa 40 € a persona secondo recensioni: da verificare). Serve prenotare e la cena è lunga: meglio in una sera senza sveglia all'alba, per esempio il 5 o 6 ottobre. ${ALLERGIE}`,
+  }),
+  place({
+    id: "pl-barbagia",
+    name: "Agriturismo Barbagia",
+    category: "ristorante",
+    address: "Agriturismo Barbagia, Alghero",
+    notes: `Agriturismo con porceddu alla brace e menù fisso (circa 35 € a persona secondo recensioni: da verificare). Serve prenotare; cena lunga, meglio in una sera senza sveglia all'alba. ${ALLERGIE}`,
+  }),
 ];
 
 let seq = 0;
@@ -673,7 +705,11 @@ function buildEvents(): TripEvent[] {
       placeId: "pl-capocaccia",
       choices: ["pl-capocaccia", "pl-centro"],
     }),
-    ev("2026-09-30", "20:30", "Cena", "pasto", { placeId: "pl-cena" }),
+    ev("2026-09-30", "19:30", "Cena presto (domani sveglia all'alba)", "pasto", {
+      placeId: "pl-samesa",
+      choices: ["pl-samesa", "pl-cajo", "pl-samandra", "pl-barbagia"],
+      notes: `Domani le strade dello shakedown chiudono alle 06:00: cena presto, preparate lo zaino e a letto presto. Stasera meglio un locale in città (Sa Mesa o la pizza da Cajò); gli agriturismi sono per una sera libera.\n${ALLERGIE}`,
+    }),
 
     // 01/10 — giovedì. Piano: shakedown (Olmedo) + Ittiri Arena. Orari: timetable ufficiale.
     ev("2026-10-01", "", "Partenza da Alghero verso lo shakedown (Olmedo)", "partenza", { stageId: "sd" }),

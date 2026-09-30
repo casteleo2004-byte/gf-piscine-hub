@@ -43,6 +43,20 @@ function migrate(data: AppData): AppData {
       ],
     };
   }
+  if ((data.version ?? 1) < 26) {
+    // Ristoranti ad Alghero: nuovi luoghi e cena di stasera a scelta, senza rinfrescare
+    // tutto il 30/09 (le spunte già messe oggi restano).
+    const cena = seed.events.find((e) => e.date === "2026-09-30" && e.type === "pasto" && e.choices);
+    data = {
+      ...data,
+      places: [...data.places, ...seed.places.filter((p) => !data.places.some((x) => x.id === p.id))],
+      events: data.events.map((e) =>
+        cena && e.date === "2026-09-30" && e.type === "pasto" && e.placeId === "pl-cena"
+          ? { ...cena, id: e.id, done: e.done }
+          : e,
+      ),
+    };
+  }
   if ((data.version ?? 1) < 17) {
     // Luoghi di Livorno riscritti (parcheggi, cena senza pesce): si prendono dal seed.
     const fresh = new Map(seed.places.filter((p) => p.id.startsWith("pl-livorno-")).map((p) => [p.id, p]));
