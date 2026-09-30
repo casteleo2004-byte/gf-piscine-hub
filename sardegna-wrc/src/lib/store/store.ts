@@ -74,6 +74,37 @@ function migrate(data: AppData): AppData {
       ],
     };
   }
+  // Id delle attività sempre unici: con la vecchia numerazione (ev1, ev2, …) i rinfreschi
+  // di un giorno potevano riusare id di altri giorni e la spunta finiva sull'attività sbagliata.
+  const seen = new Set<string>();
+  data = {
+    ...data,
+    events: data.events.map((e, i) => {
+      if (!seen.has(e.id)) {
+        seen.add(e.id);
+        return e;
+      }
+      const id = `${e.id}-${e.date}-${i}`;
+      seen.add(id);
+      return { ...e, id };
+    }),
+  };
+  // Stesso controllo per gli oggetti delle checklist (quelli aggiunti dal seed nelle
+  // migrazioni possono avere lo stesso id di oggetti già presenti).
+  data = {
+    ...data,
+    gearPresets: data.gearPresets.map((g) => {
+      const ids = new Set<string>();
+      return {
+        ...g,
+        items: g.items.map((it, i) => {
+          const id = ids.has(it.id) ? `${it.id}-${i}` : it.id;
+          ids.add(id);
+          return id === it.id ? it : { ...it, id };
+        }),
+      };
+    }),
+  };
   // Completa eventuali campi aggiunti in versioni successive.
   return {
     ...seed,

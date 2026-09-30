@@ -601,7 +601,8 @@ function ev(
   extra: Partial<TripEvent> = {},
 ): TripEvent {
   seq += 1;
-  return { id: `ev${seq}`, date, time, title, type, done: false, ...extra };
+  // Id con la data: i rinfreschi di un giorno non riusano gli id di altri giorni.
+  return { id: `ev-${date}-${seq}`, date, time, title, type, done: false, ...extra };
 }
 
 function buildEvents(): TripEvent[] {

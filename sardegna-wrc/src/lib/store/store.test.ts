@@ -37,4 +37,29 @@ describe("migrazione dati salvati", () => {
     expect(s.spectatorPoints.some((x) => x.id === "sp-micky")).toBe(false);
     vi.unstubAllGlobals();
   });
+
+  it("id delle attività sempre unici: spuntare una riga non tocca un altro giorno", async () => {
+    // Dati salvati con la vecchia numerazione (ev1, ev2, …): il 30/09 aveva id che
+    // dopo i rinfreschi del 29/09 venivano riusati per nuove attività di quel giorno.
+    const old = { ...createSeed(), version: 16 };
+    old.events = old.events.map((e, i) => ({ ...e, id: `ev${i + 1}` }));
+    old.events.find((e) => e.date === "2026-09-30")!.id = "ev1";
+    const stored: Record<string, string> = { "wrc-hub:data": JSON.stringify(old) };
+    vi.stubGlobal("window", { addEventListener: () => {} });
+    vi.stubGlobal("localStorage", {
+      getItem: (k: string) => stored[k] ?? null,
+      setItem: (k: string, v: string) => (stored[k] = v),
+      removeItem: (k: string) => delete stored[k],
+    });
+    const { getState } = await import("./store");
+    const { actions } = await import("./actions");
+    const ids = getState().events.map((e) => e.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    const wed = getState().events.find((e) => e.date === "2026-09-30")!;
+    actions.toggleEventDone(wed.id);
+    expect(getState().events.find((e) => e.id === wed.id)?.done).toBe(true);
+    expect(getState().events.filter((e) => e.done)).toHaveLength(1);
+    for (const g of getState().gearPresets) expect(new Set(g.items.map((x) => x.id)).size).toBe(g.items.length);
+    vi.unstubAllGlobals();
+  });
 });
