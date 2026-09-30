@@ -14,7 +14,7 @@ import type {
 // Dati iniziali del viaggio, solo da fonti verificabili: biglietti, prenotazioni,
 // percorso ufficiale del rally. Ciò che non è noto resta vuoto o "da verificare".
 
-export const DATA_VERSION = 23;
+export const DATA_VERSION = 24;
 
 /**
  * Giorni i cui dati iniziali sono cambiati in una versione: chi ha dati salvati
@@ -43,6 +43,7 @@ export const SEED_UPDATES: Record<number, string[]> = {
   21: [], // guida ufficiale: Ittiri Arena (parcheggi lungo la NSA 167, accesso da est lato Tiesi)
   22: [], // guida ufficiale: Tula–Erula (accessi da Tula e da Erula)
   23: [], // guida ufficiale: Su Filigosu–Lerno (solo 4x4, divieto 30 min prima dello start)
+  24: [], // guida ufficiale: Lerno Jump solo dalla pista forestale di Sa Conchedda (SS389dir.A)
 };
 
 /** Prove e punti spettatore d'esempio delle prime versioni, rimossi dalla v5. */
@@ -197,7 +198,7 @@ const stages: RallyStage[] = [
     roadClosure: "05:01",
     passes: [{ label: "SS 11 · 2° passaggio", time: "14:31", roadClosure: "12:31" }],
     lengthKm: 24.14,
-    notes: `Lerno Jump alla partenza: area Experience 9 con parcheggio Experience, e zona pubblico 9. Altre zone: Sa Jone (10, con parcheggio spettatori), Tandalò Paddock (11), Centrale Elettrica (12). ${ACCESSO}`,
+    notes: `Lerno Jump alla partenza: area Experience 9 con parcheggio Experience, e zona pubblico 9. Altre zone: Sa Jone (10, due inversioni tecniche vicino al laghetto), Tandalò Paddock (11), Centrale Elettrica (12). ACCESSO (guida ufficiale): solo dalla pista forestale di Sa Conchedda, che si prende dalla SS389dir.A. NON salite dal Lago Lerno: quella strada è usata dalle auto in gara. Se il navigatore vi manda dal Lago Lerno, seguite invece i cartelli dell'organizzazione. Non bloccate la strada: è percorso alternativo dei concorrenti. Parcheggi ampi e non delimitati, scendendo verso il laghetto.`,
     parkingKind: "parking",
     parkingName: "Parcheggio spettatori · Lerno",
     parking: P(40.608137, 9.184611),
@@ -386,8 +387,8 @@ const spectatorPoints: SpectatorPoint[] = [
     wow: 5,
     cornerType: "Salto",
     walkRoute:
-      "Dall'Access Point di Buddusò seguire l'accesso segnalato verso Tandalò e Sa Jone fino alla partenza: parcheggio Experience accanto al Lerno Jump.",
-    description: "Il salto di Lerno alla partenza della prova, con area Experience dedicata.",
+      "ACCESSO (guida ufficiale): solo dalla pista forestale di Sa Conchedda, che si prende dalla SS389dir.A. NON salite dal Lago Lerno: quella strada è usata dalle auto in gara. Se il navigatore vi manda dal Lago Lerno, seguite invece i cartelli dell'organizzazione. Non bloccate la strada: è percorso alternativo dei concorrenti. Parcheggi ampi e non delimitati scendendo verso il laghetto; parcheggio Experience accanto al Lerno Jump.",
+    description: "Il Lerno Jump, noto come Micky's Jump, a circa 1.000 metri sul Monte Lerno: un dosso cieco lancia le auto in uno dei salti più famosi del mondiale. Una delle immagini simbolo del Rally Italia Sardegna.",
     source: FONTE,
     notes: DA_MYMAPS,
     point: P(40.603697, 9.178533),
