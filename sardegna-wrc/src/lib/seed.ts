@@ -14,7 +14,7 @@ import type {
 // Dati iniziali del viaggio, solo da fonti verificabili: biglietti, prenotazioni,
 // percorso ufficiale del rally. Ciò che non è noto resta vuoto o "da verificare".
 
-export const DATA_VERSION = 21;
+export const DATA_VERSION = 22;
 
 /**
  * Giorni i cui dati iniziali sono cambiati in una versione: chi ha dati salvati
@@ -41,6 +41,7 @@ export const SEED_UPDATES: Record<number, string[]> = {
   19: ["2026-09-29"], // Livorno senza città: uscita Porto, parcheggio P1, tutto a piedi, imbarco diretto
   20: [], // guida ufficiale alle PS per spettatori (rallyitaliasardegna.com): dettagli delle aree
   21: [], // guida ufficiale: Ittiri Arena (parcheggi lungo la NSA 167, accesso da est lato Tiesi)
+  22: [], // guida ufficiale: Tula–Erula (accessi da Tula e da Erula)
 };
 
 /** Prove e punti spettatore d'esempio delle prime versioni, rimossi dalla v5. */
@@ -150,7 +151,7 @@ const stages: RallyStage[] = [
     passes: [{ label: "SS 5 · 2° passaggio", time: "14:31", roadClosure: "12:31" }],
     lengthKm: 18.77,
     notes:
-      "Aree Experience 4, 5 e 6 tra Turrina Manna e Sa Mela. Accesso Experience e disabili riservato alle auto; da Tula accesso a senso unico fino allo start della prova, dopo lo start solo in uscita. Da Erula c'è il bus navetta (Bus IN/OUT Point) con punto ristoro.",
+      "Aree Experience 4, 5 e 6 tra Turrina Manna e Sa Mela. Accesso Experience e disabili riservato alle auto; da Tula accesso a senso unico fino allo start della prova, dopo lo start solo in uscita. Da Erula c'è il bus navetta (Bus IN/OUT Point) con punto ristoro. Guida ufficiale: parte centrale nel parco eolico di Sa Turrina Manna (salti e compressioni), finale stretto e tecnico nel bosco di Coghinas. Parcheggi ampi sia sul lato Tula sia sul lato Erula; da Erula si accede dalla zona del cimitero comunale. Non bloccate la strada da Tula: è via di evacuazione e percorso alternativo dei concorrenti.",
     parkingKind: "parking",
     parkingName: "Parcheggio Sa Mela (auto Experience e disabili)",
     parking: P(40.780709, 8.975162),
@@ -334,7 +335,8 @@ const spectatorPoints: SpectatorPoint[] = [
     experienceArea: true,
     wow: 4,
     walkRoute:
-      "Da Tula accesso a senso unico fino allo start della prova (dopo lo start solo in uscita), fino ai parcheggi vicino all'area 4. Parcheggio Experience accanto.",
+      "Due accessi (guida ufficiale). Da Tula: strada in salita a senso unico, percorribile fino allo start della prova; dopo la partenza diventa a senso unico in discesa. Non bloccate la strada: è via di evacuazione. Da Erula: dalla zona del cimitero comunale. Parcheggi ampi su entrambi i lati; parcheggio Experience accanto all'area 4.",
+    description: "Dentro il parco eolico di Sa Turrina Manna, lungo una fascia tagliafuoco: tratto velocissimo con salti e compressioni di grande impatto.",
     source: FONTE,
     notes: DA_MYMAPS,
     point: P(40.762394, 8.9658306),
