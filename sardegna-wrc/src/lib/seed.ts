@@ -14,7 +14,7 @@ import type {
 // Dati iniziali del viaggio, solo da fonti verificabili: biglietti, prenotazioni,
 // percorso ufficiale del rally. Ciò che non è noto resta vuoto o "da verificare".
 
-export const DATA_VERSION = 19;
+export const DATA_VERSION = 20;
 
 /**
  * Giorni i cui dati iniziali sono cambiati in una versione: chi ha dati salvati
@@ -39,6 +39,7 @@ export const SEED_UPDATES: Record<number, string[]> = {
   17: ["2026-09-29"], // NAVIGA ai parcheggi e all'imbarco Moby ufficiale (Via Donegani)
   18: ["2026-09-29"], // avviso ZTL di Livorno
   19: ["2026-09-29"], // Livorno senza città: uscita Porto, parcheggio P1, tutto a piedi, imbarco diretto
+  20: [], // guida ufficiale alle PS per spettatori (rallyitaliasardegna.com): dettagli delle aree
 };
 
 /** Prove e punti spettatore d'esempio delle prime versioni, rimossi dalla v5. */
@@ -280,8 +281,8 @@ const spectatorPoints: SpectatorPoint[] = [
     experienceArea: true,
     wow: 4,
     cornerType: "Tornanti e salto alla partenza",
-    walkRoute: "Dall'Access Point di Olmedo seguire l'accesso segnalato fino all'Ex Miniera: parcheggio Experience accanto alla partenza.",
-    description: "Shakedown a pochi km da Alghero: le auto passano più volte, ottimo per iniziare e provare foto e video.",
+    walkRoute: "Dall'Access Point di Olmedo seguire l'accesso segnalato fino all'Ex Miniera: parcheggio Experience accanto alla partenza. La guida ufficiale indica ampia disponibilità di parcheggi e chiede di seguire scrupolosamente segnaletica e indicazioni.",
+    description: "Dentro la miniera di bauxite di Olmedo: nel piazzale principale ampi traversi, cambi di direzione e un salto. Dalle tribune naturali rialzate ai margini del piazzale si seguono a lungo le auto. È l'unica zona aperta al pubblico dello shakedown (guida ufficiale). Le auto passano più volte: ottimo per iniziare e provare foto e video.",
     source: FONTE,
     notes: DA_MYMAPS,
     point: P(40.659268, 8.397047),

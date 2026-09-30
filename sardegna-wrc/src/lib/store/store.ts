@@ -28,8 +28,9 @@ function migrate(data: AppData): AppData {
       spectatorPoints: data.spectatorPoints.filter((x) => !EXAMPLE_IDS.spectatorPoints.includes(x.id)),
     };
   }
-  if ((data.version ?? 1) < 10) {
-    // Prove e aree dai documenti ufficiali: sostituiscono quelle dei dati iniziali precedenti,
+  if ((data.version ?? 1) < 20) {
+    // Prove e aree dai documenti ufficiali (ultima revisione: guida alle PS per spettatori):
+    // sostituiscono quelle dei dati iniziali precedenti,
     // mantenendo ciò che l'utente ha aggiunto a mano.
     const seedStages = new Set(seed.stages.map((x) => x.id));
     const seedPoints = new Set(seed.spectatorPoints.map((x) => x.id));
