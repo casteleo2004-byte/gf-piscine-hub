@@ -14,7 +14,7 @@ import type {
 // Dati iniziali del viaggio, solo da fonti verificabili: biglietti, prenotazioni,
 // percorso ufficiale del rally. Ciò che non è noto resta vuoto o "da verificare".
 
-export const DATA_VERSION = 29;
+export const DATA_VERSION = 30;
 
 /**
  * Giorni i cui dati iniziali sono cambiati in una versione: chi ha dati salvati
@@ -49,6 +49,7 @@ export const SEED_UPDATES: Record<number, string[]> = {
   27: [], // ritiro fisico dei Pass Gold all'ufficio accrediti (pagina biglietti ufficiale)
   28: [], // rientro ad Alghero dopo le prove di giovedì e domenica (aggiunti dalla migrazione)
   29: [], // shakedown: NAVIGA passa dall'ingresso ufficiale di Olmedo (percorso "01 Access")
+  30: ["2026-10-03"], // sabato: Nuraghe Loelle (Experience 11) al posto del Galoppatoio, scelta del proprietario
 };
 
 /** Prove e punti spettatore d'esempio delle prime versioni, rimossi dalla v5. */
@@ -221,6 +222,7 @@ const stages: RallyStage[] = [
   stage({
     id: "ps-coiluna",
     number: 9,
+    spectatorPointId: "exp-nuraghe-loelle",
     name: "Coiluna – Loelle",
     date: "2026-10-03",
     firstCar: "09:11",
@@ -768,21 +770,22 @@ function buildEvents(): TripEvent[] {
     ev("2026-10-02", "14:31", "PS 5 · Tula – Erula 2", "prova", { stageId: "ps-tula", roadClosure: "12:31", optional: true }),
     ev("2026-10-02", "15:31", "PS 6 · Su Filigosu – Lerno 2", "prova", { stageId: "ps-filigosu", roadClosure: "13:31", optional: true }),
 
-    // 03/10 — sabato. Piano: Galoppatoio di Pattada (Experience 12–13), due passaggi.
-    ev("2026-10-03", "", "Partenza da Alghero verso il Galoppatoio di Pattada", "partenza", { stageId: "ps-solorche" }),
-    ev("2026-10-03", "07:07", "Strade chiuse: da ora non si entra più", "parcheggio", { stageId: "ps-solorche", roadClosure: "07:07" }),
-    ev("2026-10-03", "10:07", "PS 10 · 1° passaggio al Galoppatoio", "prova", { stageId: "ps-solorche", roadClosure: "07:07" }),
+    // 03/10 — sabato. Piano: Nuraghe Loelle (Experience 11) su Coiluna–Loelle, due passaggi.
+    ev("2026-10-03", "", "Partenza da Alghero verso il Nuraghe Loelle (Buddusò)", "partenza", { stageId: "ps-coiluna" }),
+    ev("2026-10-03", "06:11", "Strade chiuse: da ora non si entra più", "parcheggio", { stageId: "ps-coiluna", roadClosure: "06:11" }),
+    ev("2026-10-03", "09:11", "PS 9 · 1° passaggio al Nuraghe Loelle", "prova", { stageId: "ps-coiluna", roadClosure: "06:11" }),
     ev("2026-10-03", "12:30", "Pranzo", "pasto", { notes: "Portare cibo e acqua: in zona i servizi possono essere pochi." }),
-    ev("2026-10-03", "16:37", "PS 13 · 2° passaggio al Galoppatoio", "prova", { stageId: "ps-solorche", roadClosure: "14:37" }),
-    ev("2026-10-03", "17:45", "Rientro all'alloggio", "auto", {
+    ev("2026-10-03", "15:41", "PS 12 · 2° passaggio al Nuraghe Loelle", "prova", { stageId: "ps-coiluna", roadClosure: "13:41" }),
+    ev("2026-10-03", "17:00", "Rientro all'alloggio", "auto", {
       placeId: ALLOGGIO,
-      notes: "Si riparte quando la strada riapre, dopo l'ultima auto: l'orario è indicativo.",
+      notes: "Si riparte quando la strada riapre, dopo l'ultima auto: l'orario è indicativo. Da Buddusò ad Alghero circa 2 ore (stima).",
     }),
     ev("2026-10-03", "20:30", "Cena", "pasto", { placeId: "pl-cena" }),
     ev("2026-10-03", "08:01", "PS 8 · Lerno – Sa Conchedda – Monti di Alà 1", "prova", { stageId: "ps-lernoala", roadClosure: "05:01", optional: true }),
-    ev("2026-10-03", "09:11", "PS 9 · Coiluna – Loelle 1", "prova", { stageId: "ps-coiluna", roadClosure: "06:11", optional: true }),
+    ev("2026-10-03", "07:07", "Strade chiuse al Galoppatoio (alternativa)", "parcheggio", { stageId: "ps-solorche", roadClosure: "07:07", optional: true }),
+    ev("2026-10-03", "10:07", "PS 10 · Galoppatoio di Pattada 1", "prova", { stageId: "ps-solorche", roadClosure: "07:07", optional: true }),
     ev("2026-10-03", "14:31", "PS 11 · Lerno – Sa Conchedda – Monti di Alà 2", "prova", { stageId: "ps-lernoala", roadClosure: "12:31", optional: true }),
-    ev("2026-10-03", "15:41", "PS 12 · Coiluna – Loelle 2", "prova", { stageId: "ps-coiluna", roadClosure: "13:41", optional: true }),
+    ev("2026-10-03", "16:37", "PS 13 · Galoppatoio di Pattada 2", "prova", { stageId: "ps-solorche", roadClosure: "14:37", optional: true }),
 
     // 04/10 — domenica. Piano: Argentiera sul mare (Experience 15–16) e podio.
     ev("2026-10-04", "", "Partenza da Alghero verso l'Argentiera", "partenza", { stageId: "ps-argentiera" }),
@@ -847,7 +850,7 @@ const days: TripDay[] = [
   { date: "2026-09-30", title: "Sbarco a Olbia e arrivo ad Alghero", kind: "turismo", location: "Olbia → Alghero", gearPresetId: "turismo" },
   { date: "2026-10-01", title: "Rally · Shakedown e Ittiri Arena", kind: "rally", location: "Alghero", gearPresetId: "rally", notes: PASS, planStageIds: ["sd", "ps1"] },
   { date: "2026-10-02", title: "Rally · Alà Arena", kind: "rally", location: "Alghero", gearPresetId: "rally", notes: PASS, planStageIds: ["ps-alalerno"] },
-  { date: "2026-10-03", title: "Rally · Galoppatoio di Pattada", kind: "rally", location: "Alghero", gearPresetId: "rally", notes: PASS, planStageIds: ["ps-solorche"] },
+  { date: "2026-10-03", title: "Rally · Nuraghe Loelle", kind: "rally", location: "Alghero", gearPresetId: "rally", notes: PASS, planStageIds: ["ps-coiluna"] },
   { date: "2026-10-04", title: "Rally · Argentiera e podio", kind: "rally", location: "Alghero", gearPresetId: "rally", notes: PASS, planStageIds: ["ps-argentiera"] },
   { date: "2026-10-05", title: "Stintino e La Pelosa", kind: "turismo", location: "Alghero", gearPresetId: "turismo" },
   { date: "2026-10-06", title: "Bosa e costa ovest", kind: "turismo", location: "Alghero", gearPresetId: "foto" },

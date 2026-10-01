@@ -100,8 +100,11 @@ describe("prove 2026 (timetable ufficiale V5.1)", () => {
     expect(times("2026-10-04")).toEqual(["08:31", "10:05", "11:38", "14:15"]);
   });
   it("l'area Experience (Pass Gold) viene prima di una zona pubblico più WOW", () => {
-    const st = data.stages.find((s) => s.id === "ps-coiluna")!;
-    expect(spectatorPointOf(st, data)?.id).toBe("exp-budduso-arena");
+    const st = { ...data.stages.find((s) => s.id === "ps-coiluna")!, spectatorPointId: undefined };
+    expect(["exp-budduso-arena", "exp-nuraghe-loelle"]).toContain(spectatorPointOf(st, data)?.id);
+    // Sabato: scelta del proprietario, Nuraghe Loelle (Experience 11)
+    expect(spectatorPointOf(data.stages.find((s) => s.id === "ps-coiluna")!, data)?.id).toBe("exp-nuraghe-loelle");
+    expect(data.days.find((d) => d.date === "2026-10-03")?.planStageIds).toEqual(["ps-coiluna"]);
   });
   it("NAVIGA: la partenza porta in auto al parcheggio ufficiale, la prova a piedi all'area Gold", () => {
     const fri = eventsOfDay(data, "2026-10-02");
