@@ -208,7 +208,7 @@ export function eventsOfDay(data: AppData, date: ISODate): TripEvent[] {
     .filter((e) => e.date === date)
     .map((e) => withEffectiveTime(e, data))
     // Con un piano, le attività delle prove fuori piano diventano facoltative.
-    .map((e) => (plan && e.stageId ? { ...e, optional: !plan.includes(e.stageId) } : e))
+    .map((e) => (plan && e.stageId ? { ...e, optional: !plan.includes(e.stageId) || !!e.skip } : e))
     .sort((a, b) => sortMinutes(a.time) - sortMinutes(b.time) || a.id.localeCompare(b.id, undefined, { numeric: true }));
 }
 

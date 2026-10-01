@@ -14,7 +14,7 @@ import type {
 // Dati iniziali del viaggio, solo da fonti verificabili: biglietti, prenotazioni,
 // percorso ufficiale del rally. Ciò che non è noto resta vuoto o "da verificare".
 
-export const DATA_VERSION = 30;
+export const DATA_VERSION = 31;
 
 /**
  * Giorni i cui dati iniziali sono cambiati in una versione: chi ha dati salvati
@@ -50,6 +50,7 @@ export const SEED_UPDATES: Record<number, string[]> = {
   28: [], // rientro ad Alghero dopo le prove di giovedì e domenica (aggiunti dalla migrazione)
   29: [], // shakedown: NAVIGA passa dall'ingresso ufficiale di Olmedo (percorso "01 Access")
   30: ["2026-10-03"], // sabato: Nuraghe Loelle (Experience 11) al posto del Galoppatoio, scelta del proprietario
+  31: ["2026-10-02"], // venerdì: solo il passaggio del mattino, pomeriggio di riposo (scelta del proprietario)
 };
 
 /** Prove e punti spettatore d'esempio delle prime versioni, rimossi dalla v5. */
@@ -758,12 +759,12 @@ function buildEvents(): TripEvent[] {
     ev("2026-10-02", "", "Partenza da Alghero verso Alà Arena", "partenza", { stageId: "ps-alalerno" }),
     ev("2026-10-02", "07:08", "Strade chiuse: da ora non si entra più", "parcheggio", { stageId: "ps-alalerno", roadClosure: "07:08" }),
     ev("2026-10-02", "10:08", "PS 4 · 1° passaggio all'Alà Arena", "prova", { stageId: "ps-alalerno", roadClosure: "07:08" }),
-    ev("2026-10-02", "12:30", "Pranzo", "pasto", { notes: "Portare cibo e acqua: in zona i servizi possono essere pochi." }),
-    ev("2026-10-02", "16:38", "PS 7 · 2° passaggio all'Alà Arena", "prova", { stageId: "ps-alalerno", roadClosure: "14:38" }),
-    ev("2026-10-02", "17:45", "Rientro all'alloggio", "auto", {
+    ev("2026-10-02", "11:30", "Rientro all'alloggio: pomeriggio di riposo", "auto", {
       placeId: ALLOGGIO,
-      notes: "Si riparte quando la strada riapre, dopo l'ultima auto: l'orario è indicativo.",
+      notes: "Dopo il primo passaggio si riparte quando i commissari lo consentono e la strada riapre (prima della nuova chiusura delle 14:38): l'orario è indicativo. Circa 2 ore di strada (stima). Il secondo passaggio delle 16:38 è uguale al primo: oggi si riposa, domani sveglia presto per il Nuraghe Loelle.",
     }),
+    ev("2026-10-02", "14:00", "Pranzo e riposo ad Alghero", "pasto"),
+    ev("2026-10-02", "16:38", "PS 7 · 2° passaggio all'Alà Arena (se restate)", "prova", { stageId: "ps-alalerno", roadClosure: "14:38", optional: true, skip: true }),
     ev("2026-10-02", "20:30", "Cena", "pasto", { placeId: "pl-cena" }),
     ev("2026-10-02", "08:01", "PS 2 · Tula – Erula 1", "prova", { stageId: "ps-tula", roadClosure: "05:01", optional: true }),
     ev("2026-10-02", "09:01", "PS 3 · Su Filigosu – Lerno 1", "prova", { stageId: "ps-filigosu", roadClosure: "06:01", optional: true }),

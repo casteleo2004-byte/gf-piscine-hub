@@ -242,7 +242,7 @@ describe("piano del giorno (primo rally)", () => {
     expect(e.time).toMatch(/^0[3-5]:\d{2}$/);
   });
   it("le prove fuori piano sono facoltative e non diventano mai la prossima", () => {
-    expect(fri.filter((e) => e.optional).map((e) => e.stageId)).toEqual(["ps-tula", "ps-filigosu", "ps-tula", "ps-filigosu"]);
+    expect(fri.filter((e) => e.optional).map((e) => e.stageId)).toEqual(["ps-tula", "ps-filigosu", "ps-tula", "ps-filigosu", "ps-alalerno"]);
     for (const t of ["05:30", "08:00", "14:00", "15:00"]) expect(fri[nextEventIndex(fri, at(t), true)].optional).toBeFalsy();
   });
   it("la partenza segue la chiusura strade e il margine", () => {
