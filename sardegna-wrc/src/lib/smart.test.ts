@@ -104,7 +104,7 @@ describe("prove 2026 (timetable ufficiale V5.1)", () => {
     expect(["exp-budduso-arena", "exp-nuraghe-loelle"]).toContain(spectatorPointOf(st, data)?.id);
     // Sabato: scelta del proprietario, Nuraghe Loelle (Experience 11)
     expect(spectatorPointOf(data.stages.find((s) => s.id === "ps-coiluna")!, data)?.id).toBe("exp-nuraghe-loelle");
-    expect(data.days.find((d) => d.date === "2026-10-03")?.planStageIds).toEqual(["ps-coiluna"]);
+    expect(data.days.find((d) => d.date === "2026-10-03")?.planStageIds).toEqual([]);
   });
   it("NAVIGA: la partenza porta in auto al parcheggio ufficiale, la prova a piedi all'area Gold", () => {
     const fri = eventsOfDay(data, "2026-10-02");
@@ -308,7 +308,9 @@ describe("rientro ad Alghero", () => {
   it("ogni giorno di rally finisce con il rientro dopo l'ultima prova del piano", () => {
     for (const d of ["2026-10-01", "2026-10-02", "2026-10-03", "2026-10-04"]) {
       const ev = eventsOfDay(data, d).filter((e) => !e.optional);
-      const lastProva = Math.max(...ev.filter((e) => e.type === "prova").map((e) => toMinutes(e.time)));
+      const prove = ev.filter((e) => e.type === "prova");
+      if (!prove.length) continue; // giorno senza prove nel piano (riposo)
+      const lastProva = Math.max(...prove.map((e) => toMinutes(e.time)));
       expect(ev.some((e) => e.type === "auto" && e.title.startsWith("Rientro") && toMinutes(e.time) > lastProva)).toBe(true);
     }
   });
