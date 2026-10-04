@@ -135,9 +135,10 @@ describe("prove 2026 (timetable ufficiale V5.1)", () => {
     }
     for (const s of data.stages) if (s.parking) expect(official.has(key(s.parking))).toBe(true);
   });
-  it("domenica dopo pranzo la prossima è la Power Stage", () => {
+  it("domenica dopo il primo passaggio si rientra per il podio (Power Stage facoltativa)", () => {
     const ev = eventsOfDay(data, "2026-10-04");
-    expect(ev[nextEventIndex(ev, at("13:45"), true)].title).toContain("Power Stage");
+    expect(ev[nextEventIndex(ev, at("11:15"), true)].title).toBe("Rientro ad Alghero per il podio");
+    expect(ev.find((e) => e.title.startsWith("PS 17"))?.optional).toBe(true);
   });
 });
 

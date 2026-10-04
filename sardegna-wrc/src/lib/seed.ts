@@ -14,7 +14,7 @@ import type {
 // Dati iniziali del viaggio, solo da fonti verificabili: biglietti, prenotazioni,
 // percorso ufficiale del rally. Ciò che non è noto resta vuoto o "da verificare".
 
-export const DATA_VERSION = 32;
+export const DATA_VERSION = 33;
 
 /**
  * Giorni i cui dati iniziali sono cambiati in una versione: chi ha dati salvati
@@ -52,6 +52,7 @@ export const SEED_UPDATES: Record<number, string[]> = {
   30: ["2026-10-03"], // sabato: Nuraghe Loelle (Experience 11) al posto del Galoppatoio, scelta del proprietario
   31: ["2026-10-02"], // venerdì: solo il passaggio del mattino, pomeriggio di riposo (scelta del proprietario)
   32: ["2026-10-03"], // sabato: riposo e Service Park, nessuna prova (scelta del proprietario)
+  33: ["2026-10-04"], // domenica: solo il passaggio del mattino, poi podio ad Alghero (scelta del proprietario)
 };
 
 /** Prove e punti spettatore d'esempio delle prime versioni, rimossi dalla v5. */
@@ -792,8 +793,12 @@ function buildEvents(): TripEvent[] {
     ev("2026-10-04", "07:05", "Strade chiuse: da ora non si entra più", "parcheggio", { stageId: "ps-argentiera", roadClosure: "07:05" }),
     ev("2026-10-04", "10:05", "PS 15 · 1° passaggio all'Argentiera", "prova", { stageId: "ps-argentiera", roadClosure: "07:05" }),
     ev("2026-10-04", "12:30", "Pranzo", "pasto", { notes: "Portare cibo e acqua: le strade restano chiuse fino alla Power Stage." }),
-    ev("2026-10-04", "14:15", "PS 17 · Power Stage: si decide il mondiale", "prova", { stageId: "ps-argentiera", roadClosure: "07:05" }),
-    ev("2026-10-04", "15:30", "Rientro ad Alghero per il podio", "auto", {
+    ev("2026-10-04", "11:30", "Rientro ad Alghero per il podio", "auto", {
+      placeId: "pl-servicepark",
+      notes: "Dopo l'ultima auto del primo passaggio, a piedi al parcheggio (15–20 minuti) e via. Il percorso d'accesso ufficiale (\"23 Access\") non passa sulla prova: si può uscire anche se la strada della prova resta chiusa fino alla Power Stage. Chiedete comunque ai commissari. Ad Alghero per le 15:30–16:00, come consigliato, per godersi il podio.",
+    }),
+    ev("2026-10-04", "14:15", "PS 17 · Power Stage (se restate)", "prova", { stageId: "ps-argentiera", roadClosure: "07:05", optional: true, skip: true }),
+    ev("2026-10-04", "15:30", "Arrivo in zona podio", "rally", {
       id: "ev-rientro-2026-10-04",
       placeId: "pl-servicepark",
       notes: `${RIENTRO} Dall'Argentiera ad Alghero circa 45 minuti (stima). NAVIGA porta al Service Park; il luogo esatto del podio è da verificare sul posto.`,
