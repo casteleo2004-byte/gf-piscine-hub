@@ -14,7 +14,7 @@ import type {
 // Dati iniziali del viaggio, solo da fonti verificabili: biglietti, prenotazioni,
 // percorso ufficiale del rally. Ciò che non è noto resta vuoto o "da verificare".
 
-export const DATA_VERSION = 34;
+export const DATA_VERSION = 35;
 
 /**
  * Giorni i cui dati iniziali sono cambiati in una versione: chi ha dati salvati
@@ -54,6 +54,7 @@ export const SEED_UPDATES: Record<number, string[]> = {
   32: ["2026-10-03"], // sabato: riposo e Service Park, nessuna prova (scelta del proprietario)
   33: ["2026-10-04"], // domenica: solo il passaggio del mattino, poi podio ad Alghero (scelta del proprietario)
   34: [], // imbarco Moby a Olbia: Stazione Marittima Isola Bianca (sito Moby) + punto OpenStreetMap
+  35: ["2026-10-08"], // rientro: colazione McDonald's di Stagno, Burger King di Manerba, casa
 };
 
 /** Prove e punti spettatore d'esempio delle prime versioni, rimossi dalla v5. */
@@ -91,6 +92,11 @@ const ZTL_LIVORNO =
 // terminal traghetti da OpenStreetMap ("Stazione Marittima Olbia", amenity=ferry_terminal).
 const OLBIA_PORTO = "Stazione Marittima Isola Bianca, 07026 Olbia";
 const OLBIA_TERMINAL: GeoPoint = { lat: 40.9240526, lng: 9.5212712 };
+// Rientro 08/10 (scelte del proprietario). Punti da OpenStreetMap (amenity=fast_food).
+// McDonald's di Stagno (Collesalvetti), Via Aurelia 33: fuori città, verso A12 e FI-PI-LI.
+const MC_STAGNO: GeoPoint = { lat: 43.5890897, lng: 10.3461861 };
+// Burger King di Manerba del Garda, Via Trevisago (Solarolo).
+const BK_MANERBA: GeoPoint = { lat: 45.5388553, lng: 10.5311209 };
 const DOCUMENTI = "All'imbarco serve la carta d'identità in originale di entrambi (indicato sul biglietto).";
 // Limite check-in all'andata: ore 20:00, 2 ore prima della partenza (indicato dal proprietario).
 const CHECKIN_LIMITE = "Limite per il check-in: ore 20:00, 2 ore prima della partenza.";
@@ -848,6 +854,28 @@ function buildEvents(): TripEvent[] {
       point: OLBIA_TERMINAL,
       notes: "Cabina doppia interna (C2) · 2 adulti · auto al seguito. Arrivo a Livorno la mattina dell'8 ottobre.",
     }),
+
+    // 08/10 — rientro a casa (scelte del proprietario). L'indirizzo di casa non va nel repo.
+    ev("2026-10-08", "07:00", "Sbarco a Livorno", "traghetto", {
+      address: LIVORNO_PORTO,
+      notes: "Orario indicativo: l'ora di arrivo esatta è sul biglietto o nell'app Moby. Uscendo dal porto, seguite le indicazioni per l'autostrada (non il centro).",
+    }),
+    ev("2026-10-08", "07:30", "Colazione al McDonald's di Stagno", "pasto", {
+      point: MC_STAGNO,
+      address: "McDonald's, Via Aurelia 33, Stagno, Collesalvetti",
+      notes: `Fuori dal centro, sulla strada verso l'autostrada (A12) e la FI-PI-LI. Orario di apertura da verificare su Maps prima di andare. ${ALLERGIE}`,
+    }),
+    ev("2026-10-08", "08:15", "Autostrada verso il Garda", "partenza", {
+      point: BK_MANERBA,
+      address: "Burger King, Via Trevisago, Manerba del Garda",
+      notes: "Circa 3 ore e mezza di strada (stima; all'andata Maps dava 3h22 da Manerba al porto di Livorno). Scegliete su Maps il percorso con meno code. Una pausa ogni due ore.",
+    }),
+    ev("2026-10-08", "12:00", "Pranzo al Burger King · Manerba", "pasto", {
+      point: BK_MANERBA,
+      address: "Burger King, Via Trevisago, Manerba del Garda",
+      notes: `Ultima tappa prima di casa. ${ALLERGIE}`,
+    }),
+    ev("2026-10-08", "13:00", "Verso casa", "auto", { notes: "Bentornati! Ricordate di scrivere due righe nel Diario finché è tutto fresco." }),
   ];
 }
 
@@ -868,6 +896,7 @@ const days: TripDay[] = [
   { date: "2026-10-05", title: "Stintino e La Pelosa", kind: "turismo", location: "Alghero", gearPresetId: "turismo" },
   { date: "2026-10-06", title: "Bosa e costa ovest", kind: "turismo", location: "Alghero", gearPresetId: "foto" },
   { date: "2026-10-07", title: "Rientro: traghetto Olbia → Livorno", kind: "viaggio", location: "Alghero → Olbia" },
+  { date: "2026-10-08", title: "Sbarco a Livorno e rientro a casa", kind: "viaggio", location: "Livorno → casa" },
 ];
 
 function preset(id: string, name: string, items: string[]): GearPreset {
@@ -959,7 +988,7 @@ export function createSeed(): AppData {
       id: "sardegna-2026",
       name: "Sardegna 2026",
       startDate: "2026-09-29",
-      endDate: "2026-10-07",
+      endDate: "2026-10-08",
       baseName: "Alghero",
       base: ALGHERO,
     },

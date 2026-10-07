@@ -43,6 +43,14 @@ function migrate(data: AppData): AppData {
       ],
     };
   }
+  if ((data.version ?? 1) < 35) {
+    // Nuovo giorno 08/10 (rientro a casa) e fine viaggio spostata.
+    data = {
+      ...data,
+      days: [...data.days, ...seed.days.filter((d) => !data.days.some((x) => x.date === d.date))],
+      trip: { ...data.trip, endDate: seed.trip.endDate },
+    };
+  }
   if ((data.version ?? 1) < 34) {
     // Imbarco di Olbia: indirizzo ufficiale Moby e punto del terminal, senza toccare le spunte.
     const ref = seed.events.find((e) => e.date === "2026-10-07" && e.point && e.address);

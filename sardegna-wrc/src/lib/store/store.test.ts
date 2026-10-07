@@ -25,7 +25,9 @@ describe("migrazione dati salvati", () => {
     });
     const { getState } = await import("./store");
     const s = getState();
-    expect(s.version).toBe(34);
+    expect(s.version).toBe(35);
+    expect(s.days.some((d) => d.date === "2026-10-08")).toBe(true);
+    expect(s.events.some((e) => e.date === "2026-10-08" && e.title.includes("McDonald"))).toBe(true);
     expect(s.gearPresets.some((g) => g.id === "spesa")).toBe(true);
     expect(s.events.some((e) => e.title === "vecchio")).toBe(false);
     expect(s.events.find((e) => e.title === "Partenza Moby Livorno → Olbia")?.time).toBe("22:00");
