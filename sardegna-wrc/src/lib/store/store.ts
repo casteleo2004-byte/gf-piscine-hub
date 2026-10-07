@@ -43,6 +43,16 @@ function migrate(data: AppData): AppData {
       ],
     };
   }
+  if ((data.version ?? 1) < 34) {
+    // Imbarco di Olbia: indirizzo ufficiale Moby e punto del terminal, senza toccare le spunte.
+    const ref = seed.events.find((e) => e.date === "2026-10-07" && e.point && e.address);
+    data = {
+      ...data,
+      events: data.events.map((e) =>
+        ref && e.date === "2026-10-07" && e.address === "Porto di Olbia" ? { ...e, address: ref.address, point: ref.point } : e,
+      ),
+    };
+  }
   if ((data.version ?? 1) < 28) {
     // Rientri ad Alghero dopo le prove (giovedì e domenica), aggiunti senza toccare le spunte.
     const rientri = seed.events.filter((e) => e.id.startsWith("ev-rientro-"));

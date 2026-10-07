@@ -14,7 +14,7 @@ import type {
 // Dati iniziali del viaggio, solo da fonti verificabili: biglietti, prenotazioni,
 // percorso ufficiale del rally. Ciò che non è noto resta vuoto o "da verificare".
 
-export const DATA_VERSION = 33;
+export const DATA_VERSION = 34;
 
 /**
  * Giorni i cui dati iniziali sono cambiati in una versione: chi ha dati salvati
@@ -53,6 +53,7 @@ export const SEED_UPDATES: Record<number, string[]> = {
   31: ["2026-10-02"], // venerdì: solo il passaggio del mattino, pomeriggio di riposo (scelta del proprietario)
   32: ["2026-10-03"], // sabato: riposo e Service Park, nessuna prova (scelta del proprietario)
   33: ["2026-10-04"], // domenica: solo il passaggio del mattino, poi podio ad Alghero (scelta del proprietario)
+  34: [], // imbarco Moby a Olbia: Stazione Marittima Isola Bianca (sito Moby) + punto OpenStreetMap
 };
 
 /** Prove e punti spettatore d'esempio delle prime versioni, rimossi dalla v5. */
@@ -85,7 +86,11 @@ const PARCHEGGIO_PORTO = "Piazza del Portuale, 57100 Livorno";
 // Via Forte San Pietro. In Venezia Nuova si entra solo a piedi.
 const ZTL_LIVORNO =
   "ZTL: in Venezia Nuova non entrate in auto (varchi con telecamere, attivi sempre); il centro è ZTL dalle 7:30 alle 20:00. Lasciate l'auto al parcheggio del porto e seguite i cartelli \"Porto\" e \"Imbarco passeggeri\", non le scorciatoie del navigatore nel centro.";
-const OLBIA_PORTO = "Porto di Olbia";
+// Imbarco Moby a Olbia (sito Moby): "Moby - Unimare c/o Stazione Marittima, Banchina Isola
+// Bianca, 07026 Olbia OT"; check-in elettronico nel piazzale davanti alla nave. Punto del
+// terminal traghetti da OpenStreetMap ("Stazione Marittima Olbia", amenity=ferry_terminal).
+const OLBIA_PORTO = "Stazione Marittima Isola Bianca, 07026 Olbia";
+const OLBIA_TERMINAL: GeoPoint = { lat: 40.9240526, lng: 9.5212712 };
 const DOCUMENTI = "All'imbarco serve la carta d'identità in originale di entrambi (indicato sul biglietto).";
 // Limite check-in all'andata: ore 20:00, 2 ore prima della partenza (indicato dal proprietario).
 const CHECKIN_LIMITE = "Limite per il check-in: ore 20:00, 2 ore prima della partenza.";
@@ -829,15 +834,18 @@ function buildEvents(): TripEvent[] {
     }),
     ev("2026-10-07", "17:00", "Partenza da Alghero verso Olbia", "partenza", {
       address: OLBIA_PORTO,
+      point: OLBIA_TERMINAL,
       notes: "Orario suggerito per essere al porto verso le 19:00, con un'ora di margine sul check-in: controllare il tempo su Maps.",
     }),
     ev("2026-10-07", "19:00", "In fila per l'imbarco a Olbia", "traghetto", {
       address: OLBIA_PORTO,
+      point: OLBIA_TERMINAL,
       deadline: "20:00",
       notes: `${CHECKIN_RITORNO}\n${DOCUMENTI}`,
     }),
     ev("2026-10-07", "22:00", "Partenza Moby Olbia → Livorno", "traghetto", {
       address: OLBIA_PORTO,
+      point: OLBIA_TERMINAL,
       notes: "Cabina doppia interna (C2) · 2 adulti · auto al seguito. Arrivo a Livorno la mattina dell'8 ottobre.",
     }),
   ];
