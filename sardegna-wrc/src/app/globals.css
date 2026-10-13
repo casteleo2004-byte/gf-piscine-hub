@@ -1,0 +1,115 @@
+@import "tailwindcss";
+
+/* Token colore: tema scuro (default) e tema "Sole" ad alto contrasto. */
+:root {
+  --bg: #000000;
+  --surface: #151518;
+  --surface-2: #26262c;
+  --line: #3a3a42;
+  --text: #ffffff;
+  --muted: #cfcfd6;
+  --accent: #ffd60a;
+  --accent-ink: #000000;
+  --hi: #ffd60a;
+  --rally: #ff5a36;
+  --ok: #34d860;
+  --warn: #ffa31a;
+  --danger: #ff4d43;
+  --info: #6ad4ff;
+  color-scheme: dark;
+}
+
+:root[data-theme="sun"] {
+  --bg: #ffffff;
+  --surface: #f1f1f4;
+  --surface-2: #e2e2e8;
+  --line: #b9b9c2;
+  --text: #000000;
+  --muted: #26262b;
+  --accent: #ffd000;
+  --accent-ink: #000000;
+  --hi: #7a4a00;
+  --rally: #d12a08;
+  --ok: #137a2c;
+  --warn: #a35200;
+  --danger: #c30f06;
+  --info: #0060a8;
+  color-scheme: light;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  /* Testo evidenziato: giallo sul nero, ambra scuro al sole. */
+  --color-hi: var(--hi);
+  --color-rally: var(--rally);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, system-ui, sans-serif;
+}
+
+html {
+  background: var(--bg);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 18px;
+  line-height: 1.35;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+  min-height: 100dvh;
+}
+
+/* Niente zoom automatico di iOS sugli input (servono ≥16px). */
+input,
+select,
+textarea {
+  font-size: 18px;
+}
+
+button,
+a {
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+.pt-safe {
+  padding-top: max(env(safe-area-inset-top), 12px);
+}
+
+.pb-nav {
+  padding-bottom: calc(96px + env(safe-area-inset-bottom));
+}
+
+.pb-safe {
+  padding-bottom: max(env(safe-area-inset-bottom), 12px);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+:root[data-theme="sun"] .sun-border {
+  outline: 2px solid #000;
+  outline-offset: -2px;
+}
